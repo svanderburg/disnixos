@@ -1,0 +1,118 @@
+#!/bin/bash -e
+# Disnix - A distributed application layer for Nix
+# Copyright (C) 2008-2010  Sander van der Burg
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+# Shows the usage of this command to the user
+
+showUsage()
+{
+    echo "Usage: $0 -s services_expr -n network_expr -d distribution_expr [options]"
+    echo "Options:"
+    echo
+    echo "-s,--services       Services Nix expression which describes all components of the distributed system"
+    echo "-n,--network        Network Nix expression which declares a NixOS configuration for each machine in the network"
+    echo "-d,--distribution   Distribution Nix expression which maps services to machines in the network"
+    echo "--show-trace        Shows a trace of the output"
+    echo "-h,--help           Shows the usage of this command"
+}
+
+# Parse valid argument options
+
+PARAMS=`getopt -n $0 -o s:n:d:h -l services:,network:,distribution:,show-trace,help -- "$@"`
+
+if [ $? != 0 ]
+then
+    showUsage
+    exit 1
+fi
+
+eval set -- "$PARAMS"
+
+# Evaluate valid options
+
+while [ "$1" != "--" ]
+do
+    case "$1" in
+        -s|--services)	    
+	    servicesFile=`readlink -f $2`
+	    ;;
+	-n|--network)
+	    networkFile=`readlink -f $2`
+	    ;;
+	-d|--distribution)
+	    distributionFile=`readlink -f $2`
+	    ;;
+	--show-trace)
+	    showTrace=1
+	    ;;
+	-h|--help)
+	    showUsage
+	    exit 0
+	    ;;
+    esac
+    
+    shift
+done
+
+# Validate the given options
+
+if [ "$servicesFile" = "" ]
+then
+    echo "ERROR: A services expression must be specified!" >&2
+    exit 1
+fi
+
+if [ "$networkFile" = "" ]
+then
+    echo "ERROR: A network expression must be specified!" >&2
+    exit 1
+fi
+
+if [ "$distributionFile" = "" ]
+then
+    echo "ERROR: A distribution expression must be specified!" >&2
+    exit 1
+fi
+
+if [ "$showTrace" = "1" ]
+then
+    showTraceArg="--show-trace"
+fi
+
+# Generate virtual machines matching the configuration in the network Nix expression
+vmsPath=`disnix-generate-vms $networkFile`
+
+# Generate infrastructure expression from network expression
+infrastructureFile=`disnix-generate-infra $networkFile`
+
+if [ ! -f ./vms ]
+then
+    # Start the virtual machines
+    $vmsPath/bin/run-vms
+
+    # Wait until the VMs are booted
+    echo "The virtual network is booting"
+    echo "Press [Enter] to perform the deployment"
+    read
+
+    # Write a file that indicates that VMs are running
+    touch vms
+fi
+
+# Call disnix-env with generated infrastructure expression and virtualisation options
+# to automatically deploy the service in the virtual machines
+disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --coordinator-profile-path ./coordinator-profile --target-property backdoor --interface disnix-backdoor-client $showTraceArg

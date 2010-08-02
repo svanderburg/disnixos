@@ -1,0 +1,242 @@
+#!/bin/bash -e
+# Disnix - A distributed application layer for Nix
+# Copyright (C) 2008-2010  Sander van der Burg
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+showUsage()
+{
+    echo "Usage:"
+    echo "$0 {[--target | -t ] socket_file {operation}"
+    echo
+    echo "Operations:"
+    echo "  --import [--localfile|--remotefile] derivations"
+    echo "  --export [--localfile|--remotefile] derivations"
+    echo "  --print-invalid derivations"
+    echo "  {-r|--realise} derivations"
+    echo "  --set [{-p|--profile} name] derivation"
+    echo "  {-q|--query-installed} [{-p|--profile} name]"
+    echo "  --query-requisites derivations"
+    echo "  --collect-garbage [{-d|--delete-old}]\n"
+    echo "  --activate --type type --arguments arguments derivation"
+    echo "  --deactivate --type type --arguments arguments derivation"
+    echo "  --lock [{-p|--profile} profile]"
+    echo "  --unlock [{-p|--profile} profile]"
+    echo "  {-h | --help}"
+}
+
+# Parse valid argument options
+
+PARAMS=`getopt -n $0 -o rqp:d -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,help -- "$@"`
+
+if [ $? != 0 ]
+then
+    showUsage
+    exit 1
+fi
+
+eval set -- "$PARAMS"
+
+# Evaluate valid options
+
+while [ "$1" != "--" ]
+do
+    case "$1" in
+        --import)
+	    operation="import";
+	    ;;
+	--export)
+	    operation="export";
+	    ;;
+	--print-invalid)
+	    operation="print-invalid";
+	    ;;
+	-r|--realise)
+	    operation="realise";
+	    ;;
+	--set)
+	    operation="set";
+	    ;;
+	-q|--query-installed)
+	    operation="query-installed";
+	    ;;
+	--query-requisites)
+	    operation="query-requisites";
+	    ;;
+	--collect-garbage)
+	    operation="collect-garbage";
+	    ;;
+	--activate)
+	    operation="activate";
+	    path=$2
+	    ;;
+	--deactivate)
+	    operation="deactivate";
+	    path=$2
+	    ;;
+	--lock)
+	    operation="lock";
+	    path=$2
+	    ;;
+	--unlock)
+	    operation="unlock";
+	    path=$2
+	    ;;
+	--target)
+	    target=$2
+	    ;;
+	--localfile)
+	    localfile=1
+	    ;;
+	--remotefile)
+	    remotefile=1
+	    ;;
+	-p|--profile)
+	    profileArg="--profile $2"
+	    ;;
+	-d|--delete-old)
+	    deleteOldArg="-d"
+	    ;;
+	--type)
+	    type=$2
+	    ;;
+	--arguments)
+	    argsArg="$argsArg --arguments \"$2\""
+	    ;;
+	-h|--help)
+	    showUsage
+	    exit 0
+	    ;;
+    esac
+    
+    shift
+done
+
+shift
+
+# Validate the given options
+
+if [ "$target" = "" ]
+then
+    echo "ERROR: A target socket file must be specified!" >&2
+    exit 1
+else
+    socketFile=$(readlink -f $target)
+fi
+
+if [ "$TMPDIR" = "" ]
+then
+    export TMPDIR=/tmp
+fi
+
+export PATH=$PATH:@socat@/bin
+
+# Execute selected operation
+
+case "$operation" in
+    import)
+        # Returns always true since host Nix store == guest Nix store
+	;;
+    export)
+        # Returns always true since host Nix store == guest Nix store
+        ;;
+    print-invalid)
+	# Everything is always valid since we have no Nix DB
+	;;
+    realise)
+        outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client --realise $@; echo \$?" | socat stdio $socketFile > $outputFile
+	exitStatus=$(tail -1 $outputFile)
+	head -n -1 $outputFile
+	rm -f $outputFile
+	exit $exitStatus
+        ;;
+    set)
+	outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client $profileArg --set $@; echo \$?" | socat stdio $socketFile > $outputFile
+	exitStatus=$(tail -1 $outputFile)
+	head -n -1 $outputFile
+	rm -f $outputFile
+	exit $exitStatus
+        ;;
+    query-installed)
+	outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client $profileArg --query-installed $@; echo \$?" | socat stdio $socketFile > $outputFile
+	exitStatus=$(tail -1 $outputFile)
+	head -n -1 $outputFile
+	rm -f $outputFile
+	exit $exitStatus
+        ;;
+    query-requisites)
+	outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client --query-requisites $@; echo \$?" | socat stdio $socketFile > $outputFile
+	exitStatus=$(tail -1 $outputFile)
+	head -n -1 $outputFile
+	rm -f $outputFile
+	exit $exitStatus
+        ;;
+    collect-garbage)
+	outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client --collect-garbage $deleteOldArg $@; echo \$?" | socat stdio $socketFile > $outputFile
+	exitStatus=$(tail -1 $outputFile)
+	head -n -1 $outputFile
+	rm -f $outputFile
+	exit $exitStatus
+        ;;
+    activate)
+	if [ "$type" = "" ]
+	then
+	    echo "ERROR: A type must be specified!" >&2
+	    exit 1
+	fi
+	
+	outputFile=$(mktemp -p $TMPDIR)
+	echo "disnix-client --type $type $argsArg --activate $@; echo \$?" | socat stdio $socketFile > $outputFile
+	exitStatus=$(tail -1 $outputFile)
+	head -n -1 $outputFile
+	rm -f $outputFile
+	exit $exitStatus
+	;;
+    deactivate)
+	if [ "$type" = "" ]
+	then
+	    echo "ERROR: A type must be specified!" >&2
+	    exit 1
+	fi
+	
+	outputFile=$(mktemp -p $TMPDIR)
+	echo "disnix-client --type $type $argsArg --deactivate $@; echo \$?" | socat stdio $socketFile > $outputFile
+	exitStatus=$(tail -1 $outputFile)
+	head -n -1 $outputFile
+	rm -f $outputFile
+	exit $exitStatus
+	;;
+    lock)
+	outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client --lock $profileArg; echo \$?" | socat stdio $socketFile > $outputFile
+	exitStatus=$(tail -1 $outputFile)
+	head -n -1 $outputFile
+	rm -f $outputFile
+	exit $exitStatus
+        ;;
+    unlock)
+	outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client --unlock $profileArg; echo \$?" | socat stdio $socketFile > $outputFile
+	exitStatus=$(tail -1 $outputFile)
+	head -n -1 $outputFile
+	rm -f $outputFile
+	exit $exitStatus
+        ;;
+esac
