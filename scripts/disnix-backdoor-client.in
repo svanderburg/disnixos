@@ -141,7 +141,7 @@ then
     export TMPDIR=/tmp
 fi
 
-export PATH=$PATH:@socat@/bin
+export PATH=$PATH:$(dirname @socat@)
 
 # Execute selected operation
 
