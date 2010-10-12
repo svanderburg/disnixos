@@ -15,7 +15,8 @@ let
       in
         "  "+targetName+" = {\n"+
         "    backdoor = \"@port@.socket\";\n"+
-	"    hostname = \"${targetName}\";\n"
+	"    hostname = \"${targetName}\";\n"+
+	"    system = \"i686-linux\";"
       +
         (if config.services.tomcat.enable then
           "    tomcatPort = 8080;\n"

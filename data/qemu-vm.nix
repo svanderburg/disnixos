@@ -131,7 +131,7 @@ let
           -initrd ${config.system.build.toplevel}/initrd \
           ${qemuGraphics} \
           $QEMU_OPTS \
-          -append "$(cat ${config.system.build.toplevel}/kernel-params) init=${config.system.build.bootStage2} systemConfig=${config.system.build.toplevel} regInfo=${regInfo} ${kernelConsole} $QEMU_KERNEL_PARAMS" \
+          -append "$(cat ${config.system.build.toplevel}/kernel-params) init=${config.system.build.toplevel}/init regInfo=${regInfo} ${kernelConsole} $QEMU_KERNEL_PARAMS" \
           ${config.virtualisation.qemu.options}
     '';
 
@@ -167,9 +167,12 @@ in
       
   boot.initrd.postDeviceCommands =
     ''
+      # Workaround for massive clock drift with the "kvm-clock" clock source.
+      echo hpet > /sys/devices/system/clocksource/clocksource0/current_clocksource
+    
       # Set up networking.  Needed for CIFS mounting.
       ifconfig eth0 up 10.0.2.15
-
+      
       # If the disk image appears to be empty, run mke2fs to
       # initialise.
       FSTYPE=$(blkid -o value -s TYPE /dev/vda || true)
