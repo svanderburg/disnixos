@@ -200,7 +200,7 @@ in
   # where the regular value for the `fileSystems' attribute should be
   # disregarded for the purpose of building a VM test image (since
   # those filesystems don't exist in the VM).
-  fileSystems = mkOverride 50 {}
+  fileSystems = mkOverride 50
     [ { mountPoint = "/";
         device = "/dev/vda";
       }
@@ -221,7 +221,7 @@ in
   # host filesystem and thus deadlocks the system.
   networking.useDHCP = false;
 
-  networking.defaultGateway = mkOverride 200 {} "10.0.2.2";
+  networking.defaultGateway = mkOverride 200 "10.0.2.2";
 
   networking.nameservers = [ "10.0.2.3" ];
 
@@ -249,13 +249,13 @@ in
 
   # When building a regular system configuration, override whatever
   # video driver the host uses.
-  services.xserver.videoDriver = mkOverride 50 {} null;
-  services.xserver.videoDrivers = mkOverride 50 {} [ "cirrus" "vesa" ];
-  services.xserver.defaultDepth = mkOverride 50 {} 0;
-  services.xserver.resolutions = mkOverride 50 {} [];
+  services.xserver.videoDriver = mkOverride 50 null;
+  services.xserver.videoDrivers = mkOverride 50 [ "cirrus" "vesa" ];
+  services.xserver.defaultDepth = mkOverride 50 0;
+  services.xserver.resolutions = mkOverride 50 [];
 
   services.mingetty.ttys = ttys ++ optional (!cfg.graphics) "ttyS0";
 
   # Wireless won't work in the VM.
-  networking.enableWLAN = mkOverride 50 {} false;
+  networking.enableWLAN = mkOverride 50 false;
 }
