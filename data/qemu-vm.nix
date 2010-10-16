@@ -99,7 +99,17 @@ let
         example = "-vga std";
         description = "Options passed to QEMU.";
       };
-      
+    
+    virtualisation.writableStore = 
+      mkOption {
+        default = true;
+        description =
+          ''
+            If enabled, the Nix store in the VM is made writable by
+            layering an AUFS/tmpfs filesystem on top of the host's Nix
+            store.
+          '';
+      };
   };
 
   cfg = config.virtualisation;
@@ -154,7 +164,11 @@ in
   # CIFS.  Also use paravirtualised network and block devices for
   # performance.
   boot.initrd.availableKernelModules =
-    [ "cifs" "virtio_net" "virtio_pci" "virtio_blk" "virtio_balloon" "nls_utf8" ];
+    [ "cifs" "virtio_net" "virtio_pci" "virtio_blk" "virtio_balloon" "nls_utf8" ]
+    ++ optional cfg.writableStore [ "aufs" ];
+
+  boot.extraModulePackages =
+    optional cfg.writableStore config.boot.kernelPackages.aufs2;
 
   boot.initrd.extraUtilsCommands =
     ''
@@ -194,7 +208,18 @@ in
         ${config.environment.nix}/bin/nix-store --load-db < $regInfo
       )
     '';
-      
+
+  boot.initrd.postMountCommands =
+    ''
+      mkdir -p $targetRoot/boot
+      mount -o remount,ro $targetRoot/nix/store
+      ${optionalString cfg.writableStore ''
+        mkdir /mnt-store-tmpfs
+        mount -t tmpfs -o "mode=755" none /mnt-store-tmpfs
+        mount -t aufs -o dirs=/mnt-store-tmpfs=rw:$targetRoot/nix/store=rr none $targetRoot/nix/store
+      ''}
+    '';
+
   virtualisation.pathsInNixDB = [ config.system.build.toplevel ];
   
   # Mount the host filesystem via CIFS, and bind-mount the Nix store

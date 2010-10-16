@@ -164,12 +164,12 @@ case "$operation" in
 	exit $exitStatus
         ;;
     set)
-	outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client $profileArg --set $@; echo \$?" | socat stdio $socketFile > $outputFile
-	exitStatus=$(tail -1 $outputFile)
-	head -n -1 $outputFile
-	rm -f $outputFile
-	exit $exitStatus
+	#outputFile=$(mktemp -p $TMPDIR)
+        #echo "disnix-client $profileArg --set $@; echo \$?" | socat stdio $socketFile > $outputFile
+	#exitStatus=$(tail -1 $outputFile)
+	#head -n -1 $outputFile
+	#rm -f $outputFile
+	#exit $exitStatus
         ;;
     query-installed)
 	outputFile=$(mktemp -p $TMPDIR)
