@@ -94,7 +94,7 @@ then
 fi
 
 # Generate virtual machines matching the configuration in the network Nix expression
-vmsPath=`disnix-generate-vms $networkFile`
+vmsPath=`nixos-build-vms --use-backdoor -n $networkFile`
 
 # Generate infrastructure expression from network expression
 infrastructureFile=`disnix-generate-infra $networkFile`

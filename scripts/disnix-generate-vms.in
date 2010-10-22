@@ -1,7 +1,0 @@
-#!/bin/bash -e
-
-# Autoconf settings
-export prefix=@prefix@
-
-# Execute operation
-nix-build @datadir@/@PACKAGE@/vms.nix --argstr networkFile $(readlink -f $1)

@@ -14,7 +14,7 @@ let
         config = (import /etc/nixos/nixos/lib/eval-config.nix { modules = [ configuration ]; }).config;
       in
         "  "+targetName+" = {\n"+
-        "    backdoor = \"@port@.socket\";\n"+
+        "    backdoor = \"${targetName}.socket\";\n"+
 	"    hostname = \"${targetName}\";\n"+
 	"    system = \"i686-linux\";"
       +
@@ -39,13 +39,5 @@ pkgs.stdenv.mkDerivation {
 cat > $out <<EOF
 ${infrastructureString}
 EOF
-    
-port=65280
-    
-while [ "$(grep "@port@" $out)" != "" ]
-do
-    port2=$((port++))
-    sed -i -e "0,/@port@/s//$port2/" $out
-done
 '';
 }

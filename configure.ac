@@ -32,6 +32,5 @@ scripts/Makefile
 data/Makefile
 scripts/disnix-backdoor-client
 scripts/disnix-generate-infra
-scripts/disnix-generate-vms
 ])
 AC_OUTPUT
