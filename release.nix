@@ -5,6 +5,7 @@ let
     tarball =
       { disnix_vm_addons ? {outPath = ./.; rev = 1234;}
       , officialRelease ? false
+      , disnix ? (import ../../disnix/trunk/release.nix {}).build {}
       }:
 
       with import nixpkgs {};
@@ -15,12 +16,13 @@ let
         src = disnix_vm_addons;
         inherit officialRelease;
 
-        buildInputs = [ socat ];
+        buildInputs = [ socat pkgconfig disnix ];
       };
 
     build =
       { tarball ? jobs.tarball {}
       , system ? "x86_64-linux"
+      , disnix ? (import ../../disnix/trunk/release.nix {}).build {}
       }:
 
       with import nixpkgs { inherit system; };
@@ -29,7 +31,7 @@ let
         name = "disnix-vm-addons";
         src = tarball;
 
-        buildInputs = [ socat ];
+        buildInputs = [ socat pkgconfig disnix ];
       };      
   };
 in jobs

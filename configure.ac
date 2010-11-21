@@ -12,18 +12,16 @@ if test -z "$$1"; then
 fi
 ])
 
-# Checks for installed programs
-AC_DEFUN([NEED_PROG],
-[
-AC_PATH_PROG($1, $2)
-if test -z "$$1"; then
-    AC_MSG_ERROR([$2 is required])
-fi
-])
-
 # Checks for programs
 AC_PROG_INSTALL
+PKG_PROG_PKG_CONFIG
 NEED_PROG(socat, socat)
+
+# Checks for Disnix libraries
+DISNIX_REQUIRED=0.2
+PKG_CHECK_MODULES(DISNIX, disnix >= $DISNIX_REQUIRED)
+DISNIX_PREFIX=`pkg-config --variable=prefix disnix`
+AC_SUBST(DISNIX_PREFIX)
 
 # Output
 AC_CONFIG_FILES([
@@ -32,5 +30,6 @@ scripts/Makefile
 data/Makefile
 scripts/disnix-backdoor-client
 scripts/disnix-generate-infra
+scripts/disnix-vm-env
 ])
 AC_OUTPUT

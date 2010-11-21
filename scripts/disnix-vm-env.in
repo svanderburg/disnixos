@@ -30,6 +30,10 @@ showUsage()
     echo "-h,--help           Shows the usage of this command"
 }
 
+# Import checks
+
+source @DISNIX_PREFIX@/share/disnix/checks
+
 # Parse valid argument options
 
 PARAMS=`getopt -n $0 -o s:n:d:h -l services:,network:,distribution:,show-trace,help -- "$@"`
@@ -70,31 +74,13 @@ done
 
 # Validate the given options
 
-if [ "$servicesFile" = "" ]
-then
-    echo "ERROR: A services expression must be specified!" >&2
-    exit 1
-fi
-
-if [ "$networkFile" = "" ]
-then
-    echo "ERROR: A network expression must be specified!" >&2
-    exit 1
-fi
-
-if [ "$distributionFile" = "" ]
-then
-    echo "ERROR: A distribution expression must be specified!" >&2
-    exit 1
-fi
-
-if [ "$showTrace" = "1" ]
-then
-    showTraceArg="--show-trace"
-fi
+checkServicesFile
+checkInfrastructureFile
+checkDistributionFile
+checkShowTrace
 
 # Generate virtual machines matching the configuration in the network Nix expression
-vmsPath=`nixos-build-vms --use-backdoor -n $networkFile`
+vmsPath=`nixos-build-vms --use-backdoor -n $networkFile $showTraceArg`
 
 # Generate infrastructure expression from network expression
 infrastructureFile=`disnix-generate-infra $networkFile`
