@@ -26,6 +26,7 @@ showUsage()
     echo "-s,--services       Services Nix expression which describes all components of the distributed system"
     echo "-n,--network        Network Nix expression which declares a NixOS configuration for each machine in the network"
     echo "-d,--distribution   Distribution Nix expression which maps services to machines in the network"
+    echo "--no-out-link       Do not create a 'result' symlink"
     echo "--show-trace        Shows a trace of the output"
     echo "-h,--help           Shows the usage of this command"
 }
@@ -60,6 +61,9 @@ do
 	-d|--distribution)
 	    distributionFile=`readlink -f $2`
 	    ;;
+	--no-out-link)
+	    noOutLink=1
+	    ;;
 	--show-trace)
 	    showTrace=1
 	    ;;
@@ -77,13 +81,14 @@ done
 checkServicesFile
 checkInfrastructureFile
 checkDistributionFile
+checkNoOutLink
 checkShowTrace
 
 # Generate virtual machines matching the configuration in the network Nix expression
-vmsPath=`nixos-build-vms --use-backdoor -n $networkFile $showTraceArg`
+vmsPath=`nixos-build-vms --use-backdoor -n $networkFile $showTraceArg $noOutLinkArg`
 
 # Generate infrastructure expression from network expression
-infrastructureFile=`disnix-generate-infra $networkFile`
+infrastructureFile=`disnix-generate-infra $showTraceArg $noOutLinkArg $networkFile`
 
 if [ ! -f ./vms ]
 then
