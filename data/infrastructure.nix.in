@@ -1,0 +1,28 @@
+let
+  networkFile = @networkFile@;
+  nixpkgs = "@nixpkgs@";
+  nixos = "@nixos@";
+  useBackdoor = @useBackdoor@;
+
+  pkgs = import nixpkgs {};
+  network = import networkFile;
+
+  configurations = pkgs.lib.mapAttrs (targetName: configuration: 
+    (import "${nixos}/lib/eval-config.nix" {
+      inherit nixpkgs;
+      
+      modules = [
+        configuration
+	{ key = "publish-infrastructure";
+	  services.disnix.publishInfrastructure.enable = true;
+	  services.disnix.publishInfrastructure.enableAuthentication = true;
+	}
+      ] ++ pkgs.lib.optional useBackdoor {
+        key = "backdoor";
+	networking.hostName = targetName;
+	services.disnix.infrastructure.backdoor = "${targetName}.socket";
+      };
+      extraArgs = configurations;
+    }).config) network;
+in
+pkgs.lib.mapAttrs (targetName: config: config.services.disnix.infrastructure) configurations

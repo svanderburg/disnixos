@@ -23,9 +23,10 @@ showUsage()
     echo "Usage: $0 [options] network_expr"
     echo "Options:"
     echo
-    echo "--no-out-link Do not create a 'result' symlink"
-    echo "--show-trace  Shows a trace of the output"
-    echo "-h,--help     Shows the usage of this command"
+    echo "--no-out-link  Do not create a 'result' symlink"
+    echo "--use-backdoor Indicates that the backdoor must be enabled so that the VMs can be accessed through a UNIX domain socket"
+    echo "--show-trace   Shows a trace of the output"
+    echo "-h,--help      Shows the usage of this command"
 }
 
 # Autoconf settings
@@ -36,7 +37,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o h -l no-out-link,show-trace,help -- "$@"`
+PARAMS=`getopt -n $0 -o h -l no-out-link,use-backdoor,show-trace,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -53,6 +54,9 @@ do
     case "$1" in
 	--no-out-link)
 	    noOutLink=1
+	    ;;
+	--use-backdoor)
+	    useBackdoor=1
 	    ;;
 	--show-trace)
 	    showTrace=1
@@ -73,6 +77,16 @@ shift
 checkNoOutLink
 checkShowTrace
 
+if [ "$useBackdoor" = "1" ]
+then
+    useBackdoorArg="--arg useBackdoor true"
+fi
+
+if [ "$NIXOS" = "" ]
+then
+    export NIXOS=/etc/nixos/nixos
+fi
+
 if [ "$@" = "" ]
 then
     echo "ERROR: A network expression must be specified!" >&2
@@ -82,4 +96,4 @@ else
 fi
 
 # Execute operation
-nix-build @datadir@/@PACKAGE@/generate-infrastructure.nix --argstr networkFile $networkFile $showTraceArg $noOutLinkArg
+nix-build @datadir@/@PACKAGE@/generate-infrastructure.nix --argstr networkFile $networkFile $useBackdoorArg $showTraceArg $noOutLinkArg
