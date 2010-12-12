@@ -1,15 +1,19 @@
-{networkFile, useBackdoor ? false}:
+{ networkFile
+, useBackdoor ? false
+, nixpkgs ? builtins.getEnv "NIXPKGS_ALL"
+, nixos ? builtins.getEnv "NIXOS"
+}:
 
 let
-  pkgs = import (builtins.getEnv "NIXPKGS_ALL") {};
+  pkgs = import nixpkgs {};
   infrastructureNix = @prefix@/share/disnix-vm-addons/infrastructure.nix.in;
 in
 pkgs.stdenv.mkDerivation {
   name = "infrastructure.nix";
   buildCommand = ''
     sed -e "s|@networkFile@|${networkFile}|" \
-        -e "s|@nixpkgs@|${builtins.getEnv "NIXPKGS_ALL"}|" \
-	-e "s|@nixos@|${builtins.getEnv "NIXOS"}|" \
+        -e "s|@nixpkgs@|${nixpkgs}|" \
+	-e "s|@nixos@|${nixos}|" \
 	-e "s|@useBackdoor@|${if useBackdoor then "true" else "false"}|" ${infrastructureNix} > $out
   '';
 }
