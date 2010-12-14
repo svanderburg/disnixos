@@ -3,6 +3,7 @@ let
   nixpkgs = "@nixpkgs@";
   nixos = "@nixos@";
   useBackdoor = @useBackdoor@;
+  useTcpSocket = @useTcpSocket@;
 
   pkgs = import nixpkgs {};
   network = import networkFile;
@@ -20,7 +21,7 @@ let
       ] ++ pkgs.lib.optional useBackdoor {
         key = "backdoor";
 	networking.hostName = targetName;
-	services.disnix.infrastructure.backdoor = "UNIX-CONNECT:${targetName}.socket";
+	services.disnix.infrastructure.backdoor = if useTcpSocket then "TCP:${targetName}:512" else "UNIX-CONNECT:${targetName}.socket";
       };
       extraArgs = configurations;
     }).config) network;
