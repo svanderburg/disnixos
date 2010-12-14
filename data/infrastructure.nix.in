@@ -20,7 +20,7 @@ let
       ] ++ pkgs.lib.optional useBackdoor {
         key = "backdoor";
 	networking.hostName = targetName;
-	services.disnix.infrastructure.backdoor = "${targetName}.socket";
+	services.disnix.infrastructure.backdoor = "UNIX-CONNECT:${targetName}.socket";
       };
       extraArgs = configurations;
     }).config) network;

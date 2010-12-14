@@ -19,7 +19,7 @@
 showUsage()
 {
     echo "Usage:"
-    echo "$0 {[--target | -t ] socket_file {operation}"
+    echo "$0 {[--target | -t ] address {operation}"
     echo
     echo "Operations:"
     echo "  --import [--localfile|--remotefile] derivations"
@@ -130,10 +130,8 @@ shift
 
 if [ "$target" = "" ]
 then
-    echo "ERROR: A target socket file must be specified!" >&2
+    echo "ERROR: A target address file must be specified!" >&2
     exit 1
-else
-    socketFile=$(readlink -f $target)
 fi
 
 if [ "$TMPDIR" = "" ]
@@ -157,7 +155,7 @@ case "$operation" in
 	;;
     realise)
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --realise $@; echo \$?" | socat stdio $socketFile > $outputFile
+        echo "disnix-client --realise $@; echo \$?" | socat stdio $target > $outputFile
 	exitStatus=$(tail -1 $outputFile)
 	head -n -1 $outputFile
 	rm -f $outputFile
@@ -165,7 +163,7 @@ case "$operation" in
         ;;
     set)
 	#outputFile=$(mktemp -p $TMPDIR)
-        #echo "disnix-client $profileArg --set $@; echo \$?" | socat stdio $socketFile > $outputFile
+        #echo "disnix-client $profileArg --set $@; echo \$?" | socat stdio $target > $outputFile
 	#exitStatus=$(tail -1 $outputFile)
 	#head -n -1 $outputFile
 	#rm -f $outputFile
@@ -173,7 +171,7 @@ case "$operation" in
         ;;
     query-installed)
 	outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client $profileArg --query-installed $@; echo \$?" | socat stdio $socketFile > $outputFile
+        echo "disnix-client $profileArg --query-installed $@; echo \$?" | socat stdio $target > $outputFile
 	exitStatus=$(tail -1 $outputFile)
 	head -n -1 $outputFile
 	rm -f $outputFile
@@ -181,7 +179,7 @@ case "$operation" in
         ;;
     query-requisites)
 	outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --query-requisites $@; echo \$?" | socat stdio $socketFile > $outputFile
+        echo "disnix-client --query-requisites $@; echo \$?" | socat stdio $target > $outputFile
 	exitStatus=$(tail -1 $outputFile)
 	head -n -1 $outputFile
 	rm -f $outputFile
@@ -189,7 +187,7 @@ case "$operation" in
         ;;
     collect-garbage)
 	outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --collect-garbage $deleteOldArg $@; echo \$?" | socat stdio $socketFile > $outputFile
+        echo "disnix-client --collect-garbage $deleteOldArg $@; echo \$?" | socat stdio $target > $outputFile
 	exitStatus=$(tail -1 $outputFile)
 	head -n -1 $outputFile
 	rm -f $outputFile
@@ -203,7 +201,7 @@ case "$operation" in
 	fi
 	
 	outputFile=$(mktemp -p $TMPDIR)
-	echo "disnix-client --type $type $argsArg --activate $@; echo \$?" | socat stdio $socketFile > $outputFile
+	echo "disnix-client --type $type $argsArg --activate $@; echo \$?" | socat stdio $target > $outputFile
 	exitStatus=$(tail -1 $outputFile)
 	head -n -1 $outputFile
 	rm -f $outputFile
@@ -217,7 +215,7 @@ case "$operation" in
 	fi
 	
 	outputFile=$(mktemp -p $TMPDIR)
-	echo "disnix-client --type $type $argsArg --deactivate $@; echo \$?" | socat stdio $socketFile > $outputFile
+	echo "disnix-client --type $type $argsArg --deactivate $@; echo \$?" | socat stdio $target > $outputFile
 	exitStatus=$(tail -1 $outputFile)
 	head -n -1 $outputFile
 	rm -f $outputFile
@@ -225,7 +223,7 @@ case "$operation" in
 	;;
     lock)
 	outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --lock $profileArg; echo \$?" | socat stdio $socketFile > $outputFile
+        echo "disnix-client --lock $profileArg; echo \$?" | socat stdio $target > $outputFile
 	exitStatus=$(tail -1 $outputFile)
 	head -n -1 $outputFile
 	rm -f $outputFile
@@ -233,7 +231,7 @@ case "$operation" in
         ;;
     unlock)
 	outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --unlock $profileArg; echo \$?" | socat stdio $socketFile > $outputFile
+        echo "disnix-client --unlock $profileArg; echo \$?" | socat stdio $target > $outputFile
 	exitStatus=$(tail -1 $outputFile)
 	head -n -1 $outputFile
 	rm -f $outputFile
