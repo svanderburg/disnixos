@@ -29,6 +29,7 @@ Makefile
 scripts/Makefile
 data/Makefile
 data/generate-infrastructure.nix
+data/testing.nix
 scripts/disnix-backdoor-client
 scripts/disnix-generate-infra
 scripts/disnix-vm-env

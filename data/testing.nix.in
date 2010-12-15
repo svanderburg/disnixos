@@ -1,0 +1,111 @@
+{ nixpkgs ? builtins.getEnv "NIXPKGS_ALL"
+, nixos ? builtins.getEnv "NIXOS"
+, system ? builtins.currentSystem
+, disnix ? @DISNIX_PREFIX@
+, disnixos ? @prefix@
+}:
+
+let
+  generateManifestSrc =
+    {name, tarball}:
+    
+    with import nixpkgs { inherit system; };
+    
+    stdenv.mkDerivation {
+      name = "${name}-manifest-src";
+      buildCommand =
+	''
+	  ensureDir $out
+	  cd $out
+	  tar xfvj ${tarball}/tarballs/*.tar.bz2 --strip-components=1
+	'';
+    };
+in
+{
+  sourceTarball =
+    {name, version, src, officialRelease}:
+    
+    with import nixpkgs { inherit system; };
+    
+    releaseTools.sourceTarball {
+      inherit name version src officialRelease;
+      
+      distPhase =
+	''
+	  mkdir ../$name-$version
+	  rm -Rf `find . -name .svn`
+	  mv * ../$name-$version
+	  cd ..
+	  ensureDir $out/tarballs
+	  tar cfvj $out/tarballs/$name-$version.tar.bz2 $name-$version
+	'';
+    };
+
+  buildManifest = 
+    {name, version, tarball, servicesFile, networkFile, distributionFile}:
+    
+    with import nixpkgs { inherit system; };
+    
+    releaseTools.nixBuild rec {
+      inherit name version;
+      src = tarball;
+      
+      manifestSrc = generateManifestSrc {
+        inherit name tarball;
+      };
+      
+      infrastructure = import "${disnixos}/share/disnix-vm-addons/generate-infrastructure.nix" {
+	networkFile = "${manifestSrc}/${networkFile}";
+	useBackdoor = true;
+	useTcpSocket = true;
+	inherit nixpkgs nixos;
+      };
+      
+      manifest = import "${disnix}/share/disnix/manifest.nix" {
+	servicesFile = "${manifestSrc}/${servicesFile}";
+	infrastructureFile = "${infrastructure}";
+	distributionFile = "${manifestSrc}/${distributionFile}";
+	targetProperty = "backdoor";
+      };
+      
+      installPhase =
+	''
+	  ensureDir $out
+	  ln -s $manifest $out/manifest.xml
+	  ln -s $infrastructure $out/infrastructure.nix
+	'';
+	
+       checkPhase = "echo hello";
+    };
+
+  disnixTest =
+    {name, manifest, tarball, networkFile, testScript}:
+    
+    let
+      infrastructure = import "${manifest}/infrastructure.nix";
+      
+      manifestSrc = generateManifestSrc {
+        inherit name tarball;
+      };
+    in
+    with import "${nixos}/lib/testing.nix" { inherit nixpkgs system; services = null; };
+    with import nixpkgs { inherit system; };
+    
+    simpleTest {
+      nodes = import "${manifestSrc}/${networkFile}";
+      
+      testScript =
+        ''
+	  startAll;
+	  
+	  ${lib.concatMapStrings (targetName:
+	  ''
+	    ${"\$"}${targetName}->mustSucceed("${socat}/bin/socat tcp-listen:512,fork exec:/bin/sh &");
+	  '') (builtins.attrNames infrastructure)}
+	  
+	  ${"\$"}${builtins.head (builtins.attrNames infrastructure)}->mustSucceed("${disnix}/bin/disnix-activate --interface ${disnixos}/bin/disnix-backdoor-client --target-property backdoor --infrastructure ${manifest}/infrastructure.nix --no-coordinator-profile ${manifest}/manifest.xml");
+	  
+	  ${testScript}
+	'';
+    };
+}

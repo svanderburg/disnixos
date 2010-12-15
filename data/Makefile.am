@@ -1,2 +1,2 @@
-pkgdata_DATA = generate-infrastructure.nix infrastructure.nix.in
-EXTRA_DIST = generate-infrastructure.nix.in infrastructure.nix
+pkgdata_DATA = generate-infrastructure.nix infrastructure.nix.in testing.nix
+EXTRA_DIST = generate-infrastructure.nix.in infrastructure.nix testing.nix.in
