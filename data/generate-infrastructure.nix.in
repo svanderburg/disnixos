@@ -7,7 +7,7 @@
 
 let
   pkgs = import nixpkgs {};
-  infrastructureNix = @prefix@/share/disnix-vm-addons/infrastructure.nix.in;
+  infrastructureNix = @prefix@/share/disnixos/infrastructure.nix.in;
 in
 pkgs.stdenv.mkDerivation {
   name = "infrastructure.nix";

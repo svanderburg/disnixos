@@ -3,7 +3,7 @@
 let
   jobs = rec {
     tarball =
-      { disnix_vm_addons ? {outPath = ./.; rev = 1234;}
+      { disnixos ? {outPath = ./.; rev = 1234;}
       , officialRelease ? false
       , disnix ? (import ../../disnix/trunk/release.nix {}).build {}
       }:
@@ -11,9 +11,9 @@ let
       with import nixpkgs {};
 
       releaseTools.sourceTarball {
-        name = "disnix-vm-addons-tarball";
+        name = "disnixos-tarball";
         version = builtins.readFile ./version;
-        src = disnix_vm_addons;
+        src = disnixos;
         inherit officialRelease;
 
         buildInputs = [ socat pkgconfig disnix ];
@@ -28,7 +28,7 @@ let
       with import nixpkgs { inherit system; };
 
       releaseTools.nixBuild {
-        name = "disnix-vm-addons";
+        name = "disnixos";
         src = tarball;
 
         buildInputs = [ socat pkgconfig disnix ];

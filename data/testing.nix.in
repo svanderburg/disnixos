@@ -54,7 +54,7 @@ in
         inherit name tarball;
       };
       
-      infrastructure = import "${disnixos}/share/disnix-vm-addons/generate-infrastructure.nix" {
+      infrastructure = import "${disnixos}/share/disnixos/generate-infrastructure.nix" {
 	networkFile = "${manifestSrc}/${networkFile}";
 	useBackdoor = true;
 	useTcpSocket = true;

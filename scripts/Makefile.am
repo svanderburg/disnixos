@@ -1,3 +1,3 @@
-bin_SCRIPTS = disnix-backdoor-client disnix-generate-infra disnix-vm-env
+bin_SCRIPTS = disnix-backdoor-client disnixos-geninfra disnixos-vm-env
 
-EXTRA_DIST = disnix-backdoor-client.in disnix-generate-infra.in disnix-vm-env.in
+EXTRA_DIST = disnix-backdoor-client.in disnixos-geninfra.in disnixos-vm-env.in

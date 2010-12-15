@@ -1,5 +1,5 @@
 AC_PREREQ(2.61)
-AC_INIT([disnix-vm-addons], m4_esyscmd([echo -n $(cat ./version)$VERSION_SUFFIX]))
+AC_INIT([disnixos], m4_esyscmd([echo -n $(cat ./version)$VERSION_SUFFIX]))
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([1.7.2 -Wall -Werror])
 
@@ -31,7 +31,7 @@ data/Makefile
 data/generate-infrastructure.nix
 data/testing.nix
 scripts/disnix-backdoor-client
-scripts/disnix-generate-infra
-scripts/disnix-vm-env
+scripts/disnixos-geninfra
+scripts/disnixos-vm-env
 ])
 AC_OUTPUT

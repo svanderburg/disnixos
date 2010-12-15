@@ -89,7 +89,7 @@ checkShowTrace
 vmsPath=`nixos-build-vms --use-backdoor --no-out-link $showTraceArg $networkFile`
 
 # Generate infrastructure expression from network expression
-infrastructureFile=`disnix-generate-infra --use-backdoor --no-out-link $showTraceArg $networkFile`
+infrastructureFile=`disnixos-geninfra --use-backdoor --no-out-link $showTraceArg $networkFile`
 
 if [ ! -f ./vms ]
 then
