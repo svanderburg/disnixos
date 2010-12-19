@@ -100,9 +100,11 @@ in
 	  
 	  ${lib.concatMapStrings (targetName:
 	  ''
+	    ${"\$"}${targetName}->waitForJob("network-interfaces");
+	    ${"\$"}${targetName}->waitForJob("disnix");
 	    my $pid = ${"\$"}${targetName}->mustSucceed("${socat}/bin/socat tcp-listen:512,fork exec:/bin/sh & echo -n \$!");
 	    ${"\$"}${targetName}->mustSucceed("while [ \"\$(ps -p $pid | grep socat)\" = \"\" ]; do sleep 0.5; done");
-	    ${"\$"}${targetName}->waitForJob("disnix");
+	    
 	  '') (builtins.attrNames infrastructure)}
 	  
 	  ${"\$"}${builtins.head (builtins.attrNames infrastructure)}->mustSucceed("${disnix}/bin/disnix-activate --interface ${disnixos}/bin/disnix-backdoor-client --target-property backdoor --infrastructure ${manifest}/infrastructure.nix --no-coordinator-profile ${manifest}/manifest.xml");
