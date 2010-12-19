@@ -14,11 +14,14 @@ let
       
       modules = [
         configuration
-	{ key = "publish-infrastructure";
+      ]
+      ++ [ 
+        { key = "publish-infrastructure";
 	  services.disnix.publishInfrastructure.enable = true;
 	  services.disnix.publishInfrastructure.enableAuthentication = true;
 	}
-      ] ++ pkgs.lib.optional useBackdoor {
+      ]
+      ++ pkgs.lib.optional useBackdoor {
         key = "backdoor";
 	networking.hostName = targetName;
 	services.disnix.infrastructure.backdoor = if useTcpSocket then "TCP:${targetName}:512" else "UNIX-CONNECT:${targetName}.socket";
