@@ -66,6 +66,7 @@ in
 	infrastructureFile = "${infrastructure}";
 	distributionFile = "${manifestSrc}/${distributionFile}";
 	targetProperty = "backdoor";
+	inherit nixpkgs;
       };
       
       installPhase =
