@@ -1,0 +1,18 @@
+let
+  networkFile = @networkFile@;
+  nixpkgs = "@nixpkgs@";
+  nixos = "@nixos@";
+
+  pkgs = import nixpkgs {};
+  evalConfig = import "${nixos}/lib/eval-config.nix";
+  network = import networkFile;
+in
+pkgs.lib.mapAttr (targetName: config: 
+  {
+    name = targetName;
+    pkg = (evalConfig {
+      modules = [ config ];
+    }).config.system.build.toplevel;
+    type = "nixos-configuration";
+  }
+) network

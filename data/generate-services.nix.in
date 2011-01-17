@@ -1,0 +1,17 @@
+{ networkFile
+, nixpkgs ? builtins.getEnv "NIXPKGS_ALL"
+, nixos ? builtins.getEnv "NIXOS"
+}:
+
+let
+  pkgs = import nixpkgs {};
+  servicesNix = @prefix@/share/disnixos/services.nix.in;
+in
+pkgs.stdenv.mkDerivation {
+  name = "services.nix";
+  buildCommand = ''
+    sed -e "s|@networkFile@|${networkFile}|" \
+        -e "s|@nixpkgs@|${nixpkgs}|" \
+	-e "s|@nixos@|${nixos}|" ${servicesNix} > $out
+  '';
+}

@@ -1,0 +1,36 @@
+{ networkFile
+, manifestFile
+, nixpkgs ? builtins.getEnv("NIXPKGS_ALL")
+, disnix ? @DISNIX_PREFIX@
+, disnixos ? @prefix@
+}:
+
+let
+  network = import networkFile;
+  pkgs = import nixpkgs {};
+  
+  testScript = ''
+    startAll;
+    
+    ${pkgs.lib.concatMapStrings (targetName:
+      ''
+        ${"\$"}${targetName}->waitForJob("network-interfaces");
+        ${"\$"}${targetName}->waitForJob("disnix");
+        my $pid = ${"\$"}${targetName}->mustSucceed("${pkgs.socat}/bin/socat tcp-listen:512,fork exec:/bin/sh & echo -n \$!");
+        ${"\$"}${targetName}->mustSucceed("while [ \"\$(ps -p $pid | grep socat)\" = \"\" ]; do sleep 0.5; done");
+      ''
+    ) (builtins.attrNames network)}
+    
+    ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --interface ${disnixos}/bin/disnix-backdoor-client --no-coordinator-profile ${manifestFile}");
+    
+    sleep 1e9;
+  '';
+in
+pkgs.stdenv.mkDerivation {
+  name = "testScript";
+  buildCommand = ''
+    cat > $out << "EOF"
+    ${testScript}
+    EOF
+  '';
+}

@@ -29,9 +29,13 @@ Makefile
 scripts/Makefile
 data/Makefile
 data/generate-infrastructure.nix
+data/generate-services.nix
+data/generate-tests.nix
 data/testing.nix
 scripts/disnix-backdoor-client
 scripts/disnixos-geninfra
+scripts/disnixos-genservices
+scripts/disnixos-gentests
 scripts/disnixos-vm-env
 ])
 AC_OUTPUT

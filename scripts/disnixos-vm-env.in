@@ -60,6 +60,9 @@ do
 	-d|--distribution)
 	    distributionFile=`readlink -f $2`
 	    ;;
+	--no-out-link)
+	    noOutLink=1
+	    ;;
 	--show-trace)
 	    showTrace=1
 	    ;;
@@ -91,20 +94,13 @@ vmsPath=`nixos-build-vms --use-backdoor --no-out-link $showTraceArg $networkFile
 # Generate infrastructure expression from network expression
 infrastructureFile=`disnixos-geninfra --use-backdoor --no-out-link $showTraceArg $networkFile`
 
-if [ ! -f ./vms ]
-then
-    # Start the virtual machines
-    $vmsPath/bin/run-vms
+# Build the manifest
+manifest=`disnix-manifest -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property backdoor --no-out-link`
 
-    # Wait until the VMs are booted
-    echo "The virtual network is booting"
-    echo "Press [Enter] to perform the deployment"
-    read
+# Set a test script which automatically deploys the system
+export tests=`cat $(disnixos-gentests --no-out-link -n $networkFile $manifest)`
 
-    # Write a file that indicates that VMs are running
-    touch vms
-fi
-
-# Call disnix-env with generated infrastructure expression and virtualisation options
-# to automatically deploy the service in the virtual machines
-disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --coordinator-profile-path ./coordinator-profile --target-property backdoor --interface disnix-backdoor-client $showTraceArg
+# Start the virtual machines
+export TMPDIR=`mktemp -d`
+$vmsPath/bin/nixos-test-driver
+rm -R $TMPDIR

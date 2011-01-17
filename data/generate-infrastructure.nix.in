@@ -1,6 +1,6 @@
 { networkFile
 , useBackdoor ? false
-, useTcpSocket ? false
+, useTcpSocket ? true
 , nixpkgs ? builtins.getEnv "NIXPKGS_ALL"
 , nixos ? builtins.getEnv "NIXOS"
 }:

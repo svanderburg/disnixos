@@ -72,11 +72,10 @@ in
       installPhase =
 	''
 	  ensureDir $out
-	  ln -s $manifest $out/manifest.xml
-	  ln -s $infrastructure $out/infrastructure.nix
+	  ln -s $manifest $out
 	'';
 	
-       checkPhase = "echo hello";
+      checkPhase = "echo hello";
     };
 
   disnixTest =
@@ -108,7 +107,7 @@ in
 	    
 	  '') (builtins.attrNames infrastructure)}
 	  
-	  ${"\$"}${builtins.head (builtins.attrNames infrastructure)}->mustSucceed("${disnix}/bin/disnix-activate --interface ${disnixos}/bin/disnix-backdoor-client --target-property backdoor --infrastructure ${manifest}/infrastructure.nix --no-coordinator-profile ${manifest}/manifest.xml");
+	  ${"\$"}${builtins.head (builtins.attrNames infrastructure)}->mustSucceed("${disnix}/bin/disnix-activate --interface ${disnixos}/bin/disnix-backdoor-client --no-coordinator-profile ${manifest}/manifest.xml");
 	  
 	  ${testScript}
 	'';
