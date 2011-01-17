@@ -72,7 +72,7 @@ in
       installPhase =
 	''
 	  ensureDir $out
-	  ln -s $manifest $out
+	  ln -s $manifest $out/manifest.xml
 	'';
 	
       checkPhase = "echo hello";
