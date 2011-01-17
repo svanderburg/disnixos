@@ -82,17 +82,17 @@ in
     {name, manifest, tarball, networkFile, testScript}:
     
     let
-      infrastructure = import "${manifest}/infrastructure.nix";
-      
       manifestSrc = generateManifestSrc {
         inherit name tarball;
       };
+      
+      network = import "${manifestSrc}/${networkFile}";
     in
     with import "${nixos}/lib/testing.nix" { inherit nixpkgs system; services = null; };
     with import nixpkgs { inherit system; };
     
     simpleTest {
-      nodes = import "${manifestSrc}/${networkFile}";
+      nodes = import network;
       
       testScript =
         ''
@@ -105,9 +105,9 @@ in
 	    my $pid = ${"\$"}${targetName}->mustSucceed("${socat}/bin/socat tcp-listen:512,fork exec:/bin/sh & echo -n \$!");
 	    ${"\$"}${targetName}->mustSucceed("while [ \"\$(ps -p $pid | grep socat)\" = \"\" ]; do sleep 0.5; done");
 	    
-	  '') (builtins.attrNames infrastructure)}
+	  '') (builtins.attrNames network)}
 	  
-	  ${"\$"}${builtins.head (builtins.attrNames infrastructure)}->mustSucceed("${disnix}/bin/disnix-activate --interface ${disnixos}/bin/disnix-backdoor-client --no-coordinator-profile ${manifest}/manifest.xml");
+	  ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --interface ${disnixos}/bin/disnix-backdoor-client --no-coordinator-profile ${manifest}/manifest.xml");
 	  
 	  ${testScript}
 	'';
