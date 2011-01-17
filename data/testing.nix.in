@@ -92,7 +92,7 @@ in
     with import nixpkgs { inherit system; };
     
     simpleTest {
-      nodes = import network;
+      nodes = network;
       
       testScript =
         ''
