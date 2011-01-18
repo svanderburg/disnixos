@@ -1,0 +1,107 @@
+#!/bin/bash -e
+# Disnix - A distributed application layer for Nix
+# Copyright (C) 2008-2010  Sander van der Burg
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+# Shows the usage of this command to the user
+
+showUsage()
+{
+    echo "Usage: $0 [options] network_expr"
+    echo "Options:"
+    echo
+    echo "--target-property   The target property of an infrastructure model, that specifies how to "
+    echo "                    connect to the remote Disnix interface. (Defaults to hostname)"
+    echo "--interface         Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
+    echo "-p,--profile        Name of the profile that is used for this system. Defaults to: default"
+    echo "--show-trace        Shows a trace of the output"
+    echo "-h,--help           Shows the usage of this command"
+}
+
+# Import checks
+source @DISNIX_PREFIX@/share/disnix/checks
+
+# Parse valid argument options
+
+PARAMS=`getopt -n $0 -o p:h -l profile:,target-property:,interface:,show-trace,help -- "$@"`
+
+if [ $? != 0 ]
+then
+    showUsage
+    exit 1
+fi
+
+eval set -- "$PARAMS"
+
+# Evaluate valid options
+
+while [ "$1" != "--" ]
+do
+    case "$1" in
+	-p|--profile)
+	    profileArg="--profile $2"
+	    ;;
+        --target-property)
+	    targetProperty=$2
+	    ;;
+	--interface)
+	    interface=$2
+	    ;;
+	--show-trace)
+	    showTrace=1
+	    ;;
+	-h|--help)
+	    showUsage
+	    exit 0
+	    ;;
+    esac
+    
+    shift
+done
+
+shift
+
+# Validate the given options
+
+checkClientInterface
+checkTargetProperty
+checkShowTrace
+
+if [ "$@" = "" ]
+then
+    echo "ERROR: A network expression must be specified!" >&2
+    exit 1
+else
+    networkFile=$(readlink -f $@)
+fi
+
+# Generate services model from network model
+servicesFile=`disnixos-genservices $networkFile --no-out-link $showTraceArg`
+
+# Generate infrastructure model from network model
+infrastructureFile=`disnixos-geninfra $networkFile --no-out-link $showTraceArg`
+
+# Map NixOS configurations (services) to machines in the infrastructure model
+distributionFile=`disnix-gendist-roundrobin -s $servicesFile -i $infrastructureFile --no-out-link $showTraceArg`
+
+# Create a manifest file
+manifest=`disnix-manifest -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --no-out-link`
+
+# Distribute system derivations
+disnix-distribute --interface $interface $manifest
+
+# Activate system derivations
+disnix-activate $profileArg --interface $interface --no-coordinator-profile --no-target-profile $manifest
