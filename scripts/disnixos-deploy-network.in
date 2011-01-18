@@ -89,10 +89,10 @@ else
 fi
 
 # Generate services model from network model
-servicesFile=`disnixos-genservices $networkFile --no-out-link $showTraceArg`
+servicesFile=`disnixos-genservices --no-out-link $showTraceArg $networkFile`
 
 # Generate infrastructure model from network model
-infrastructureFile=`disnixos-geninfra $networkFile --no-out-link $showTraceArg`
+infrastructureFile=`disnixos-geninfra --no-out-link $showTraceArg $networkFile`
 
 # Map NixOS configurations (services) to machines in the infrastructure model
 distributionFile=`disnix-gendist-roundrobin -s $servicesFile -i $infrastructureFile --no-out-link $showTraceArg`
@@ -104,4 +104,4 @@ manifest=`disnix-manifest -s $servicesFile -i $infrastructureFile -d $distributi
 disnix-distribute --interface $interface $manifest
 
 # Activate system derivations
-disnix-activate $profileArg --interface $interface --no-coordinator-profile --no-target-profile $manifest
+disnix-activate $profileArg --interface $interface --no-coordinator-profile --no-target-profiles --no-upgrade $manifest
