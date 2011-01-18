@@ -98,7 +98,7 @@ infrastructureFile=`disnixos-geninfra --no-out-link $showTraceArg $networkFile`
 distributionFile=`disnix-gendist-roundrobin -s $servicesFile -i $infrastructureFile --no-out-link $showTraceArg`
 
 # Create a manifest file
-manifest=`disnix-manifest -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --no-out-link`
+manifest=`disnix-manifest -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --no-out-link $showTraceArg`
 
 # Distribute system derivations
 disnix-distribute --interface $interface $manifest
