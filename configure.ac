@@ -16,6 +16,20 @@ fi
 AC_PROG_INSTALL
 PKG_PROG_PKG_CONFIG
 NEED_PROG(socat, socat)
+AC_PATH_PROG(xmllint, xmllint, false)
+AC_PATH_PROG(xsltproc, xsltproc, false)
+AC_PATH_PROG(dblatex, dblatex)
+
+# Checks for Docbook stuff
+AC_ARG_WITH(docbook-rng, AC_HELP_STRING([--with-docbook-rng=PATH],
+  [path of the DocBook RelaxNG schema]),
+  docbookrng=$withval, docbookrng=/docbook-rng-missing)
+AC_SUBST(docbookrng)
+
+AC_ARG_WITH(docbook-xsl, AC_HELP_STRING([--with-docbook-xsl=PATH],
+  [path of the DocBook XSL stylesheets]),
+  docbookxsl=$withval, docbookxsl=/docbook-xsl-missing)
+AC_SUBST(docbookxsl)
 
 # Checks for Disnix libraries
 DISNIX_REQUIRED=0.2
@@ -26,6 +40,8 @@ AC_SUBST(DISNIX_PREFIX)
 # Output
 AC_CONFIG_FILES([
 Makefile
+doc/Makefile
+doc/manual/Makefile
 scripts/Makefile
 data/Makefile
 data/generate-infrastructure.nix

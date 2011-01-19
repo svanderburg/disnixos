@@ -1,0 +1,114 @@
+<chapter xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xml:id="chap-installation">
+
+	<title>Installation</title>
+
+	<para>
+		This chapter explains how DisnixOS can be installed. Except for the basic 
+		<link xlink:href="http://nixos.org/disnix">Disnix</link> 
+		toolset, only the coordinator machine needs the DisnixOS
+		exentension tools. 
+	</para>
+	
+	<section>
+		<title>Compiling DisnixOS from source</title>
+
+		<para>
+			This section explains how to compile DisnixOS from source code.
+			Usually, this is only needed in special circumstances such as for 
+			development, or trying a new platform. A more convenient way to install
+			DisnixOS is to use the Nix package manager.
+		</para>
+		
+		<section>
+			<title>Prerequisites</title>
+			<para>
+				In order to build DisnixOS from source code, the following dependencies are required:
+				Since it is an extension to Disnix, the core Disnix toolset must be installed. Have a look for 
+				installation instructions in the Disnix manual.
+				Moreover, for network communications, DisnixOS uses
+				<link xlink:href="http://www.dest-unreach.org/socat">socat</link>,
+				which must also be present on the system.
+			</para>
+		</section>
+
+		<section>
+			<title>Compiling DisnixOS</title>
+
+			<para>
+				After unpacking or checking out the DisnixOS sources, it can be
+				compiled by executing the following commands:
+
+<screen>
+$ ./configure <replaceable>options...</replaceable>
+$ make
+$ make install
+</screen>
+			</para>
+
+			<para>
+				When building from the Subversion repository, these should be
+				preceded by the command:
+
+<screen>
+$ ./bootstrap
+</screen>
+			</para>
+
+			<para>
+				The installation path can be specified by passing the
+				<option>--prefix=<replaceable>prefix</replaceable></option> to
+				<command>configure</command>. The default installation directory is
+				<filename>/usr/local</filename>. You can change this to any location
+				you like.  You must have write permission to the
+				<replaceable>prefix</replaceable> path.
+			</para>
+		</section>
+	</section>
+
+	<section>
+		<title>Installing by using the Nix package manager</title>
+
+		<para>
+			The easiest way to use DisnixOS is by installing the DisnixOS package with
+			the Nix package manager from the
+			<link xlink:href="http://nixos.org/nixpkgs">Nixpkgs</link>
+			repository by typing:
+
+<screen>
+$ nix-env -i disnixos
+</screen>
+
+			Another way is downloading the DisnixOS source distribution
+			and to compile it manually. Moreover, it is also a good thing to have
+			to basic Disnix toolset in your environment. This can be done by typing:
+		</para>
+
+<screen>
+$ nix-env -i disnix
+</screen>
+
+		<para>
+			A copy of
+			<link xlink:href="http://nixos.org/nixpkgs">Nixpkgs</link> is required
+			and an environment variable <code>NIXPKGS_ALL</code> must point to the path where
+			it is installed, so that Disnix is able to find it. On NixOS a copy is 
+			already present and this environment variable has already been configured.
+			On other systems this variable can be configured by adding the following lines to your
+			<filename>~/.bash_profile</filename> configuration (or another configuration
+			file, if you use a different shell):
+		</para>
+		
+<screen>
+$ cat &gt;&gt; ~/.bash_profile &lt;&lt;EOF
+# Begin Nixpkgs addition
+
+NIXPKGS_ALL=/path/to/nixpkgs/pkgs/top-level/all-packages.nix
+export NIXPKGS_ALL
+
+# End Nixpkgs addition
+EOF
+</screen>
+	</section>
+</chapter>

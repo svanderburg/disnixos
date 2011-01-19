@@ -24,7 +24,7 @@ showUsage()
     echo "Options:"
     echo
     echo "--no-out-link  Do not create a 'result' symlink"
-    echo "--use-backdoor Indicates that the backdoor must be enabled so that the VMs can be accessed through a UNIX domain socket"
+    echo "--use-backdoor Indicates that the backdoor must be enabled so that the VMs can be accessed through a socket"
     echo "--show-trace   Shows a trace of the output"
     echo "-h,--help      Shows the usage of this command"
 }

@@ -1,1 +1,1 @@
-SUBDIRS = scripts data
+SUBDIRS = doc scripts data

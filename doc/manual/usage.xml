@@ -1,0 +1,85 @@
+<chapter xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xml:id="chap-usage">
+
+	<title>Usage</title>
+
+        <para>
+		DisnixOS offers some additional features to the basic Disnix toolset, which are shown in this section.
+        </para>
+        
+	<section>
+		<title>Deploying the infrastructure</title>
+		<para>
+			To deploy the NixOS configurations of machines in the network, the following instruction can be used:
+		</para>
+		
+<screen>
+$ disnixos-deploy-network network.nix
+</screen>
+
+	</section>
+		
+	<section>
+		<title>Deploying the services and infrastructure at once</title>
+		
+		<para>
+			In order to automatically deploy NixOS configurations in a network machines and the services of
+			which a distributed system is composed, the following instruction can be used:
+		</para>
+		
+<screen>
+$ disnixos-env -s services.nix -n network.nix -d distribution.nix
+</screen>
+		
+		<para>
+			This command is essentially a combination of the <command>nixos-deploy-network</command> (which
+			deploys the infrastructure and
+			<command>disnix-env</command> (which deploys the services) commands.
+		</para>
+	</section>
+	
+	<section>
+		<title>Deploying a system in a virtual network</title>
+		
+		<para>
+			You can also deploy a system in a network of virtual machines, which is useful for testing:
+		</para>
+		
+<screen>
+$ disnixos-vm-env -s services.nix -n network.nix -d distribution.nix
+</screen>
+		<para>
+			The <command>disnixos-vm-env</command> command is almost similar to the <command>disnix-env</command> command,
+			except that it generates and launches a network of virtual machine instances. Moreover, this command
+			cannot be used to upgrade a system.
+		</para>
+	</section>
+	
+	<section>
+		<title>Generating an infrastructure model</title>
+		
+		<para>
+			DisnixOS used a network model instead of an infrastructure model, which the basic Disnix toolset uses.
+			Esentially, the semantics of these models are quite similar. The <command>disnixos-geninfra</command>
+			can be used to generate an infrastructure model from the network model:
+		</para>
+		
+<screen>
+$ disnixos-geninfra network.nix
+</screen>
+
+		<para>
+			The output of the tool is the path to the generated infrastructure model. This file can be used by tools in the
+			basic Disnix toolset. For example:
+		</para>
+ 
+<screen>
+$ disnix-collect-garbage $(disnixos-geninfra network.nix)
+</screen>
+
+		<para>
+			The above command runs the Disnix garbage collector on machines defined in the network model.
+		</para>
+	</section>
+</chapter>

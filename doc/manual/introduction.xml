@@ -1,0 +1,66 @@
+<chapter xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xml:id="chap-introduction">
+
+	<title>Introduction</title>
+
+	<para>
+		Disnix is a toolset used to perform distributed deployment tasks
+		and is built on top of Nix; a package manager which has some distinct
+		features compared to conventional package
+		managers to make deployment safe and reliable.
+	</para>
+
+	<para>
+		The purpose of Disnix is to manage the deployment of distributable
+		components (or <emphasis>services</emphasis>) in a network of machines.
+		Disnix, however, does not manage the deployment of the infrastructure itself. Normally,
+		a system administrator must manually install machines in the network by
+		following the installation steps of the operating system. Moreover, a system administrator
+		or developer must also manually write an infrastructure model, matching the
+		actual configuration of the network in order to correctly deploy a service-oriented
+		system.
+	</para>
+	
+	<para>
+		This DisnixOS extension provides complementary infrastructure management tools for Disnix
+		built on top of 
+		<link xlink:href="http://nixos.org/nixos">NixOS</link>,
+		a GNU/Linux distribution built around the Nix package manager. NixOS is a distribution
+		in which complete system configurations can be built from declarative specifications and
+		also allows atomic upgrades and rollbacks of complete system architectures.
+	</para>
+	
+	<section>
+		<title>Features</title>
+		
+		<simplesect>
+			<title>Infrastructure deployment</title>
+			<para>
+				DisnixOS allows you to write a network of NixOS configurations in a model and
+				to automatically deploy the system configurations in a network of machines through
+				the Disnix interface.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Infrastructure virtualisation</title>
+			<para>
+				DisnixOS uses the virtualisation features of NixOS to build a network of virtual machines
+				closely matching the real network and automatically deploys the service-oriented system,
+				so that it can be easily tested by developers.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Automated testing of a service-oriented system</title>
+			<para>
+				DisnixOS uses the virtualisation test techniques (also used for the NixOS
+				testsuite) to automatically script the deployment and testcases in a distributed
+				environment, so that a service-oriented system can be automatically tested, and run on
+				<link xlink:href="http://nixos.org/hydra">Hydra</link>,
+				a continuous build and integration server built on top of Nix.
+			</para>
+		</simplesect>
+	</section>
+</chapter>
