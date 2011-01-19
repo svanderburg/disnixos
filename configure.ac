@@ -34,6 +34,7 @@ data/generate-tests.nix
 data/testing.nix
 scripts/disnix-backdoor-client
 scripts/disnixos-deploy-network
+scripts/disnixos-env
 scripts/disnixos-geninfra
 scripts/disnixos-genservices
 scripts/disnixos-gentests

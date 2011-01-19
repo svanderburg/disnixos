@@ -20,31 +20,32 @@
 
 showUsage()
 {
-    echo "Usage: $0 -s services_expr -n network_expr -d distribution_expr [options]"
+    echo "Usage: $0 -s services.nix -n network.nix -d distribution.nix [options]"
     echo "Options:"
     echo
     echo "-s,--services       Services Nix expression which describes all components of the distributed system"
     echo "-n,--network        Network Nix expression which declares a NixOS configuration for each machine in the network"
     echo "-d,--distribution   Distribution Nix expression which maps services to machines in the network"
+    echo "--target-property   The target property of an infrastructure model, that specifies how to "
+    echo "                    connect to the remote Disnix interface. (Defaults to hostname)"
+    echo "--interface         Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
+    echo "-p,--profile        Name of the profile that is used for this system. Defaults to: default"
     echo "--show-trace        Shows a trace of the output"
     echo "-h,--help           Shows the usage of this command"
 }
 
 # Autoconf settings
-
 export prefix=@prefix@
 
 # Import checks
-
 source @datadir@/@PACKAGE@/checks
 
 # Import Disnix checks
-
 source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o s:n:d:h -l services:,network:,distribution:,show-trace,help -- "$@"`
+PARAMS=`getopt -n $0 -o s:n:d:p:h -l services:,network:,distribution:,profile:,target-property:,interface:,show-trace,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -68,8 +69,14 @@ do
 	-d|--distribution)
 	    distributionFile=`readlink -f $2`
 	    ;;
-	--no-out-link)
-	    noOutLink=1
+	-p|--profile)
+	    profileArg="--profile $2"
+	    ;;
+        --target-property)
+	    targetProperty=$2
+	    ;;
+	--interface)
+	    interface=$2
 	    ;;
 	--show-trace)
 	    showTrace=1
@@ -88,21 +95,15 @@ done
 checkServicesFile
 checkNetworkFile
 checkDistributionFile
+checkClientInterface
+checkTargetProperty
 checkShowTrace
 
-# Generate virtual machines matching the configuration in the network Nix expression
-vmsPath=`nixos-build-vms --use-backdoor --no-out-link $showTraceArg $networkFile`
+# Generate infrastructure model from network model
+infrastructureFile=`disnixos-geninfra network.nix`
 
-# Generate infrastructure expression from network expression
-infrastructureFile=`disnixos-geninfra --use-backdoor --no-out-link $showTraceArg $networkFile`
+# Upgrade the NixOS configurations
+disnixos-deploy-network --target-property $targetProperty --interface $interface $profileArg $showTraceArg $networkFile
 
-# Build the manifest
-manifest=`disnix-manifest -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property backdoor --no-out-link $showTraceArg`
-
-# Set a test script which automatically deploys the system
-export tests=`cat $(disnixos-gentests --no-out-link -n $networkFile $showTraceArg $manifest)`
-
-# Start the virtual machines
-export TMPDIR=`mktemp -d`
-$vmsPath/bin/nixos-test-driver
-rm -R $TMPDIR
+# Upgrade the services
+disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $profileArg $showTraceArg
