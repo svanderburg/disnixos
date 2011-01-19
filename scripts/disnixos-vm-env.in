@@ -104,5 +104,6 @@ export tests=`cat $(disnixos-gentests --no-out-link -n $networkFile $showTraceAr
 
 # Start the virtual machines
 export TMPDIR=`mktemp -d`
+cd $TMPDIR
 $vmsPath/bin/nixos-test-driver
 rm -R $TMPDIR
