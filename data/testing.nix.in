@@ -57,7 +57,6 @@ in
       infrastructure = import "${disnixos}/share/disnixos/generate-infrastructure.nix" {
 	networkFile = "${manifestSrc}/${networkFile}";
 	useBackdoor = true;
-	useTcpSocket = true;
 	inherit nixpkgs nixos;
       };
       

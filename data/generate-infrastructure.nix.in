@@ -1,6 +1,5 @@
 { networkFile
 , useBackdoor ? false
-, useTcpSocket ? true
 , nixpkgs ? builtins.getEnv "NIXPKGS_ALL"
 , nixos ? builtins.getEnv "NIXOS"
 }:
@@ -15,7 +14,6 @@ pkgs.stdenv.mkDerivation {
     sed -e "s|@networkFile@|${networkFile}|" \
         -e "s|@nixpkgs@|${nixpkgs}|" \
 	-e "s|@nixos@|${nixos}|" \
-	-e "s|@useBackdoor@|${if useBackdoor then "true" else "false"}|" \
-	-e "s|@useTcpSocket@|${if useTcpSocket then "true" else "false"}|" ${infrastructureNix} > $out
+	-e "s|@useBackdoor@|${if useBackdoor then "true" else "false"}|" ${infrastructureNix} > $out
   '';
 }
