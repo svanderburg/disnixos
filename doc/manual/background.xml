@@ -1,0 +1,167 @@
+<chapter xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xml:id="chap-background">
+
+	<title>Background</title>
+
+	<para>
+		<link xlink:href="http://nixos.org/nixos">NixOS</link>
+		is a GNU/Linux distribution, which uses the Nix package manager to manage
+		all packages, system components (such as the Linux kernel) and configuration files.
+		In NixOS, system configurations are derived from declarative specifications describing
+		properties of the system, such as kernel modules, partitions, services and
+		system packages.
+	</para>
+	
+	<example xml:id="ex-1-nixos-configuration">
+		<title>A NixOS configuration running a OpenSSH server</title>
+<programlisting>
+{pkgs, ...}: <co xml:id='co-1-functionHeader' />
+
+{
+  boot = { <co xml:id='co-2-boot' />
+    loader = {
+      grub = {
+        device = "/dev/sda";
+      };
+    };
+  };
+
+  fileSystems = [ <co xml:id='co-3-filesystems' />
+    { mountPoint = "/";
+      device = "/dev/sda2";
+    }
+  ];
+
+  swapDevices = [
+    { device = "/dev/sda1"; }
+  ];
+  
+  services = { <co xml:id='co-4-services' />
+    openssh = {
+      enable = true;
+    };
+  };
+
+  environment = { <co xml:id='co-5-environment' />
+    systemPackages = [
+      pkgs.mc
+      pkgs.subversion
+      pkgs.lynx
+    ];
+  };  
+}
+</programlisting>
+	</example>
+	
+	<para>
+		<xref linkend="ex-1-nixos-configuration" /> shows a Nix expression describing the configuration
+		of a machine.
+	</para>
+	
+	<calloutlist>
+		<callout arearefs='co-1-functionHeader'>
+			<para>
+				This line states that the expression is a function, having
+				an argument called <varname>pkgs</varname>, which refers to
+				<link xlink:href="http://nixos.org/nixpkgs">Nixpkgs</link>, 
+				a collection of 2500 packages which can be deployed
+				by the Nix package manager.
+			</para>
+		</callout>
+		
+		<callout arearefs='co-2-boot'>
+			<para>
+				This section of the NixOS specifcation describes the settings
+				of the GRUB bootloader, such as that the partition containing
+				the MBR is <filename>/dev/sda</filename>.
+			</para>
+		</callout>
+		
+		<callout arearefs='co-3-filesystems'>
+			<para>
+				This section of the NixOS specifcation describes the settings
+				of hard drive partitions, such as the root partition and the
+				swap partition.
+			</para>
+		</callout>
+		
+		<callout arearefs='co-4-services'>
+			<para>
+				This section of the NixOS specifcation describes the services
+				running on the system, such as the OpenSSH server providing
+				remote SSH access.
+			</para>
+		</callout>
+		
+		<callout arearefs='co-5-environment'>
+			<para>
+				This section of the NixOS specifcation describes the system packages,
+				which can be used by all users on the machines, such as the
+				Lynx web browser and Midnight Commander.
+			</para>
+		</callout>
+	</calloutlist>
+	
+	<para>
+		The specification in <xref linkend="ex-1-nixos-configuration" /> can be stored in the
+		at <filename>/etc/nixos/configuration.nix</filename> and 
+		the complete configuration can be built from source code and activated by running:
+	</para>
+	
+<screen>
+$ nixos-rebuild switch
+</screen>
+
+	<para>
+		 NixOS configurations can also be used in an attributeset, describing a network
+		 of machines:
+	</para>
+
+	<example xml:id="ex-2-network">
+		<title>A network of NixOS configurations</title>
+<programlisting>
+{
+  test1 = import ../configurations/openssh.nix; <co xml:id='co-1-openssh' />
+  test2 = import ../configurations/tomcat.nix; <co xml:id='co-2-tomcat' />
+  test3 = import ../configurations/httpd.nix;
+}
+</programlisting>
+	</example>
+	
+	<para>
+		<xref linkend="ex-2-network" /> shows a network of NixOS configurations. Basically, this
+		expression is an attribute set in which each attribute refers to a NixOS configuration: 
+	</para>
+	
+	<calloutlist>
+		<callout arearefs='co-1-openssh'>
+			<para>
+				This attribute declares that we have a machine with identifier
+				<varname>test1</varname>, having a configuration running a OpenSSH server,
+				described earlier in <xref linkend="ex-1-nixos-configuration" />.
+			</para>
+		</callout>
+		<callout arearefs='co-2-tomcat'>
+			<para>
+				This attribute declares that we have a machine with identifier
+				<varname>test2</varname>, having a configuration running an Apache Tomcat server.
+			</para>
+		</callout>
+	</calloutlist>
+	
+	<para>
+		By typing the following instruction on the command line, the network of machines are built
+		from source code, distributed to the target machines and finally activated:
+	</para>
+	
+<screen>
+$ nixos-deploy-network network.nix
+</screen>
+	
+	<para>
+		Disnix is a toolset supporting the deployment of services. DisnixOS combines the latter feature
+		of using <command>nixos-deploy-network</command> to deploy networks of NixOS machines,
+		as addition to Disnix to provide infrastructure deployment.
+	</para>
+</chapter>

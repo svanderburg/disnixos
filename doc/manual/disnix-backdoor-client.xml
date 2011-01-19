@@ -31,7 +31,7 @@
 		<para>
 			The command <command>disnix-backdoor-client</command> provides remote access to a <command>disnix-service</command> instance running
 			on a machine in the network by using a insecure socket with public access. This tool is designed for use with
-			  <command>disnixos-vm-env</command> to automatically deploy a system in a network of virtual machines.
+			<link linkend="sec-disnixos-vm-env"><command>disnixos-vm-env</command></link> to automatically deploy a system in a network of virtual machines.
 		</para>
 		<para>
 			In most cases this command is not used directly, but is used by specifying the <option>--interface</option> option

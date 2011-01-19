@@ -18,6 +18,10 @@
 $ disnixos-deploy-network network.nix
 </screen>
 
+		<para>
+			By executing the command above, all the system configurations are built from the NixOS specifications,
+			then distributed to the machines in the network and finally activated.
+		</para>
 	</section>
 		
 	<section>
@@ -34,7 +38,7 @@ $ disnixos-env -s services.nix -n network.nix -d distribution.nix
 		
 		<para>
 			This command is essentially a combination of the <command>nixos-deploy-network</command> (which
-			deploys the infrastructure and
+			deploys the infrastructure) and
 			<command>disnix-env</command> (which deploys the services) commands.
 		</para>
 	</section>
@@ -43,7 +47,8 @@ $ disnixos-env -s services.nix -n network.nix -d distribution.nix
 		<title>Deploying a system in a virtual network</title>
 		
 		<para>
-			You can also deploy a system in a network of virtual machines, which is useful for testing:
+			You can also deploy a system in a network of virtual machines, which is useful for testing.
+			This can be done by executing the following instruction:
 		</para>
 		
 <screen>
@@ -60,7 +65,7 @@ $ disnixos-vm-env -s services.nix -n network.nix -d distribution.nix
 		<title>Generating an infrastructure model</title>
 		
 		<para>
-			DisnixOS used a network model instead of an infrastructure model, which the basic Disnix toolset uses.
+			DisnixOS uses a network model instead of an infrastructure model, which the basic Disnix toolset uses.
 			Esentially, the semantics of these models are quite similar. The <command>disnixos-geninfra</command>
 			can be used to generate an infrastructure model from the network model:
 		</para>

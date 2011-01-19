@@ -19,7 +19,7 @@
 		following the installation steps of the operating system. Moreover, a system administrator
 		or developer must also manually write an infrastructure model, matching the
 		actual configuration of the network in order to correctly deploy a service-oriented
-		system.
+		system, which is sometimes a lot of work and error prone.
 	</para>
 	
 	<para>
@@ -28,7 +28,7 @@
 		<link xlink:href="http://nixos.org/nixos">NixOS</link>,
 		a GNU/Linux distribution built around the Nix package manager. NixOS is a distribution
 		in which complete system configurations can be built from declarative specifications and
-		also allows atomic upgrades and rollbacks of complete system architectures.
+		also allows atomic upgrades and rollbacks of complete system configurations.
 	</para>
 	
 	<section>
@@ -47,16 +47,16 @@
 			<title>Infrastructure virtualisation</title>
 			<para>
 				DisnixOS uses the virtualisation features of NixOS to build a network of virtual machines
-				closely matching the real network and automatically deploys the service-oriented system,
-				so that it can be easily tested by developers.
+				closely matching the actual network and automatically deploys the service-oriented system
+				in the virtual network,	so that it can be easily tested by developers.
 			</para>
 		</simplesect>
 		
 		<simplesect>
 			<title>Automated testing of a service-oriented system</title>
 			<para>
-				DisnixOS uses the virtualisation test techniques (also used for the NixOS
-				testsuite) to automatically script the deployment and testcases in a distributed
+				DisnixOS uses the virtualisation test techniques, used for the NixOS
+				testsuite, to automatically script the deployment and testcases in a distributed
 				environment, so that a service-oriented system can be automatically tested, and run on
 				<link xlink:href="http://nixos.org/hydra">Hydra</link>,
 				a continuous build and integration server built on top of Nix.

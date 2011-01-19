@@ -36,7 +36,7 @@
 			the NixOS configurations of machines in the network and its properties and a distribution model which maps services to machines.
 		</para>
 		<para>
-			By invoking this command it will first build a network of virtual machines, closely matching the
+			By invoking this command, it will first build a network of virtual machines, closely matching the
 			NixOS configurations in the network model.
 			Then it will build all the services that are defined in the distribution
 			model from source code including all its dependencies. Finally, it launches the virtual machines

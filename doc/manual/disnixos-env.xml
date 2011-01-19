@@ -50,8 +50,9 @@
 			also deal with the inter-dependencies so that no services fails due to a missing inter-dependency.
 		</para>
 		<para>
-			This command is essentially a composition of the <command>disnixos-deploy-network</command> command (which
-			deploys the infrastructure) and the <command>disnix-env</command> (which deploys the services of which
+			This command is essentially a composition of the 
+			<link linkend="sec-disnixos-deploy-network"><command>disnixos-deploy-network</command></link>
+			command (which deploys the infrastructure) and <command>disnix-env</command> (which deploys the services of which
 			the system is composed).
 		</para>
 	</refsection>

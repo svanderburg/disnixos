@@ -25,9 +25,11 @@
 			<title>Prerequisites</title>
 			<para>
 				In order to build DisnixOS from source code, the following dependencies are required:
-				Since it is an extension to Disnix, the core Disnix toolset must be installed. Have a look for 
+				Since it is an extension to
+				<link xlink:href="http://nixos.org/disnix">Disnix</link>,
+				the core Disnix toolset must be installed. Have a look for 
 				installation instructions in the Disnix manual.
-				Moreover, for network communications, DisnixOS uses
+				Moreover, for network communication, DisnixOS uses
 				<link xlink:href="http://www.dest-unreach.org/socat">socat</link>,
 				which must also be present on the system.
 			</para>
@@ -68,7 +70,7 @@ $ ./bootstrap
 	</section>
 
 	<section>
-		<title>Installing by using the Nix package manager</title>
+		<title>Installing DisnixOS by using the Nix package manager</title>
 
 		<para>
 			The easiest way to use DisnixOS is by installing the DisnixOS package with
@@ -93,7 +95,7 @@ $ nix-env -i disnix
 			A copy of
 			<link xlink:href="http://nixos.org/nixpkgs">Nixpkgs</link> is required
 			and an environment variable <code>NIXPKGS_ALL</code> must point to the path where
-			it is installed, so that Disnix is able to find it. On NixOS a copy is 
+			it is installed, so that Disnix is able to find it. In NixOS, a copy is 
 			already present and this environment variable has already been configured.
 			On other systems this variable can be configured by adding the following lines to your
 			<filename>~/.bash_profile</filename> configuration (or another configuration

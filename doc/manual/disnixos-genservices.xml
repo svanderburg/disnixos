@@ -28,7 +28,7 @@
 		
 		<para>
 			The command <command>disnixos-genservices</command> generates a services model
-			from a network model so that <command>disnix-manifest</command> can build
+			from a network model, referring to actual system derivations so that <command>disnix-manifest</command> can build
 			a network of NixOS configurations and <command>disnix-distribute</command>
 			and <command>disnix-activate</command> can distribute and activate the
 			configurations.

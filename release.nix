@@ -44,7 +44,7 @@ let
           nuke-refs $out/index.pdf
 	  
 	  echo "doc-pdf manual $out/index.pdf" >> $out/nix-support/hydra-build-products
-	  echo "doc manual $out/share/doc/disnix/manual" >> $out/nix-support/hydra-build-products
+	  echo "doc manual $out/share/doc/disnixos/manual" >> $out/nix-support/hydra-build-products
 	'';
       };
 
