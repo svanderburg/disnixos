@@ -113,4 +113,23 @@ export NIXPKGS_ALL
 EOF
 </screen>
 	</section>
+	
+	<section>
+		<title>Using the virtualization features on a regular Linux distribution</title>
+		
+		<para>
+			To use the NixOS virtualization features on a regular Linux distribution, you need a
+			copy of the NixOS source code, which can be obtained from our Subversion repository by typing:
+			
+<screen>
+$ svn co https://svn.nixos.org/repos/nix/nixos/trunk nixos
+</screen>
+		</para>
+		
+		<para>
+			Moreover, you need a system capable of running
+			<link xlink:href="http://www.linux-kvm.org">KVM</link>, check your host Linux
+			distribution for more instructions.
+		</para>
+	</section>
 </chapter>
