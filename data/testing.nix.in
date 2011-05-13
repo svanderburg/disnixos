@@ -87,7 +87,7 @@ in
       
       network = import "${manifestSrc}/${networkFile}";
     in
-    with import "${nixos}/lib/testing.nix" { inherit nixpkgs system; services = null; };
+    with import "${nixos}/lib/testing.nix" { inherit nixpkgs system; };
     with import nixpkgs { inherit system; };
     
     simpleTest {
