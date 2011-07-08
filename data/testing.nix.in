@@ -32,12 +32,12 @@ in
       
       distPhase =
 	''
-	  mkdir ../$name-$version
+	  mkdir ../$name
 	  rm -Rf `find . -name .svn`
-	  mv * ../$name-$version
+	  mv * ../$name
 	  cd ..
 	  ensureDir $out/tarballs
-	  tar cfvj $out/tarballs/$name-$version.tar.bz2 $name-$version
+	  tar cfvj $out/tarballs/$name.tar.bz2 $name
 	'';
     };
 
