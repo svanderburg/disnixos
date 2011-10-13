@@ -73,11 +73,6 @@ shift
 checkNoOutLink
 checkShowTrace
 
-if [ "$NIXOS" = "" ]
-then
-    export NIXOS=/etc/nixos/nixos
-fi
-
 if [ "$@" = "" ]
 then
     echo "ERROR: A network expression must be specified!" >&2
