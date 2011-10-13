@@ -1,5 +1,5 @@
-{ nixpkgs ? builtins.getEnv "NIXPKGS_ALL"
-, nixos ? builtins.getEnv "NIXOS"
+{ nixpkgs ? <nixpkgs>
+, nixos ? <nixos>
 , system ? builtins.currentSystem
 , disnix ? @DISNIX_PREFIX@
 , disnixos ? @prefix@

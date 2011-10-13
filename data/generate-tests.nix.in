@@ -1,6 +1,6 @@
 { networkFile
 , manifestFile
-, nixpkgs ? builtins.getEnv("NIXPKGS_ALL")
+, nixpkgs ? <nixpkgs>
 , disnix ? @DISNIX_PREFIX@
 , disnixos ? @prefix@
 }:

@@ -1,7 +1,7 @@
 { networkFile
 , useBackdoor ? false
-, nixpkgs ? builtins.getEnv "NIXPKGS_ALL"
-, nixos ? builtins.getEnv "NIXOS"
+, nixpkgs ? <nixpkgs>
+, nixos ? <nixos>
 }:
 
 let
