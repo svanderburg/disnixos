@@ -20,7 +20,7 @@
 
 showUsage()
 {
-    echo "Usage: $0 -s services.nix -n network.nix -d distribution.nix [options]"
+    echo "Usage: $0 -s services.nix -n network.nix [ -n network2.nix ... ] -d distribution.nix [options]"
     echo "Options:"
     echo
     echo "-s,--services       Services Nix expression which describes all components of the distributed system"
@@ -64,7 +64,7 @@ do
 	    servicesFile=`readlink -f $2`
 	    ;;
 	-n|--network)
-	    networkFile=`readlink -f $2`
+	    networkFiles="$networkFiles `readlink -f $2`"
 	    ;;
 	-d|--distribution)
 	    distributionFile=`readlink -f $2`
@@ -93,17 +93,17 @@ done
 # Validate the given options
 
 checkServicesFile
-checkNetworkFile
+checkNetworkFiles
 checkDistributionFile
 checkClientInterface
 checkTargetProperty
 checkShowTrace
 
 # Generate infrastructure model from network model
-infrastructureFile=`disnixos-geninfra network.nix`
+infrastructureFile=`disnixos-geninfra $networkFiles`
 
 # Upgrade the NixOS configurations
-disnixos-deploy-network --target-property $targetProperty --interface $interface $profileArg $showTraceArg $networkFile
+disnixos-deploy-network --target-property $targetProperty --interface $interface $profileArg $showTraceArg $networkFiles
 
 # Upgrade the services
 disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $profileArg $showTraceArg

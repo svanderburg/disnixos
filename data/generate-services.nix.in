@@ -1,4 +1,4 @@
-{ networkFile
+{ networkFiles
 , nixpkgs ? <nixpkgs>
 , nixos ? <nixos>
 }:
@@ -10,7 +10,8 @@ in
 pkgs.stdenv.mkDerivation {
   name = "services.nix";
   buildCommand = ''
-    sed -e "s|@networkFile@|${networkFile}|" \
+    sed -e "s|@networkFiles@|${toString networkFiles}|" \
+        -e "s|@nixpkgs@|${nixpkgs}|" \
 	-e "s|@nixos@|${nixos}|" ${servicesNix} > $out
   '';
 }

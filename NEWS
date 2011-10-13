@@ -1,0 +1,8 @@
+Version 0.2
+===========
+
+- Machines in the network model can refer to each other through the 'node' parameter
+
+- Multiple network models are also supported, so you can capture concerns separately
+
+- Various bug fixes

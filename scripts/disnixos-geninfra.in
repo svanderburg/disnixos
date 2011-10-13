@@ -87,8 +87,12 @@ then
     echo "ERROR: A network expression must be specified!" >&2
     exit 1
 else
-    networkFile=$(readlink -f $@)
+    while [ "$1" != "" ]
+    do
+	networkFiles="$networkFiles $(readlink -f $1)"
+	shift
+    done
 fi
 
 # Execute operation
-nix-build @datadir@/@PACKAGE@/generate-infrastructure.nix --argstr networkFile $networkFile $useBackdoorArg $showTraceArg $noOutLinkArg
+nix-build @datadir@/@PACKAGE@/generate-infrastructure.nix --arg networkFiles "[ $networkFiles ]" $useBackdoorArg $showTraceArg $noOutLinkArg

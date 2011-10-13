@@ -1,19 +1,20 @@
 let
-  networkFile = @networkFile@;
+  networkFiles = [ @networkFiles@ ];
   nixpkgs = "@nixpkgs@";
   nixos = "@nixos@";
   useBackdoor = @useBackdoor@;
 
   pkgs = import nixpkgs {};
-  network = import networkFile;
+  
+  networks = map (networkFile: import networkFile) networkFiles;
+
+  network = pkgs.lib.zipAttrs networks;
 
   configurations = pkgs.lib.mapAttrs (targetName: configuration: 
     (import "${nixos}/lib/eval-config.nix" {
       inherit nixpkgs;
       
-      modules = [
-        configuration
-      ]
+      modules = configuration
       ++ [ 
         { key = "publish-infrastructure";
 	  services.disnix.publishInfrastructure.enable = true;

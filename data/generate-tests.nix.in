@@ -1,4 +1,4 @@
-{ networkFile
+{ networkFiles
 , manifestFile
 , nixpkgs ? <nixpkgs>
 , disnix ? @DISNIX_PREFIX@
@@ -6,8 +6,11 @@
 }:
 
 let
-  network = import networkFile;
   pkgs = import nixpkgs {};
+  
+  networks = map (networkFile: import networkFile) networkFiles;
+  
+  network = pkgs.lib.zipAttrs networks;
   
   testScript = ''
     startAll;

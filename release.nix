@@ -1,4 +1,4 @@
-{ nixpkgs ? /etc/nixos/nixpkgs }:
+{ nixpkgs ? <nixpkgs> }:
 
 let
   jobs = rec {

@@ -18,11 +18,11 @@
 
 # Checks whether a network expression is given. Exits with status 1 if not set.
 
-checkNetworkFile()
+checkNetworkFiles()
 {
-    if [ "$networkFile" = "" ]
+    if [ "$networkFiles" = "" ]
     then
-	echo "ERROR: A network expression must be specified!" >&2
+	echo "ERROR: At least one network expression must be specified!" >&2
 	exit 1
     fi
 }

@@ -20,6 +20,7 @@
 			<command>disnixos-genservices</command>
 			<arg><replaceable>options</replaceable></arg>
 			<arg choice="plain"><replaceable>network_expr</replaceable></arg>
+			<arg choice="opt"><replaceable>network_expr2 ...</replaceable></arg>
 		</cmdsynopsis>
 	</refsynopsisdiv>
 	

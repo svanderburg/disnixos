@@ -1,18 +1,29 @@
 let
-  networkFile = @networkFile@;
+  networkFiles = [ @networkFiles@ ];
   nixos = "@nixos@";
+  nixpkgs = "@nixpkgs@";
+  
+  pkgs = import nixpkgs {};
 
   evalConfig = import "${nixos}/lib/eval-config.nix";
-  network = import networkFile;
+  
+  networks = map (networkFile: import networkFile) networkFiles;
+  
+  network = pkgs.lib.zipAttrs networks;
+  
+  evaluateMachines = network:
+    pkgs.lib.mapAttrs (targetName: config: 
+      {
+        name = targetName;
+        pkg = (evalConfig {
+          modules = config;
+          extraArgs = { nodes = evaluateMachines network; };
+        }).config.system.build.toplevel;
+        type = "nixos-configuration";
+      }
+    ) network;
+
 in
 {distribution, pkgs, system}:
 
-pkgs.lib.mapAttrs (targetName: config: 
-  {
-    name = targetName;
-    pkg = (evalConfig {
-      modules = [ config ];
-    }).config.system.build.toplevel;
-    type = "nixos-configuration";
-  }
-) network
+evaluateMachines network
