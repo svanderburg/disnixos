@@ -127,7 +127,27 @@ $ svn co https://svn.nixos.org/repos/nix/nixos/trunk nixos
 		</para>
 		
 		<para>
-			Moreover, you need a system capable of running
+			DisnixOS also needs to know where to find the NixOS source code, provided by the
+			<code>NIX_PATH</code> environment variable. On other Linux systems, this environment variable must
+			point to the path where the NixOS source is stored.
+			This variable can be configured by adding the following lines to your
+			<filename>~/.bash_profile</filename> configuration (or another configuration
+			file, if you use a different shell):
+		</para>
+		
+<screen>
+$ cat &gt;&gt; ~/.bash_profile &lt;&lt;EOF
+# Begin NixOS addition
+
+NIX_PATH="$NIX_PATH:nixos=/path/to/nixos"
+export NIX_PATH
+
+# End NixOS addition
+EOF
+</screen>
+		
+		<para>
+			Moreover, for efficiency you need a system capable of running
 			<link xlink:href="http://www.linux-kvm.org">KVM</link>, check your host Linux
 			distribution for more instructions.
 		</para>
