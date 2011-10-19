@@ -14,12 +14,31 @@ let
     stdenv.mkDerivation {
       name = "${name}-manifest-src";
       buildCommand =
-	''
-	  ensureDir $out
-	  cd $out
-	  tar xfvj ${tarball}/tarballs/*.tar.bz2 --strip-components=1
-	'';
+        ''
+          ensureDir $out
+          cd $out
+          tar xfvj ${tarball}/tarballs/*.tar.bz2 --strip-components=1
+        '';
     };
+    
+    generatePhysicalTestNetwork = networkFile:
+      with import nixpkgs { inherit system; };
+      
+      let network = import networkFile;
+      in
+      stdenv.mkDerivation {
+        name = "physical.nix";
+        buildCommand =
+          ''
+            cat > $out <<EOF
+            {
+              ${lib.concatMapStrings (targetName: "${targetName} = ${nixos}/modules/testing/test-instrumentation.nix;\n") (builtins.attrNames network)}
+            }
+            EOF
+          '';
+      };
+      
+    ;
 in
 {
   sourceTarball =
@@ -31,18 +50,18 @@ in
       inherit name version src officialRelease;
       
       distPhase =
-	''
-	  mkdir ../$name
-	  rm -Rf `find . -name .svn`
-	  mv * ../$name
-	  cd ..
-	  ensureDir $out/tarballs
-	  tar cfvj $out/tarballs/$name.tar.bz2 $name
-	'';
+        ''
+          mkdir ../$name
+          rm -Rf `find . -name .svn`
+          mv * ../$name
+          cd ..
+          ensureDir $out/tarballs
+          tar cfvj $out/tarballs/$name.tar.bz2 $name
+        '';
     };
 
   buildManifest = 
-    {name, version, tarball, servicesFile, networkFiles, distributionFile}:
+    {name, version, tarball, servicesFile, networkFile, distributionFile}:
     
     with import nixpkgs { inherit system; };
     
@@ -55,26 +74,26 @@ in
       };
       
       infrastructure = import "${disnixos}/share/disnixos/generate-infrastructure.nix" {
-	networkFiles = map (networkFile: "${manifestSrc}/${networkFile}") networkFiles
-	  ++ [ "${nixos}/modules/testing/test-instrumentation.nix" ] ;
-	useBackdoor = true;
-	inherit nixpkgs nixos;
+        networkFiles = [ "${manifestSrc}/${networkFile}" ]
+          ++ [ (generatePhysicalTestNetwork "${manifestSrc}/${networkFile}" ) ];
+        useBackdoor = true;
+        inherit nixpkgs nixos;
       };
       
       manifest = import "${disnix}/share/disnix/manifest.nix" {
-	servicesFile = "${manifestSrc}/${servicesFile}";
-	infrastructureFile = "${infrastructure}";
-	distributionFile = "${manifestSrc}/${distributionFile}";
-	targetProperty = "backdoor";
-	inherit nixpkgs;
+        servicesFile = "${manifestSrc}/${servicesFile}";
+        infrastructureFile = "${infrastructure}";
+        distributionFile = "${manifestSrc}/${distributionFile}";
+        targetProperty = "backdoor";
+        inherit nixpkgs;
       };
       
       installPhase =
-	''
-	  ensureDir $out
-	  ln -s $manifest $out/manifest.xml
-	'';
-	
+        ''
+          ensureDir $out
+          ln -s $manifest $out/manifest.xml
+        '';
+
       checkPhase = "echo hello";
     };
 
@@ -96,20 +115,20 @@ in
       
       testScript =
         ''
-	  startAll;
-	  
-	  ${lib.concatMapStrings (targetName:
-	  ''
-	    ${"\$"}${targetName}->waitForJob("network-interfaces");
-	    ${"\$"}${targetName}->waitForJob("disnix");
-	    my $pid = ${"\$"}${targetName}->mustSucceed("${socat}/bin/socat tcp-listen:512,fork exec:/bin/sh & echo -n \$!");
-	    ${"\$"}${targetName}->mustSucceed("while [ \"\$(ps -p $pid | grep socat)\" = \"\" ]; do sleep 0.5; done");
-	    
-	  '') (builtins.attrNames network)}
-	  
-	  ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --interface ${disnixos}/bin/disnix-backdoor-client --no-coordinator-profile ${manifest}/manifest.xml");
-	  
-	  ${testScript}
-	'';
+          startAll;
+
+          ${lib.concatMapStrings (targetName:
+          ''
+            ${"\$"}${targetName}->waitForJob("network-interfaces");
+            ${"\$"}${targetName}->waitForJob("disnix");
+            my $pid = ${"\$"}${targetName}->mustSucceed("${socat}/bin/socat tcp-listen:512,fork exec:/bin/sh & echo -n \$!");
+            ${"\$"}${targetName}->mustSucceed("while [ \"\$(ps -p $pid | grep socat)\" = \"\" ]; do sleep 0.5; done");
+    
+          '') (builtins.attrNames network)}
+
+          ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --interface ${disnixos}/bin/disnix-backdoor-client --no-coordinator-profile ${manifest}/manifest.xml");
+  
+          ${testScript}
+        '';
     };
 }
