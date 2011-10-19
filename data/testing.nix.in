@@ -37,8 +37,6 @@ let
             EOF
           '';
       };
-      
-    ;
 in
 {
   sourceTarball =
