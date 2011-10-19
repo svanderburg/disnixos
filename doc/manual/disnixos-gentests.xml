@@ -19,8 +19,8 @@
 		<cmdsynopsis>
 			<command>disnixos-gentests</command>
 			<arg><replaceable>options</replaceable></arg>
-			<arg choice="plain"><replaceable>network_expr</replaceable></arg>
-			<arg choice="opt"><replaceable>network_expr2 ...</replaceable></arg>
+			<arg choice="plain"><replaceable>-n network_expr</replaceable></arg>
+			<arg choice="opt"><replaceable>-n network_expr2 ...</replaceable></arg>
 		</cmdsynopsis>
 	</refsynopsisdiv>
 	
@@ -39,6 +39,17 @@
 		<title>Options</title>
 		
 		<variablelist>
+			<varlistentry>
+				<term><option>-n</option>, <option>--network</option></term>
+				<listitem>
+					<para>
+						Network Nix expression which captures NixOS configurations of machines in the network.
+						It is possible to pass this option multiple times, with multiple network models.
+						Multiple network models are zipped together to a single configuration, which is useful to
+						capture various aspects (e.g. physical and logical properties) of networks in separate models.
+					</para>
+				</listitem>
+			</varlistentry>
 			<varlistentry>
 				<term><option>--no-out-link</option></term>
 				<listitem>
