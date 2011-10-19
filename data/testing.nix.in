@@ -55,7 +55,8 @@ in
       };
       
       infrastructure = import "${disnixos}/share/disnixos/generate-infrastructure.nix" {
-	networkFiles = map (networkFile: "${manifestSrc}/${networkFile}") networkFiles;
+	networkFiles = map (networkFile: "${manifestSrc}/${networkFile}") networkFiles
+	  ++ [ "${nixos}/modules/testing/test-instrumentation.nix" ] ;
 	useBackdoor = true;
 	inherit nixpkgs nixos;
       };
