@@ -42,7 +42,7 @@ in
     };
 
   buildManifest = 
-    {name, version, tarball, servicesFile, networkFile, distributionFile}:
+    {name, version, tarball, servicesFile, networkFiles, distributionFile}:
     
     with import nixpkgs { inherit system; };
     
@@ -55,7 +55,7 @@ in
       };
       
       infrastructure = import "${disnixos}/share/disnixos/generate-infrastructure.nix" {
-	networkFile = "${manifestSrc}/${networkFile}";
+	networkFiles = map (networkFile: "${manifestSrc}/${networkFile}") networkFiles;
 	useBackdoor = true;
 	inherit nixpkgs nixos;
       };
