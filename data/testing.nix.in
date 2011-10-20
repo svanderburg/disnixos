@@ -32,7 +32,7 @@ let
           ''
             cat > $out <<EOF
             {
-              ${lib.concatMapStrings (targetName: "${targetName} = ${moduleName};\n") (builtins.attrNames network)}
+              ${lib.concatMapStrings (targetName: "${targetName} = \"${nixos}/${moduleName}\";\n") (builtins.attrNames network)}
             }
             EOF
           '';
@@ -73,8 +73,8 @@ in
       
       infrastructure = import "${disnixos}/share/disnixos/generate-infrastructure.nix" {
         networkFiles = [ "${manifestSrc}/${networkFile}" ]
-          ++ [ (generatePhysicalTestNetwork "${manifestSrc}/${networkFile}" "${nixos}/modules/virtualisation/qemu-vm.nix" ) ]
-          ++ [ (generatePhysicalTestNetwork "${manifestSrc}/${networkFile}" "${nixos}/modules/testing/test-instrumentation.nix" ) ];
+          ++ [ (generatePhysicalTestNetwork "${manifestSrc}/${networkFile}" "modules/virtualisation/qemu-vm.nix" ) ]
+          ++ [ (generatePhysicalTestNetwork "${manifestSrc}/${networkFile}" "modules/testing/test-instrumentation.nix" ) ];
         useBackdoor = true;
         inherit nixpkgs nixos;
       };
