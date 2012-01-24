@@ -1,5 +1,6 @@
 { networkFiles
 , useBackdoor ? false
+, useVMTesting ? false
 , nixpkgs ? <nixpkgs>
 , nixos ? <nixos>
 }:
@@ -13,7 +14,9 @@ pkgs.stdenv.mkDerivation {
   buildCommand = ''
     sed -e "s|@networkFiles@|${toString networkFiles}|" \
         -e "s|@nixpkgs@|${nixpkgs}|" \
-	-e "s|@nixos@|${nixos}|" \
-	-e "s|@useBackdoor@|${if useBackdoor then "true" else "false"}|" ${infrastructureNix} > $out
+        -e "s|@nixos@|${nixos}|" \
+        -e "s|@useBackdoor@|${if useBackdoor then "true" else "false"}|" \
+        -e "s|@useVMTesting@|${if useVMTesting then "true" else "false"}|" \
+        ${infrastructureNix} > $out
   '';
 }

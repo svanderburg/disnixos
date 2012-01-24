@@ -3,6 +3,7 @@ let
   nixpkgs = "@nixpkgs@";
   nixos = "@nixos@";
   useBackdoor = @useBackdoor@;
+  useVMTesting = @useVMTesting@;
 
   pkgs = import nixpkgs {};
   
@@ -22,9 +23,11 @@ let
 	  networking.hostName = targetName;
 	}
       ]
+      ++ pkgs.lib.optional useVMTesting "${nixos}/modules/virtualisation/qemu-vm.nix"
+      ++ pkgs.lib.optional useVMTesting "${nixos}/modules/testing/test-instrumentation.nix"
       ++ pkgs.lib.optional useBackdoor {
         key = "backdoor";
-	services.disnix.infrastructure.backdoor = "TCP:${targetName}:512";
+        services.disnix.infrastructure.backdoor = "TCP:${targetName}:512";
       };
       extraArgs = configurations;
     }).config) network;

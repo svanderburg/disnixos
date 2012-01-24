@@ -47,6 +47,14 @@
 				</listitem>
 			</varlistentry>
 			<varlistentry>
+				<term><option>--use-vm-testing</option></term>
+				<listitem>
+					<para>
+						Indicates that we want to use the NixOS VM testing features, so that their relevant properties are taken into account.
+					</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
 				<term><option>--no-out-link</option></term>
 				<listitem>
 					<para>
