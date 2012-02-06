@@ -72,9 +72,8 @@ in
       };
       
       infrastructure = import "${disnixos}/share/disnixos/generate-infrastructure.nix" {
-        networkFiles = [ "${manifestSrc}/${networkFile}" ]
-          ++ [ (generatePhysicalTestNetwork "${manifestSrc}/${networkFile}" "modules/virtualisation/qemu-vm.nix" ) ]
-          ++ [ (generatePhysicalTestNetwork "${manifestSrc}/${networkFile}" "modules/testing/test-instrumentation.nix" ) ];
+        networkFiles = [ "${manifestSrc}/${networkFile}" ];
+        useVMTesting = true;
         useBackdoor = true;
         inherit nixpkgs nixos;
       };
