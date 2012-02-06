@@ -59,7 +59,7 @@ in
     };
 
   buildManifest = 
-    {name, version, tarball, servicesFile, networkFile, distributionFile}:
+    {name, version, tarball, servicesFile, networkFile, distributionFile, externalDistributionFile ? false}:
     
     with import nixpkgs { inherit system; };
     
@@ -81,7 +81,7 @@ in
       manifest = import "${disnix}/share/disnix/manifest.nix" {
         servicesFile = "${manifestSrc}/${servicesFile}";
         infrastructureFile = "${infrastructure}";
-        distributionFile = "${manifestSrc}/${distributionFile}";
+        distributionFile = if externalDistributionFile then distributionFile else "${manifestSrc}/${distributionFile}";
         targetProperty = "backdoor";
         inherit nixpkgs;
       };
