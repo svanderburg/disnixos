@@ -59,7 +59,7 @@ in
     };
 
   buildManifest = 
-    {name, version, tarball, servicesFile, networkFile, distributionFile, externalDistributionFile ? false}:
+    {name, version, tarball, servicesFile, networkFile, externalNetworkFile ? false, distributionFile, externalDistributionFile ? false}:
     
     with import nixpkgs { inherit system; };
     
@@ -72,7 +72,7 @@ in
       };
       
       infrastructure = import "${disnixos}/share/disnixos/generate-infrastructure.nix" {
-        networkFiles = [ "${manifestSrc}/${networkFile}" ];
+        networkFiles = [ (if externalNetworkFile then networkFile else "${manifestSrc}/${networkFile}") ];
         useVMTesting = true;
         useBackdoor = true;
         inherit nixpkgs nixos;
@@ -96,14 +96,14 @@ in
     };
 
   disnixTest =
-    {name, manifest, tarball, networkFile, testScript}:
+    {name, manifest, tarball, networkFile, externalNetworkFile ? false, testScript}:
     
     let
       manifestSrc = generateManifestSrc {
         inherit name tarball;
       };
       
-      network = import "${manifestSrc}/${networkFile}";
+      network = if externalNetworkFile then import networkFile else import "${manifestSrc}/${networkFile}";
     in
     with import "${nixos}/lib/testing.nix" { inherit nixpkgs system; };
     with import nixpkgs { inherit system; };
