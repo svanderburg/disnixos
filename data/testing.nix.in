@@ -124,7 +124,7 @@ in
     
           '') (builtins.attrNames network)}
 
-          ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --interface ${disnixos}/bin/disnix-backdoor-client --no-coordinator-profile ${manifest}/manifest.xml");
+          ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --interface ${disnixos}/bin/disnix-backdoor-client --no-coordinator-profile --no-lock ${manifest}/manifest.xml");
   
           ${testScript}
         '';
