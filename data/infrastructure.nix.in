@@ -13,8 +13,6 @@ let
 
   configurations = pkgs.lib.mapAttrs (targetName: configuration: 
     (import "${nixos}/lib/eval-config.nix" {
-      inherit nixpkgs;
-      
       modules = configuration
       ++ [ 
         { key = "publish-infrastructure";
