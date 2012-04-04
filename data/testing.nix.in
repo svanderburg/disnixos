@@ -105,7 +105,7 @@ in
       
       network = if externalNetworkFile then import networkFile else import "${manifestSrc}/${networkFile}";
     in
-    with import "${nixos}/lib/testing.nix" { inherit nixpkgs system; };
+    with import "${nixos}/lib/testing.nix" { inherit system; };
     with import nixpkgs { inherit system; };
     
     simpleTest {
