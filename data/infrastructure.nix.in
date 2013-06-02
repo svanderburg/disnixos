@@ -16,10 +16,10 @@ let
       modules = configuration
       ++ [ 
         { key = "publish-infrastructure";
-	  services.disnix.publishInfrastructure.enable = true;
-	  services.disnix.publishInfrastructure.enableAuthentication = true;
-	  networking.hostName = targetName;
-	}
+          services.disnix.publishInfrastructure.enable = true;
+          services.disnix.publishInfrastructure.enableAuthentication = true;
+          networking.hostName = targetName;
+        }
       ]
       ++ pkgs.lib.optional useVMTesting "${nixos}/modules/virtualisation/qemu-vm.nix"
       ++ pkgs.lib.optional useVMTesting "${nixos}/modules/testing/test-instrumentation.nix"
