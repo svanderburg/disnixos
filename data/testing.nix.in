@@ -117,7 +117,7 @@ in
 
           ${lib.concatMapStrings (targetName:
           ''
-            ${"\$"}${targetName}->waitForJob("network-interfaces");
+            ${"\$"}${targetName}->waitForUnit("network.target");
             ${"\$"}${targetName}->waitForJob("disnix");
             my $pid = ${"\$"}${targetName}->mustSucceed("${socat}/bin/socat tcp-listen:512,fork exec:/bin/sh & echo -n \$!");
             ${"\$"}${targetName}->mustSucceed("while [ \"\$(ps -p $pid | grep socat)\" = \"\" ]; do sleep 0.5; done");

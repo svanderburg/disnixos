@@ -5,7 +5,7 @@ let
     tarball =
       { disnixos ? {outPath = ./.; rev = 1234;}
       , officialRelease ? false
-      , disnix ? (import ../../disnix/trunk/release.nix {}).build {}
+      , disnix ? (import ../disnix/release.nix {}).build {}
       }:
 
       with import nixpkgs {};
@@ -51,7 +51,7 @@ let
     build =
       { tarball ? jobs.tarball {}
       , system ? builtins.currentSystem
-      , disnix ? (import ../../disnix/trunk/release.nix {}).build {}
+      , disnix ? (import ../disnix/release.nix {}).build {}
       }:
 
       with import nixpkgs { inherit system; };
@@ -59,7 +59,6 @@ let
       releaseTools.nixBuild {
         name = "disnixos";
         src = tarball;
-
         buildInputs = [ socat pkgconfig disnix ];
       };
   };
