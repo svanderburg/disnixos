@@ -94,7 +94,7 @@ checkShowTrace
 vmsPath=`nixos-build-vms --no-out-link $showTraceArg $networkFiles`
 
 # Generate infrastructure expression from network expression
-infrastructureFile=`disnixos-geninfra --use-backdoor --use-vm-testing --no-out-link $showTraceArg $networkFiles`
+infrastructureFile=`disnixos-geninfra --use-backdoor --use-vm-testing --no-nixops --no-out-link $showTraceArg $networkFiles`
 
 # Build the manifest
 manifest=`disnix-manifest -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property backdoor --no-out-link $showTraceArg`

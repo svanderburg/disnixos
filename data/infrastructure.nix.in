@@ -4,17 +4,21 @@ let
   nixos = "@nixos@";
   useBackdoor = @useBackdoor@;
   useVMTesting = @useVMTesting@;
+  nixOpsModel = @nixOpsModel@;
 
   pkgs = import nixpkgs {};
   
   networks = map (networkFile: import networkFile) networkFiles;
 
-  network = pkgs.lib.zipAttrs networks;
+  mergedNetwork = pkgs.lib.zipAttrs networks;
+  
+  # A NixOps model has a reserved network attributes that cannot be machines
+  network = if nixOpsModel then builtins.removeAttrs mergedNetwork [ "network" "resources" ] else mergedNetwork;
 
   configurations = pkgs.lib.mapAttrs (targetName: configuration: 
     (import "${nixos}/lib/eval-config.nix" {
       modules = configuration
-      ++ [ 
+      ++ [
         { key = "publish-infrastructure";
           services.disnix.publishInfrastructure.enable = true;
           services.disnix.publishInfrastructure.enableAuthentication = true;
@@ -26,6 +30,16 @@ let
       ++ pkgs.lib.optional useBackdoor {
         key = "backdoor";
         services.disnix.infrastructure.backdoor = "TCP:${targetName}:512";
+      }
+      ++ pkgs.lib.optional nixOpsModel {
+        key = "nixops-stuff";
+        # Make NixOps's deployment.* options available.
+        require = [ <nixops/options.nix> ];
+        # Provide a default hostname and deployment target equal
+        # to the attribute name of the machine in the model.
+        networking.hostName = pkgs.lib.mkOverride 900 targetName;
+        deployment.targetHost = pkgs.lib.mkOverride 900 targetName;
+        environment.checkConfigurationOptions = false; # We assume that NixOps has already checked it
       };
       extraArgs = configurations;
     }).config) network;

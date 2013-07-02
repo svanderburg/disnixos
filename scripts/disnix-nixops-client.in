@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 # Disnix - A distributed application layer for Nix
 # Copyright (C) 2008-2011  Sander van der Burg
 #
@@ -40,8 +40,8 @@ showUsage()
 # Autoconf settings
 export prefix=@prefix@
 
-# Import checks
-source @datadir@/@PACKAGE@/checks
+# Import Disnix checks
+source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 

@@ -23,11 +23,12 @@ showUsage()
     echo "Usage: $0 [options] network_expr"
     echo "Options:"
     echo
-    echo "--no-out-link    Do not create a 'result' symlink"
-    echo "--use-backdoor   Indicates that the backdoor must be enabled so that the VMs can be accessed through a socket"
-    echo "--use-vm-testing Indicates that we generate virtual machines, so that the physical characteristics are automatically added"
-    echo "--show-trace     Shows a trace of the output"
-    echo "-h,--help        Shows the usage of this command"
+    echo "--no-out-link     Do not create a 'result' symlink"
+    echo "--use-backdoor    Indicates that the backdoor must be enabled so that the VMs can be accessed through a socket"
+    echo "--use-vm-testing  Indicates that we generate virtual machines, so that the physical characteristics are automatically added"
+    echo "--no-nixops       Indicates that the network model is not for NixOps, so we don't have to ignore reserved attributes"
+    echo "--show-trace      Shows a trace of the output"
+    echo "-h,--help         Shows the usage of this command"
 }
 
 # Autoconf settings
@@ -38,7 +39,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o h -l no-out-link,use-backdoor,use-vm-testing,show-trace,help -- "$@"`
+PARAMS=`getopt -n $0 -o h -l no-out-link,use-backdoor,use-vm-testing,no-nixops,show-trace,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -61,6 +62,9 @@ do
 	    ;;
 	--use-vm-testing)
 	    useVMTesting=1
+	    ;;
+	--no-nixops)
+	    noNixOps=1
 	    ;;
 	--show-trace)
 	    showTrace=1
@@ -91,7 +95,12 @@ then
     useVMTesting="--arg useVMTesting true"
 fi
 
-if [ "$@" = "" ]
+if [ "$noNixOps" = "1" ]
+then
+    noNixOps="--arg nixOpsModel false"
+fi
+
+if [ -z "$1" ]
 then
     echo "ERROR: A network expression must be specified!" >&2
     exit 1
@@ -104,4 +113,4 @@ else
 fi
 
 # Execute operation
-nix-build @datadir@/@PACKAGE@/generate-infrastructure.nix --arg networkFiles "[ $networkFiles ]" $useBackdoorArg $useVMTesting $showTraceArg $noOutLinkArg
+nix-build @datadir@/@PACKAGE@/generate-infrastructure.nix --arg networkFiles "[ $networkFiles ]" $useBackdoorArg $useVMTesting $noNixOps $showTraceArg $noOutLinkArg
