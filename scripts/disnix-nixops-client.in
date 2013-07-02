@@ -151,11 +151,11 @@ case "$operation" in
         if [ "$localfile" != "" ]
         then
             remotefile=`nixops ssh $target "mktemp -p $TMPDIR"`
-            nixops scp --to $target "$@" $remotefile
+            nixops scp $NIXOPS_OPTS --to $target "$@" $remotefile
         fi
         
         # Import the closure into the Nix store
-        nixops ssh $target "disnix-client --import $remotefile"
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --import $remotefile"
         ;;
     export)
         if [ "$localfile" != "1" ] && [ "$remotefile" != "1" ]
@@ -164,33 +164,33 @@ case "$operation" in
             exit 1
         fi
 
-        closure=`nixops ssh $target "disnix-client --export $@"`
+        closure=`nixops ssh $NIXOPS_OPTS $target "disnix-client --export $@"`
         
         # A remote file must be downloaded afterwards
         if [ "$remotefile" = "1" ]
         then
             localClosure=`mktemp -p $TMPDIR`
-            nixops scp --from $target $closure $localClosure > /dev/null
+            nixops scp --from $NIXOPS_OPTS $target $closure $localClosure > /dev/null
             echo $localClosure
         fi
         ;;
     print-invalid)
-        nixops ssh $target "disnix-client --print-invalid $@"
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --print-invalid $@"
         ;;
     realise)
-        nixops ssh $target "disnix-client --realise $@"
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --realise $@"
         ;;
     set)
-        nixops ssh $target "disnix-client $profileArg --set $@"
+        nixops ssh $NIXOPS_OPTS $target "disnix-client $profileArg --set $@"
         ;;
     query-installed)
-        nixops ssh $target "disnix-client $profileArg --query-installed $@"
+        nixops ssh $NIXOPS_OPTS $target "disnix-client $profileArg --query-installed $@"
         ;;
     query-requisites)
-        nixops ssh $target "disnix-client --query-requisites $@"
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --query-requisites $@"
         ;;
     collect-garbage)
-        nixops ssh $target "disnix-client --collect-garbage $deleteOldArg $@"
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --collect-garbage $deleteOldArg $@"
         ;;
     activate)
         if [ "$type" = "" ]
@@ -199,7 +199,7 @@ case "$operation" in
             exit 1
         fi
         
-        nixops ssh $target "disnix-client --type $type $argsArg --activate $@"
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type $argsArg --activate $@"
         ;;
     deactivate)
         if [ "$type" = "" ]
@@ -208,12 +208,12 @@ case "$operation" in
             exit 1
         fi
         
-        nixops ssh $target "disnix-client --type $type $argsArg --deactivate $@"
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type $argsArg --deactivate $@"
         ;;
     lock)
-        nixops ssh $target "disnix-client --lock $profileArg"
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --lock $profileArg"
         ;;
     unlock)
-        nixops ssh $target "disnix-client --unlock $profileArg"
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --unlock $profileArg"
         ;;
 esac
