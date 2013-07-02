@@ -49,6 +49,7 @@ data/generate-services.nix
 data/generate-tests.nix
 data/testing.nix
 scripts/disnix-backdoor-client
+scripts/disnix-nixops-client
 scripts/disnixos-deploy-network
 scripts/disnixos-env
 scripts/disnixos-geninfra

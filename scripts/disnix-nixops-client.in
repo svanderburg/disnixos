@@ -1,0 +1,219 @@
+#!/bin/sh -e
+# Disnix - A distributed application layer for Nix
+# Copyright (C) 2008-2011  Sander van der Burg
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+showUsage()
+{
+    echo "Usage:"
+    echo "$0 {[--target | -t ] hostname[:port] {operation}"
+    echo
+    echo "Operations:"
+    echo "  --import [--localfile|--remotefile] derivations"
+    echo "  --export [--localfile|--remotefile] derivations"
+    echo "  --print-invalid derivations"
+    echo "  {-r|--realise} derivations"
+    echo "  --set [{-p|--profile} name] derivation"
+    echo "  {-q|--query-installed} [{-p|--profile} name]"
+    echo "  --query-requisites derivations"
+    echo "  --collect-garbage [{-d|--delete-old}]\n"
+    echo "  --activate --type type --arguments arguments derivation"
+    echo "  --deactivate --type type --arguments arguments derivation"
+    echo "  --lock [{-p|--profile} profile]"
+    echo "  --unlock [{-p|--profile} profile]"
+    echo "  {-h | --help}"
+}
+
+# Autoconf settings
+export prefix=@prefix@
+
+# Import checks
+source @datadir@/@PACKAGE@/checks
+
+# Parse valid argument options
+
+PARAMS=`getopt -n $0 -o rqp:d -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,help -- "$@"`
+
+if [ $? != 0 ]
+then
+    showUsage
+    exit 1
+fi
+
+eval set -- "$PARAMS"
+
+# Evaluate valid options
+
+while [ "$1" != "--" ]
+do
+    case "$1" in
+        --import)
+            operation="import";
+            ;;
+        --export)
+            operation="export";
+            ;;
+        --print-invalid)
+            operation="print-invalid";
+            ;;
+        -r|--realise)
+            operation="realise";
+            ;;
+        --set)
+            operation="set";
+            ;;
+        -q|--query-installed)
+            operation="query-installed";
+            ;;
+        --query-requisites)
+            operation="query-requisites";
+            ;;
+        --collect-garbage)
+            operation="collect-garbage";
+            ;;
+        --activate)
+            operation="activate";
+            path=$2
+            ;;
+        --deactivate)
+            operation="deactivate";
+            path=$2
+            ;;
+        --lock)
+            operation="lock";
+            path=$2
+            ;;
+        --unlock)
+            operation="unlock";
+            path=$2
+            ;;
+        --target)
+            target=$2
+            ;;
+        --localfile)
+            localfile=1
+            ;;
+        --remotefile)
+            remotefile=1
+            ;;
+        -p|--profile)
+            profileArg="--profile $2"
+            ;;
+        -d|--delete-old)
+            deleteOldArg="-d"
+            ;;
+        --type)
+            type=$2
+            ;;
+        --arguments)
+            argsArg="$argsArg --arguments \"$2\""
+            ;;
+        -h|--help)
+            showUsage
+            exit 0
+            ;;
+    esac
+    
+    shift
+done
+
+shift
+
+# Validate the given options
+
+checkTarget
+checkTmpDir
+
+# Execute selected operation
+
+case "$operation" in
+    import)
+        if [ "$localfile" != "1" ] && [ "$remotefile" != "1" ]
+        then
+            echo "ERROR: Either a remote or a localfile must be specified!" >&2
+            exit 1
+        fi
+        
+        # A localfile must first be transferred
+        if [ "$localfile" != "" ]
+        then
+            remotefile=`nixops ssh $target "mktemp -p $TMPDIR"`
+            nixops scp --to $target "$@" $remotefile
+        fi
+        
+        # Import the closure into the Nix store
+        nixops ssh $target "disnix-client --import $remotefile"
+        ;;
+    export)
+        if [ "$localfile" != "1" ] && [ "$remotefile" != "1" ]
+        then
+            echo "ERROR: Either a remote or a localfile must be specified!" >&2
+            exit 1
+        fi
+
+        closure=`nixops ssh $target "disnix-client --export $@"`
+        
+        # A remote file must be downloaded afterwards
+        if [ "$remotefile" = "1" ]
+        then
+            localClosure=`mktemp -p $TMPDIR`
+            nixops scp --from $target $closure $localClosure > /dev/null
+            echo $localClosure
+        fi
+        ;;
+    print-invalid)
+        nixops ssh $target "disnix-client --print-invalid $@"
+        ;;
+    realise)
+        nixops ssh $target "disnix-client --realise $@"
+        ;;
+    set)
+        nixops ssh $target "disnix-client $profileArg --set $@"
+        ;;
+    query-installed)
+        nixops ssh $target "disnix-client $profileArg --query-installed $@"
+        ;;
+    query-requisites)
+        nixops ssh $target "disnix-client --query-requisites $@"
+        ;;
+    collect-garbage)
+        nixops ssh $target "disnix-client --collect-garbage $deleteOldArg $@"
+        ;;
+    activate)
+        if [ "$type" = "" ]
+        then
+            echo "ERROR: A type must be specified!" >&2
+            exit 1
+        fi
+        
+        nixops ssh $target "disnix-client --type $type $argsArg --activate $@"
+        ;;
+    deactivate)
+        if [ "$type" = "" ]
+        then
+            echo "ERROR: A type must be specified!" >&2
+            exit 1
+        fi
+        
+        nixops ssh $target "disnix-client --type $type $argsArg --deactivate $@"
+        ;;
+    lock)
+        nixops ssh $target "disnix-client --lock $profileArg"
+        ;;
+    unlock)
+        nixops ssh $target "disnix-client --unlock $profileArg"
+        ;;
+esac
