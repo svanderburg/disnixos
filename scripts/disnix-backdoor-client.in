@@ -19,7 +19,7 @@
 showUsage()
 {
     echo "Usage:"
-    echo "$0 {[--target | -t ] address {operation}"
+    echo "$0 --target address {operation}"
     echo
     echo "Operations:"
     echo "  --import [--localfile|--remotefile] derivations"

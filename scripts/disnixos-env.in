@@ -31,7 +31,6 @@ showUsage()
     echo "--interface         Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
     echo "-p,--profile        Name of the profile that is used for this system. Defaults to: default"
     echo "--no-nixops         Use Disnix's deployment facilities instead of NixOps"
-    echo "-D,--deployment     Specify the deployment name or UUID of the NixOps deployment"
     echo "--show-trace        Shows a trace of the output"
     echo "-h,--help           Shows the usage of this command"
 }
@@ -47,7 +46,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o s:n:d:p:D:h -l services:,network:,distribution:,profile:,target-property:,interface:,no-nixops,deployment,show-trace,help -- "$@"`
+PARAMS=`getopt -n $0 -o s:n:d:p:h -l services:,network:,distribution:,profile:,target-property:,interface:,no-nixops,show-trace,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -62,7 +61,7 @@ eval set -- "$PARAMS"
 while [ "$1" != "--" ]
 do
     case "$1" in
-        -s|--services)	    
+        -s|--services)
 	    servicesFile=`readlink -f $2`
 	    ;;
 	-n|--network)
@@ -83,9 +82,6 @@ do
 	--no-nixops)
 	    noNixOps=1
 	    noNixOpsArg="--no-nixops"
-	    ;;
-	-D|--deployment)
-	    deploymentArg="-d $2"
 	    ;;
 	--show-trace)
 	    showTrace=1
@@ -116,15 +112,12 @@ checkTargetProperty
 checkShowTrace
 
 # Generate infrastructure model from network model
-infrastructureFile=`disnixos-geninfra $noNixOpsArg $networkFiles`
-
-# Upgrade the NixOS configurations
+infrastructureFile=`disnixos-geninfra --no-out-link $noNixOpsArg $networkFiles`
 
 if [ "$noNixOps" = "1" ]
 then
+    # Upgrade the NixOS configurations
     disnixos-deploy-network --target-property $targetProperty --interface $interface $profileArg $showTraceArg $networkFiles
-else
-    export NIXOPS_OPTS="$NIXOPS_OPTS $deploymentArg"
 fi
 
 # Upgrade the services
