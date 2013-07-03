@@ -96,7 +96,7 @@ fi
 servicesFile=`disnixos-genservices --no-out-link $showTraceArg $networkFiles`
 
 # Generate infrastructure model from network model
-infrastructureFile=`disnixos-geninfra --no-out-link $showTraceArg $networkFiles`
+infrastructureFile=`disnixos-geninfra --no-out-link --no-nixops $showTraceArg $networkFiles`
 
 # Map NixOS configurations (services) to machines in the infrastructure model
 distributionFile=`disnix-gendist-roundrobin -s $servicesFile -i $infrastructureFile --no-out-link $showTraceArg`
