@@ -12,6 +12,6 @@ pkgs.stdenv.mkDerivation {
   buildCommand = ''
     sed -e "s|@networkFiles@|${toString networkFiles}|" \
         -e "s|@nixpkgs@|${nixpkgs}|" \
-	-e "s|@nixos@|${nixos}|" ${servicesNix} > $out
+        -e "s|@nixos@|${nixos}|" ${servicesNix} > $out
   '';
 }
