@@ -1,6 +1,6 @@
 #!/bin/bash -e
 # Disnix - A distributed application layer for Nix
-# Copyright (C) 2008-2010  Sander van der Burg
+# Copyright (C) 2008-2011  Sander van der Burg
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -20,23 +20,29 @@
 
 showUsage()
 {
-    echo "Usage: $0 [options] network_expr ..."
+    echo "Usage: $0 -n network_expr [ -n network_expr2 ] [options]"
     echo "Options:"
     echo
+    echo "-n,--network        Network Nix expression which declares a NixOS configuration for each machine in the network"
     echo "--target-property   The target property of an infrastructure model, that specifies how to "
     echo "                    connect to the remote Disnix interface. (Defaults to hostname)"
-    echo "--interface         Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
-    echo "-p,--profile        Name of the profile that is used for this system. Defaults to: default"
+    echo "--no-out-link       Do not create a 'result' symlink"
     echo "--show-trace        Shows a trace of the output"
-    echo "-h,--help           Shows the usage of this command"
+    echo "-h,--help           Shows the usage of this command to the user"
 }
 
+# Autoconf settings
+export prefix=@prefix@
+
 # Import checks
+source @datadir@/@PACKAGE@/checks
+
+# Import Disnix checks
 source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o p:h -l profile:,target-property:,interface:,show-trace,help -- "$@"`
+PARAMS=`getopt -n $0 -o n:h -l network:,target-property:,no-out-link,show-trace,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -51,52 +57,38 @@ eval set -- "$PARAMS"
 while [ "$1" != "--" ]
 do
     case "$1" in
-	-p|--profile)
-	    profileArg="--profile $2"
-	    ;;
+        -n|--network)
+            networkFiles="$networkFiles `readlink -f $2`"
+            ;;
         --target-property)
-	    targetProperty=$2
-	    ;;
-	--interface)
-	    interface=$2
-	    ;;
-	--show-trace)
-	    showTrace=1
-	    ;;
-	-h|--help)
-	    showUsage
-	    exit 0
-	    ;;
+            targetProperty=$2
+            ;;
+        --no-out-link)
+            noOutLink=1
+            ;;
+        --show-trace)
+            showTrace=1
+            ;;
+        -h|--help)
+            showUsage
+            exit 0
+            ;;
     esac
     
     shift
 done
 
-shift
-
 # Validate the given options
 
-checkClientInterface
+checkNetworkFiles
 checkTargetProperty
+checkNoOutLink
 checkShowTrace
 
-if [ "$@" = "" ]
-then
-    echo "ERROR: At least one network expression must be specified!" >&2
-    exit 1
-else
-    while [ "$1" != "" ]
-    do
-	networkFileArgs="$networkFileArgs -n $(readlink -f $1)"
-	shift
-    done
-fi
+# Build the manifest file
 
-# Create a manifest file
-manifest=`disnixos-manifest $networkFileArgs --target-property $targetProperty --no-out-link $showTraceArg`
-
-# Distribute system derivations
-disnix-distribute --interface $interface $manifest
-
-# Activate system derivations
-disnix-activate $profileArg --interface $interface --no-coordinator-profile --no-target-profiles --no-upgrade $manifest
+nix-build --arg networkFiles "[ $networkFiles ]" \
+          --argstr targetProperty $targetProperty \
+          $noOutLinkArg \
+          $showTraceArg \
+          "$(readlink -f @datadir@/@PACKAGE@/manifest.nix)"

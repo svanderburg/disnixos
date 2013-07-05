@@ -48,8 +48,10 @@ data/generate-infrastructure.nix
 data/generate-services.nix
 data/generate-tests.nix
 data/testing.nix
+data/manifest.nix
 scripts/disnix-backdoor-client
 scripts/disnix-nixops-client
+scripts/disnixos-manifest
 scripts/disnixos-deploy-network
 scripts/disnixos-env
 scripts/disnixos-geninfra
