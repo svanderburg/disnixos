@@ -73,8 +73,28 @@ let
         
         disnixos = build { system = builtins.currentSystem; };
         
-        networkNix = pkgs.writeTextFile {
-          name = "network.nix";
+        logicalNetworkNix = pkgs.writeTextFile {
+          name = "network-logical.nix";
+          
+          text = ''
+            {
+              testtarget1 = {pkgs, ...}:
+            
+              {
+                environment.systemPackages = [ pkgs.zip ];
+              };
+            
+              testtarget2 = {pkgs, ...}:
+              
+              {
+                environment.systemPackages = [ pkgs.hello ];
+              };
+            }
+          '';
+        };
+        
+        physicalNetworkNix = pkgs.writeTextFile {
+          name = "network-physical.nix";
           
           text = ''
             {
@@ -85,13 +105,22 @@ let
                   "${nixos}/modules/virtualisation/qemu-vm.nix"
                   "${nixos}/modules/testing/test-instrumentation.nix"
                 ];
-                #boot.loader.grub.device = "/dev/null";
-                #fileSystems."/".device = "/dev/null";
-                #services.openssh.enable = true;
+                boot.loader.grub.enable = false;
                 services.disnix.infrastructure.hostname = "testtarget1";
                 services.nixosManual.enable = false;
-                boot.loader.grub.enable = false;
-                environment.systemPackages = [ pkgs.zip ];
+                
+                services.dbus.enable = true;
+                
+                # Create dummy Disnix job that does nothing. This prevents it from stopping.
+                jobs.disnix =
+                  { description = "Disnix dummy server";
+
+                    wantedBy = [ "multi-user.target" ];
+                    restartIfChanged = false;
+                    script = "true";
+                  };
+                 
+                 environment.systemPackages = [ pkgs.zip ];
               };
             
               testtarget2 = {pkgs, ...}:
@@ -101,29 +130,26 @@ let
                   "${nixos}/modules/virtualisation/qemu-vm.nix"
                   "${nixos}/modules/testing/test-instrumentation.nix"
                 ];
-                #boot.loader.grub.device = "/dev/null";
-                #fileSystems."/".device = "/dev/null";
-                #services.openssh.enable = true;
-                services.disnix.infrastructure.hostname = "testtarget1";
-                services.nixosManual.enable = false;
                 boot.loader.grub.enable = false;
+                services.disnix.infrastructure.hostname = "testtarget2";
+                services.nixosManual.enable = false;
+                
+                services.dbus.enable = true;
+                
+                # Create dummy Disnix job that does nothing. This prevents it from stopping.
+                jobs.disnix =
+                  { description = "Disnix dummy server";
+
+                    wantedBy = [ "multi-user.target" ];
+                    restartIfChanged = false;
+                    script = "true";
+                  };
+                 
                 environment.systemPackages = [ pkgs.hello ];
               };
             }
           '';
         };
-      
-        network = import networkNix;
-        
-        networkBuilds = map (targetName:
-          let
-            target = builtins.getAttr targetName network;
-          in
-          (import "${nixos}/lib/eval-config.nix" {
-            inherit nixpkgs;
-            modules = [ target ];
-          }).config.system.build.toplevel
-        ) (builtins.attrNames network);
       
         machine =
           {config, pkgs, ...}:
@@ -138,6 +164,8 @@ let
             services.dbus.packages = [ disnix ];
             services.openssh.enable = true;
             
+            jobs.ssh.restartIfChanged = false;
+            
             jobs.disnix =
               { description = "Disnix server";
 
@@ -145,6 +173,7 @@ let
                 after = [ "dbus.service" ];
                 
                 path = [ pkgs.nix disnix ];
+                restartIfChanged = false; # Important, otherwise we cannot upgrade
 
                 script =
                   ''
@@ -153,7 +182,7 @@ let
                   '';
                };
               
-            environment.systemPackages = [ pkgs.stdenv pkgs.nix disnix disnixos pkgs.hello pkgs.zip pkgs.busybox pkgs.module_init_tools ];
+            environment.systemPackages = [ pkgs.stdenv pkgs.nix disnix disnixos pkgs.busybox pkgs.module_init_tools pkgs.hello pkgs.zip ];
           };
       in
       with import "${nixos}/lib/testing.nix" { system = builtins.currentSystem; };
@@ -165,10 +194,12 @@ let
             testtarget1 = machine;
             testtarget2 = machine;
           };
-          testScript = "";
-          /*testScript = 
+          testScript = 
             ''
               startAll;
+              $coordinator->waitForJob("network-interfaces.target");
+              $testtarget1->waitForJob("disnix");
+              $testtarget2->waitForJob("disnix");
               
               # Initialise ssh stuff by creating a key pair for communication
               my $key=`${pkgs.openssh}/bin/ssh-keygen -t dsa -f key -N ""`;
@@ -184,8 +215,17 @@ let
               $coordinator->mustSucceed("chmod 600 /root/.ssh/id_dsa");
               
               # Deploy the test NixOS network expression
-              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-deploy-network ${networkNix} --show-trace >&2");
-            '';*/
+              
+              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-deploy-network ${physicalNetworkNix} --show-trace >&2");
+              
+              # Check if zip is installed on the correct machine
+              $testtarget1->mustSucceed("zip -h");
+              $testtarget2->mustFail("zip -h");
+              
+              # Check if hello is installed on the correct machine
+              $testtarget2->mustSucceed("hello");
+              $testtarget1->mustFail("hello");
+            '';
         };
       };
   };

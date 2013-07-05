@@ -41,7 +41,7 @@ let
         deployment.targetHost = pkgs.lib.mkOverride 900 targetName;
         environment.checkConfigurationOptions = false; # We assume that NixOps has already checked it
       };
-      extraArgs = configurations;
+      extraArgs = { nodes = configurations; };
     }).config) network;
 in
 pkgs.lib.mapAttrs (targetName: config: config.services.disnix.infrastructure) configurations
