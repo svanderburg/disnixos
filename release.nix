@@ -119,8 +119,6 @@ let
                     restartIfChanged = false;
                     script = "true";
                   };
-                 
-                 environment.systemPackages = [ pkgs.zip ];
               };
             
               testtarget2 = {pkgs, ...}:
@@ -144,8 +142,6 @@ let
                     restartIfChanged = false;
                     script = "true";
                   };
-                 
-                environment.systemPackages = [ pkgs.hello ];
               };
             }
           '';
@@ -216,7 +212,7 @@ let
               
               # Deploy the test NixOS network expression
               
-              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-deploy-network ${physicalNetworkNix}");
+              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-deploy-network ${logicalNetworkNix} ${physicalNetworkNix}");
               
               # Check if zip is installed on the correct machine
               $testtarget1->mustSucceed("zip -h");
