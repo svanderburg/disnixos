@@ -29,7 +29,7 @@ rec {
         infrastructure = machine.config.services.disnix.infrastructure;
       in
       {
-        profile = machine.config.system.build.toplevel;
+        profile = machine.config.system.build.toplevel.outPath;
         target = getAttr targetProperty infrastructure;
       }
     ) (attrNames configurations)
@@ -38,15 +38,15 @@ rec {
   generateActivationMappings = configurations: targetProperty:
     map (targetName:
       let
-        config = getAttr targetName configurations;
-        infrastructure = config.services.disnix.infrastructure;
+        machine = getAttr targetName configurations;
+        infrastructure = machine.config.services.disnix.infrastructure;
       in
       { name = targetName;
-        service = config.system.build.toplevel;
+        service = machine.config.system.build.toplevel.outPath;
         target = infrastructure;
         dependsOn = [];
         type = "nixos-configuration";
-        targetProperty = getAttr targetProperty infrastructure;
+        inherit targetProperty;
       }
     ) (attrNames configurations)
   ;

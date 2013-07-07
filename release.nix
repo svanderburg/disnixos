@@ -216,7 +216,7 @@ let
               
               # Deploy the test NixOS network expression
               
-              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-deploy-network ${physicalNetworkNix} --show-trace >&2");
+              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-deploy-network ${physicalNetworkNix}");
               
               # Check if zip is installed on the correct machine
               $testtarget1->mustSucceed("zip -h");
