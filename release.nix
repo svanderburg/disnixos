@@ -49,7 +49,7 @@ let
       };
 
     build =
-      { tarball ? jobs.tarball {}
+      { tarball ? jobs.tarball { inherit disnix; }
       , system ? builtins.currentSystem
       , disnix ? (import ../disnix/release.nix {}).build {}
       }:
