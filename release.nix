@@ -71,7 +71,10 @@ let
       let
         pkgs = import nixpkgs {};
         
-        disnixos = build { system = builtins.currentSystem; };
+        disnixos = build {
+          system = builtins.currentSystem;
+          inherit disnix;
+        };
         
         logicalNetworkNix = pkgs.writeTextFile {
           name = "network-logical.nix";
