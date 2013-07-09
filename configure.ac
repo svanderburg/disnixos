@@ -45,7 +45,6 @@ doc/manual/Makefile
 scripts/Makefile
 data/Makefile
 data/generate-infrastructure.nix
-data/generate-services.nix
 data/generate-tests.nix
 data/testing.nix
 data/manifest.nix
@@ -55,7 +54,6 @@ scripts/disnixos-manifest
 scripts/disnixos-deploy-network
 scripts/disnixos-env
 scripts/disnixos-geninfra
-scripts/disnixos-genservices
 scripts/disnixos-gentests
 scripts/disnixos-vm-env
 ])
