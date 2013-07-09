@@ -2,7 +2,7 @@
 
 let
   evalConfig = import "${nixos}/lib/eval-config.nix";
-  inherit (builtins) getAttr attrNames;
+  inherit (builtins) getAttr attrNames unsafeDiscardOutputDependency;
 in
 rec {
   generateConfigurations = network:
@@ -69,4 +69,19 @@ rec {
       activation = generateActivationMappings configurations targetProperty;
       targets = generateTargetPropertyList configurations targetProperty;
     };
+
+  generateDistributedDerivation = network: targetProperty:
+    let
+      configurations = generateConfigurations network;
+    in
+    map (targetName:
+      let
+        machine = getAttr targetName configurations;
+        infrastructure = machine.config.services.disnix.infrastructure;
+      in
+      { derivation = unsafeDiscardOutputDependency (machine.config.system.build.toplevel.drvPath);
+        target = getAttr targetProperty infrastructure;
+      }
+    ) (attrNames configurations)
+  ;
 }

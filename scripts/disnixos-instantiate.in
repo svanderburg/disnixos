@@ -1,0 +1,124 @@
+#!/bin/bash -e
+# Disnix - A distributed application layer for Nix
+# Copyright (C) 2008-2011  Sander van der Burg
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+# Shows the usage of this command to the user
+
+showUsage()
+{
+    echo "Usage: $0 -n network_expr [ -n network_expr2 ] [ -s services_expr ] [ -d distribution_expr ] [options]"
+    echo "Options:"
+    echo
+    echo "-s,--services       Services Nix expression which describes all components of the distributed system"
+    echo "-n,--network        Network Nix expression which declares a NixOS configuration for each machine in the network"
+    echo "-d,--distribution   Distribution Nix expression which maps services to machines in the network"
+    echo "--target-property   The target property of an infrastructure model, that specifies how to "
+    echo "                    connect to the remote Disnix interface. (Defaults to hostname)"
+    echo "--no-out-link       Do not create a 'result' symlink"
+    echo "--show-trace        Shows a trace of the output"
+    echo "--vm                Configures a manifest used for the NixOS test driver"
+    echo "--no-nixops         Use Disnix's deployment facilities instead of NixOps"
+    echo "-h,--help           Shows the usage of this command to the user"
+}
+
+# Autoconf settings
+export prefix=@prefix@
+
+# Import checks
+source @datadir@/@PACKAGE@/checks
+
+# Import Disnix checks
+source @DISNIX_PREFIX@/share/disnix/checks
+
+# Parse valid argument options
+
+PARAMS=`getopt -n $0 -o s:n:d:h -l services:,network:,distribution:,target-property:,no-out-link,show-trace,vm,no-nixops,help -- "$@"`
+
+if [ $? != 0 ]
+then
+    showUsage
+    exit 1
+fi
+
+eval set -- "$PARAMS"
+
+# Evaluate valid options
+
+while [ "$1" != "--" ]
+do
+    case "$1" in
+        -s|--services)
+            servicesFile=`readlink -f $2`
+            ;;
+        -n|--network)
+            networkFiles="$networkFiles `readlink -f $2`"
+            ;;
+        -d|--distribution)
+            distributionFile=`readlink -f $2`
+            ;;
+        --target-property)
+            targetProperty=$2
+            ;;
+        --no-out-link)
+            noOutLink=1
+            ;;
+        --show-trace)
+            showTrace=1
+            ;;
+        --vm)
+            useVM=1
+            ;;
+        --no-nixops)
+            noNixOpsArg="--no-nixops"
+            ;;
+        -h|--help)
+            showUsage
+            exit 0
+            ;;
+    esac
+    
+    shift
+done
+
+# Validate the given options
+
+checkNetworkFiles
+checkTargetProperty
+checkNoOutLink
+checkShowTrace
+
+if [ "$useVM" = "1" ]
+then
+    targetProperty=backdoor
+    genInfraArgs="--use-backdoor --use-vm-testing"
+fi
+
+# Build the manifest file
+
+if [ "$servicesFile" = "" ] || [ "$distributionFile" = "" ]
+then
+    nix-build --arg networkFiles "[ $networkFiles ]" \
+              --argstr targetProperty $targetProperty \
+              $noOutLinkArg \
+              $showTraceArg \
+              "$(readlink -f @datadir@/@PACKAGE@/instantiate.nix)"
+else
+    # Generate infrastructure model from network model
+    infrastructureFile=`disnixos-geninfra --no-out-link $genInfraArgs $noNixOpsArg $networkFiles`
+    
+    disnix-instantiate -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty $noOutLinkArg $showTraceArg
+fi

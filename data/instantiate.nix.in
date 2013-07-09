@@ -1,0 +1,29 @@
+{ networkFiles
+, targetProperty
+, nixpkgs ? <nixpkgs>
+, nixos ? <nixos>
+}:
+
+let
+  pkgs = import nixpkgs {};
+
+  networks = map (networkFile: import networkFile) networkFiles;
+  
+  mergedNetwork = pkgs.lib.zipAttrs networks;
+  
+  lib = import ./lib.nix { inherit nixpkgs nixos pkgs; };
+  distributedDerivation = lib.generateDistributedDerivation mergedNetwork targetProperty;
+  
+  generateDistributedDerivationXSL = @DISNIX_PREFIX@/share/disnix/generatedistributedderivation.xsl;
+in
+pkgs.stdenv.mkDerivation {
+  name = "distributedDerivation.xml";
+  buildInputs = [ pkgs.libxslt ];
+  buildCommand = ''
+    (
+    cat <<EOF
+    ${builtins.toXML distributedDerivation}
+    EOF
+    ) | xsltproc ${generateDistributedDerivationXSL} - > $out
+  '';
+}

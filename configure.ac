@@ -47,9 +47,11 @@ data/Makefile
 data/generate-infrastructure.nix
 data/generate-tests.nix
 data/testing.nix
+data/instantiate.nix
 data/manifest.nix
 scripts/disnix-backdoor-client
 scripts/disnix-nixops-client
+scripts/disnixos-instantiate
 scripts/disnixos-manifest
 scripts/disnixos-deploy-network
 scripts/disnixos-env
