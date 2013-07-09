@@ -26,3 +26,11 @@ checkNetworkFiles()
 	exit 1
     fi
 }
+
+checkUseNixOps()
+{
+    if [ "$DISNIXOS_USE_NIXOPS" = "1" ]
+    then
+        useNixOps=1
+    fi
+}

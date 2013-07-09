@@ -31,7 +31,7 @@ showUsage()
     echo "--no-out-link       Do not create a 'result' symlink"
     echo "--show-trace        Shows a trace of the output"
     echo "--vm                Configures a manifest used for the NixOS test driver"
-    echo "--no-nixops         Use Disnix's deployment facilities instead of NixOps"
+    echo "--use-nixops        Use NixOps instead of Disnix's deployment facilities"
     echo "-h,--help           Shows the usage of this command to the user"
 }
 
@@ -46,7 +46,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o s:n:d:h -l services:,network:,distribution:,target-property:,no-out-link,show-trace,vm,no-nixops,help -- "$@"`
+PARAMS=`getopt -n $0 -o s:n:d:h -l services:,network:,distribution:,target-property:,no-out-link,show-trace,vm,use-nixops,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -82,8 +82,8 @@ do
         --vm)
             useVM=1
             ;;
-        --no-nixops)
-            noNixOpsArg="--no-nixops"
+        --use-nixops)
+            useNixOps=1
             ;;
         -h|--help)
             showUsage
@@ -107,6 +107,13 @@ then
     genInfraArgs="--use-backdoor --use-vm-testing"
 fi
 
+checkUseNixOps
+
+if [ "$useNixOps" = "1" ]
+then
+    nixOpsArg="--use-nixops"
+fi
+
 # Build the manifest file
 
 if [ "$servicesFile" = "" ] || [ "$distributionFile" = "" ]
@@ -118,7 +125,7 @@ then
               "$(readlink -f @datadir@/@PACKAGE@/instantiate.nix)"
 else
     # Generate infrastructure model from network model
-    infrastructureFile=`disnixos-geninfra --no-out-link $genInfraArgs $noNixOpsArg $networkFiles`
+    infrastructureFile=`disnixos-geninfra --no-out-link $genInfraArgs $nixOpsArg $networkFiles`
     
     disnix-instantiate -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty $noOutLinkArg $showTraceArg
 fi

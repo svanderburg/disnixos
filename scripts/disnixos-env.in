@@ -30,7 +30,7 @@ showUsage()
     echo "                    connect to the remote Disnix interface. (Defaults to hostname)"
     echo "--interface         Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
     echo "-p,--profile        Name of the profile that is used for this system. Defaults to: default"
-    echo "--no-nixops         Use Disnix's deployment facilities instead of NixOps"
+    echo "--use-nixops        Use NixOps instead of Disnix's deployment facilities"
     echo "--show-trace        Shows a trace of the output"
     echo "-h,--help           Shows the usage of this command"
 }
@@ -46,7 +46,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o s:n:d:p:h -l services:,network:,distribution:,profile:,target-property:,interface:,no-nixops,show-trace,help -- "$@"`
+PARAMS=`getopt -n $0 -o s:n:d:p:h -l services:,network:,distribution:,profile:,target-property:,interface:,use-nixops,show-trace,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -73,15 +73,14 @@ do
 	-p|--profile)
 	    profileArg="--profile $2"
 	    ;;
-        --target-property)
+	--target-property)
 	    targetProperty=$2
 	    ;;
 	--interface)
 	    interface=$2
 	    ;;
-	--no-nixops)
-	    noNixOps=1
-	    noNixOpsArg="--no-nixops"
+	--use-nixops)
+	    useNixOps=1
 	    ;;
 	--show-trace)
 	    showTrace=1
@@ -100,9 +99,10 @@ done
 checkServicesFile
 checkNetworkFiles
 checkDistributionFile
+checkUseNixOps
 
 # If no client interface is given and NixOps is used, then use the disnix-nixops-client by default
-if [ "$noNixOps" != "1" ] && [ "$interface" = "" ] && [ "$DISNIX_CLIENT_INTERFACE" = "" ]
+if [ "$useNixOps" = "1" ] && [ "$interface" = "" ] && [ "$DISNIX_CLIENT_INTERFACE" = "" ]
 then
     interface=disnix-nixops-client
 fi
@@ -114,9 +114,9 @@ checkShowTrace
 # Generate infrastructure model from network model
 infrastructureFile=`disnixos-geninfra --no-out-link $noNixOpsArg $networkFiles`
 
-if [ "$noNixOps" = "1" ]
+if [ "$useNixOps" != "1" ]
 then
-    # Upgrade the NixOS configurations
+    # Upgrade the NixOS configurations through Disnix if NixOps is not used
     disnixos-deploy-network --target-property $targetProperty --interface $interface $profileArg $showTraceArg $networkFiles
 fi
 

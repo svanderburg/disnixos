@@ -27,19 +27,22 @@ showUsage()
     echo "--target-property   The target property of an infrastructure model, that specifies how to "
     echo "                    connect to the remote Disnix interface. (Defaults to hostname)"
     echo "--interface         Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
-    echo "--no-nixops         Use Disnix's deployment facilities instead of NixOps"
+    echo "--use-nixops        Use NixOps instead of Disnix for infrastructure deployment"
     echo "-h,--help           Shows the usage of this command"
 }
 
 # Autoconf settings
 export prefix=@prefix@
 
-# Import checks
+# Import Disnix checks
 source @DISNIX_PREFIX@/share/disnix/checks
+
+# Import checks
+source @datadir@/@PACKAGE@/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o dh -l delete-old,target-property:,interface:,no-nixops,help -- "$@"`
+PARAMS=`getopt -n $0 -o dh -l delete-old,target-property:,interface:,use-nixops,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -63,8 +66,8 @@ do
 	--interface)
 	    interface=$2
 	    ;;
-	--no-nixops)
-	    noNixOpsArg="--no-nixops"
+	--use-nixops)
+	    useNixOps=1
 	    ;;
 	-h|--help)
 	    showUsage
@@ -79,6 +82,12 @@ shift
 
 # Validate the given options
 checkClientInterface
+checkUseNixOps
+
+if [ "$useNixOps" = "1" ]
+then
+    nixOpsArg="--use-nixops"
+fi
 
 if [ -z "$1" ]
 then
@@ -93,7 +102,7 @@ else
 fi
 
 # Generate infrastructure model from network model
-infrastructureFile=`disnixos-geninfra --no-out-link $noNixOpsArg $networkFiles`
+infrastructureFile=`disnixos-geninfra --no-out-link $nixOpsArg $networkFiles`
 
 # Execute operation
 disnix-collect-garbage $deleteOldArg $targetPropertyArg --interface $interface $infrastructureFile

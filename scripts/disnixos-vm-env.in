@@ -59,7 +59,7 @@ eval set -- "$PARAMS"
 while [ "$1" != "--" ]
 do
     case "$1" in
-        -s|--services)      
+        -s|--services)
             servicesFile=`readlink -f $2`
             ;;
         -n|--network)
@@ -100,7 +100,7 @@ do
     networkArgs="$networkArgs -n $n"
 done
 
-manifest=`disnixos-manifest -s $servicesFile $networkArgs -d $distributionFile --vm --no-nixops --no-out-link $showTraceArg`
+manifest=`disnixos-manifest -s $servicesFile $networkArgs -d $distributionFile --vm --no-out-link $showTraceArg`
 
 # Set a test script which automatically deploys the system
 export tests=`cat $(disnixos-gentests --no-out-link $networkArgs $showTraceArg $manifest)`

@@ -1,7 +1,7 @@
 { networkFiles
 , useBackdoor ? false
 , useVMTesting ? false
-, nixOpsModel ? true
+, nixOpsModel ? false
 , nixpkgs ? <nixpkgs>
 , nixos ? <nixos>
 }:

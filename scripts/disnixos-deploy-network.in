@@ -54,7 +54,7 @@ do
 	-p|--profile)
 	    profileArg="--profile $2"
 	    ;;
-        --target-property)
+	--target-property)
 	    targetProperty=$2
 	    ;;
 	--interface)
