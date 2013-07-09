@@ -12,9 +12,10 @@ rec {
         modules = configuration
         ++ [
           { key = "publish-infrastructure";
+            services.disnix.enable = true;
             services.disnix.publishInfrastructure.enable = true;
             services.disnix.publishInfrastructure.enableAuthentication = true;
-            networking.hostName = targetName;
+            networking.hostName = pkgs.lib.mkOverride 900 targetName;
           }
         ];
         extraArgs = { nodes = generateConfigurations network; };

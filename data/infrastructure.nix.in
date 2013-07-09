@@ -20,9 +20,10 @@ let
       modules = configuration
       ++ [
         { key = "publish-infrastructure";
+          services.disnix.enable = true;
           services.disnix.publishInfrastructure.enable = true;
           services.disnix.publishInfrastructure.enableAuthentication = true;
-          networking.hostName = targetName;
+          networking.hostName = pkgs.lib.mkOverride 900 targetName;
         }
       ]
       ++ pkgs.lib.optional useVMTesting "${nixos}/modules/virtualisation/qemu-vm.nix"
@@ -37,7 +38,6 @@ let
         require = [ <nixops/options.nix> ];
         # Provide a default hostname and deployment target equal
         # to the attribute name of the machine in the model.
-        networking.hostName = pkgs.lib.mkOverride 900 targetName;
         deployment.targetHost = pkgs.lib.mkOverride 900 targetName;
         environment.checkConfigurationOptions = false; # We assume that NixOps has already checked it
       };
