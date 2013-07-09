@@ -58,5 +58,6 @@ scripts/disnixos-env
 scripts/disnixos-geninfra
 scripts/disnixos-gentests
 scripts/disnixos-vm-env
+scripts/disnixos-collect-garbage
 ])
 AC_OUTPUT
