@@ -20,14 +20,18 @@
 
 showUsage()
 {
-    echo "Usage: $0 -n network_expr [ -n network_expr2 ] [options]"
+    echo "Usage: $0 -n network_expr [ -n network_expr2 ] [ -s services_expr ] [ -d distribution_expr ] [options]"
     echo "Options:"
     echo
+    echo "-s,--services       Services Nix expression which describes all components of the distributed system"
     echo "-n,--network        Network Nix expression which declares a NixOS configuration for each machine in the network"
+    echo "-d,--distribution   Distribution Nix expression which maps services to machines in the network"
     echo "--target-property   The target property of an infrastructure model, that specifies how to "
     echo "                    connect to the remote Disnix interface. (Defaults to hostname)"
     echo "--no-out-link       Do not create a 'result' symlink"
     echo "--show-trace        Shows a trace of the output"
+    echo "--vm                Configures a manifest used for the NixOS test driver"
+    echo "--no-nixops         Use Disnix's deployment facilities instead of NixOps"
     echo "-h,--help           Shows the usage of this command to the user"
 }
 
@@ -42,7 +46,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o n:h -l network:,target-property:,no-out-link,show-trace,help -- "$@"`
+PARAMS=`getopt -n $0 -o s:n:d:h -l services:,network:,distribution:,target-property:,no-out-link,show-trace,vm,no-nixops,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -57,8 +61,14 @@ eval set -- "$PARAMS"
 while [ "$1" != "--" ]
 do
     case "$1" in
+        -s|--services)
+            servicesFile=`readlink -f $2`
+            ;;
         -n|--network)
             networkFiles="$networkFiles `readlink -f $2`"
+            ;;
+        -d|--distribution)
+            distributionFile=`readlink -f $2`
             ;;
         --target-property)
             targetProperty=$2
@@ -68,6 +78,12 @@ do
             ;;
         --show-trace)
             showTrace=1
+            ;;
+        --vm)
+            useVM=1
+            ;;
+        --no-nixops)
+            noNixOpsArg="--no-nixops"
             ;;
         -h|--help)
             showUsage
@@ -85,10 +101,24 @@ checkTargetProperty
 checkNoOutLink
 checkShowTrace
 
+if [ "$useVM" = "1" ]
+then
+    targetProperty=backdoor
+    genInfraArgs="--use-backdoor --use-vm-testing"
+fi
+
 # Build the manifest file
 
-nix-build --arg networkFiles "[ $networkFiles ]" \
-          --argstr targetProperty $targetProperty \
-          $noOutLinkArg \
-          $showTraceArg \
-          "$(readlink -f @datadir@/@PACKAGE@/manifest.nix)"
+if [ "$servicesFile" = "" ] || [ "$distributionFile" = "" ]
+then
+    nix-build --arg networkFiles "[ $networkFiles ]" \
+              --argstr targetProperty $targetProperty \
+              $noOutLinkArg \
+              $showTraceArg \
+              "$(readlink -f @datadir@/@PACKAGE@/manifest.nix)"
+else
+    # Generate infrastructure model from network model
+    infrastructureFile=`disnixos-geninfra --no-out-link $genInfraArgs $noNixOpsArg $networkFiles`
+    
+    disnix-manifest -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty $noOutLinkArg $showTraceArg
+fi

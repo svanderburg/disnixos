@@ -59,25 +59,25 @@ eval set -- "$PARAMS"
 while [ "$1" != "--" ]
 do
     case "$1" in
-        -s|--services)	    
-	    servicesFile=`readlink -f $2`
-	    ;;
-	-n|--network)
-	    networkFiles="$networkFiles `readlink -f $2`"
-	    ;;
-	-d|--distribution)
-	    distributionFile=`readlink -f $2`
-	    ;;
-	--no-out-link)
-	    noOutLink=1
-	    ;;
-	--show-trace)
-	    showTrace=1
-	    ;;
-	-h|--help)
-	    showUsage
-	    exit 0
-	    ;;
+        -s|--services)      
+            servicesFile=`readlink -f $2`
+            ;;
+        -n|--network)
+            networkFiles="$networkFiles `readlink -f $2`"
+            ;;
+        -d|--distribution)
+            distributionFile=`readlink -f $2`
+            ;;
+        --no-out-link)
+            noOutLink=1
+            ;;
+        --show-trace)
+            showTrace=1
+            ;;
+        -h|--help)
+            showUsage
+            exit 0
+            ;;
     esac
     
     shift
@@ -93,18 +93,16 @@ checkShowTrace
 # Generate virtual machines matching the configuration in the network Nix expression
 vmsPath=`nixos-build-vms --no-out-link $showTraceArg $networkFiles`
 
-# Generate infrastructure expression from network expression
-infrastructureFile=`disnixos-geninfra --use-backdoor --use-vm-testing --no-nixops --no-out-link $showTraceArg $networkFiles`
-
 # Build the manifest
-manifest=`disnix-manifest -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property backdoor --no-out-link $showTraceArg`
 
-# Set a test script which automatically deploys the system
 for n in $networkFiles
 do
     networkArgs="$networkArgs -n $n"
 done
 
+manifest=`disnixos-manifest -s $servicesFile $networkArgs -d $distributionFile --vm --no-nixops --no-out-link $showTraceArg`
+
+# Set a test script which automatically deploys the system
 export tests=`cat $(disnixos-gentests --no-out-link $networkArgs $showTraceArg $manifest)`
 
 # Start the virtual machines
