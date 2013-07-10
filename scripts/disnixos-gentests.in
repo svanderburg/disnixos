@@ -26,6 +26,7 @@ showUsage()
     echo "-n,--network   Network Nix expression which declares a NixOS configuration for each machine in the network"
     echo "--no-out-link  Do not create a 'result' symlink"
     echo "--show-trace   Shows a trace of the output"
+    echo "--use-nixops   Use NixOps instead of Disnix's deployment facilities"
     echo "-h,--help      Shows the usage of this command"
 }
 
@@ -40,7 +41,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o n:h -l network:,no-out-link,show-trace,help -- "$@"`
+PARAMS=`getopt -n $0 -o n:h -l network:,no-out-link,show-trace,use-nixops,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -64,6 +65,9 @@ do
 	--show-trace)
 	    showTrace=1
 	    ;;
+	--use-nixops)
+	    useNixOps=1
+	    ;;
 	-h|--help)
 	    showUsage
 	    exit 0
@@ -80,6 +84,12 @@ shift
 checkNetworkFiles
 checkShowTrace
 checkNoOutLink
+checkUseNixOps
+
+if [ "$useNixOps" = "1" ]
+then
+    nixOpsArg="--arg nixOpsModel true"
+fi
 
 if [ "$@" = "" ]
 then
@@ -90,4 +100,4 @@ else
 fi
 
 # Execute operation
-nix-build @datadir@/@PACKAGE@/generate-tests.nix --argstr manifestFile $manifestFile --arg networkFiles "[ $networkFiles ]" $showTraceArg $noOutLinkArg
+nix-build @datadir@/@PACKAGE@/generate-tests.nix --argstr manifestFile $manifestFile --arg networkFiles "[ $networkFiles ]" $nixOpsArg $showTraceArg $noOutLinkArg

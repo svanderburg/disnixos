@@ -2,17 +2,17 @@
 , targetProperty
 , nixpkgs ? <nixpkgs>
 , nixos ? <nixos>
+, enableDisnix ? true
+, nixOpsModel ? false
 }:
 
 let
   pkgs = import nixpkgs {};
 
-  networks = map (networkFile: import networkFile) networkFiles;
-  
-  mergedNetwork = pkgs.lib.zipAttrs networks;
-  
   lib = import ./lib.nix { inherit nixpkgs nixos pkgs; };
-  distributedDerivation = lib.generateDistributedDerivation mergedNetwork targetProperty;
+  
+  mergedNetwork = lib.generateMergedNetwork networkFiles nixOpsModel;
+  distributedDerivation = lib.generateDistributedDerivation mergedNetwork targetProperty enableDisnix nixOpsModel false false;
   
   generateDistributedDerivationXSL = @DISNIX_PREFIX@/share/disnix/generatedistributedderivation.xsl;
 in

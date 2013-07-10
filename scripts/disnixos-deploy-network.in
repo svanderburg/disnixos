@@ -27,6 +27,7 @@ showUsage()
     echo "                    connect to the remote Disnix interface. (Defaults to hostname)"
     echo "--interface         Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
     echo "-p,--profile        Name of the profile that is used for this system. Defaults to: default"
+    echo "--disable-disnix    Do not enable the Disnix service on the target machines by default"
     echo "--show-trace        Shows a trace of the output"
     echo "-h,--help           Shows the usage of this command"
 }
@@ -36,7 +37,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o p:h -l profile:,target-property:,interface:,show-trace,help -- "$@"`
+PARAMS=`getopt -n $0 -o p:h -l profile:,target-property:,interface:,show-trace,disable-disnix,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -62,6 +63,9 @@ do
 	    ;;
 	--show-trace)
 	    showTrace=1
+	    ;;
+	--disable-disnix)
+	    disableDisnixArg="--disable-disnix"
 	    ;;
 	-h|--help)
 	    showUsage
@@ -92,9 +96,11 @@ else
     done
 fi
 
+echo IM HERE NOW BITCHES >&2
 # Create a manifest file
-manifest=`disnixos-manifest $networkFileArgs --target-property $targetProperty --no-out-link $showTraceArg`
+manifest=`disnixos-manifest $networkFileArgs --target-property $targetProperty --no-out-link $disableDisnixArg $showTraceArg`
 
+echo DONE MANIFEST >&2
 # Distribute system derivations
 disnix-distribute --interface $interface $manifest
 

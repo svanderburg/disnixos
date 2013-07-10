@@ -32,6 +32,7 @@ showUsage()
     echo "--show-trace        Shows a trace of the output"
     echo "--vm                Configures a manifest used for the NixOS test driver"
     echo "--use-nixops        Use NixOps instead of Disnix's deployment facilities"
+    echo "--disable-disnix    Do not enable the Disnix service on the target machines by default"
     echo "-h,--help           Shows the usage of this command to the user"
 }
 
@@ -46,7 +47,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o s:n:d:h -l services:,network:,distribution:,target-property:,no-out-link,show-trace,vm,use-nixops,help -- "$@"`
+PARAMS=`getopt -n $0 -o s:n:d:h -l services:,network:,distribution:,target-property:,no-out-link,show-trace,vm,use-nixops,disable-disnix,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -85,6 +86,9 @@ do
         --use-nixops)
             useNixOps=1
             ;;
+        --disable-disnix)
+            disableDisnixArg="--arg enableDisnix false"
+            ;;
         -h|--help)
             showUsage
             exit 0
@@ -109,21 +113,29 @@ fi
 
 checkUseNixOps
 
-if [ "$useNixOps" = "1" ]
-then
-    nixOpsArg="--use-nixops"
-fi
 
 # Build the manifest file
 
 if [ "$servicesFile" = "" ] || [ "$distributionFile" = "" ]
 then
+    if [ "$useNixOps" = "1" ]
+    then
+        nixOpsArg="--arg nixOpsModel true"
+    fi
+
     nix-build --arg networkFiles "[ $networkFiles ]" \
               --argstr targetProperty $targetProperty \
               $noOutLinkArg \
+              $nixOpsArg \
+              $disableDisnixArg \
               $showTraceArg \
               "$(readlink -f @datadir@/@PACKAGE@/instantiate.nix)"
 else
+    if [ "$useNixOps" = "1" ]
+    then
+        nixOpsArg="--use-nixops"
+    fi
+
     # Generate infrastructure model from network model
     infrastructureFile=`disnixos-geninfra --no-out-link $genInfraArgs $nixOpsArg $networkFiles`
     

@@ -2,27 +2,48 @@
 
 let
   evalConfig = import "${nixos}/lib/eval-config.nix";
-  inherit (builtins) getAttr attrNames unsafeDiscardOutputDependency;
+  inherit (builtins) getAttr attrNames removeAttrs unsafeDiscardOutputDependency;
 in
 rec {
-  generateConfigurations = network:
+
+  generateMergedNetwork = networkFiles: nixOpsModel:
+    let
+      networks = map (networkFile: import networkFile) networkFiles;
+      mergedNetwork = pkgs.lib.zipAttrs networks;
+    in
+    if nixOpsModel then removeAttrs mergedNetwork [ "network" "resources" ] else mergedNetwork; # A NixOps model has a reserved network attributes that cannot be machines
+  
+  generateConfigurations = network: enableDisnix: nixOpsModel: useVMTesting: useBackdoor:
     pkgs.lib.mapAttrs (targetName: configuration:
       evalConfig {
-        inherit nixpkgs;
         modules = configuration
-        ++ [
-          { key = "publish-infrastructure";
-            services.disnix.enable = true;
-            services.disnix.publishInfrastructure.enable = true;
-            services.disnix.publishInfrastructure.enableAuthentication = true;
-            networking.hostName = pkgs.lib.mkOverride 900 targetName;
-          }
-        ];
-        extraArgs = { nodes = generateConfigurations network; };
-      }
-    ) network
-  ;
-  
+        ++ pkgs.lib.optional enableDisnix {
+          key = "enable-disnix";
+          services.disnix.enable = true;
+          services.disnix.publishInfrastructure.enable = true;
+          services.disnix.publishInfrastructure.enableAuthentication = true;
+          networking.hostName = pkgs.lib.mkOverride 900 targetName;
+        }
+        ++ pkgs.lib.optionals useVMTesting [
+          "${nixos}/modules/virtualisation/qemu-vm.nix"
+          "${nixos}/modules/testing/test-instrumentation.nix"
+        ]
+        ++ pkgs.lib.optional useBackdoor {
+          key = "backdoor";
+          services.disnix.infrastructure.backdoor = "TCP:${targetName}:512";
+        }
+        ++ pkgs.lib.optional nixOpsModel {
+          key = "nixops-stuff";
+          # Make NixOps's deployment.* options available.
+          require = [ <nixops/options.nix> ];
+          # Provide a default hostname and deployment target equal
+          # to the attribute name of the machine in the model.
+          deployment.targetHost = pkgs.lib.mkOverride 900 targetName;
+          environment.checkConfigurationOptions = false; # We assume that NixOps has already checked it
+        };
+        extraArgs = { nodes = generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor; };
+      }) network;
+
   generateProfiles = configurations: targetProperty:
     map (targetName:
       let
@@ -62,18 +83,18 @@ rec {
     ) (attrNames configurations)
   ;
 
-  generateManifest = network: targetProperty:
+  generateManifest = network: targetProperty: enableDisnix: nixOpsModel: useVMTesting: useBackdoor:
     let
-      configurations = generateConfigurations network;
+      configurations = generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor;
     in
     { profiles = generateProfiles configurations targetProperty;
       activation = generateActivationMappings configurations targetProperty;
       targets = generateTargetPropertyList configurations targetProperty;
     };
 
-  generateDistributedDerivation = network: targetProperty:
+  generateDistributedDerivation = network: targetProperty: enableDisnix: nixOpsModel: useVMTesting: useBackdoor:
     let
-      configurations = generateConfigurations network;
+      configurations = generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor;
     in
     map (targetName:
       let

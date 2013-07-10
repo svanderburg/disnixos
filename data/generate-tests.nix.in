@@ -3,14 +3,18 @@
 , nixpkgs ? <nixpkgs>
 , disnix ? @DISNIX_PREFIX@
 , disnixos ? @prefix@
+, nixOpsModel ? false
 }:
 
 let
   pkgs = import nixpkgs {};
   
-  networks = map (networkFile: import networkFile) networkFiles;
+  lib = import @prefix@/share/disnixos/lib.nix {
+    inherit pkgs nixpkgs;
+    nixos = null;
+  };
   
-  network = pkgs.lib.zipAttrs networks;
+  network = lib.generateMergedNetwork networkFiles nixOpsModel;
   
   testScript = ''
     startAll;

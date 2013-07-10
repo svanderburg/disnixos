@@ -2,17 +2,19 @@
 , targetProperty
 , nixpkgs ? <nixpkgs>
 , nixos ? <nixos>
+, enableDisnix ? true
+, nixOpsModel ? false
+, useVMTesting ? false
+, useBackdoor ? false
 }:
 
 let
   pkgs = import nixpkgs {};
 
-  networks = map (networkFile: import networkFile) networkFiles;
-  
-  mergedNetwork = pkgs.lib.zipAttrs networks;
-  
   lib = import ./lib.nix { inherit nixpkgs nixos pkgs; };
-  manifest = lib.generateManifest mergedNetwork targetProperty;
+  
+  mergedNetwork = lib.generateMergedNetwork networkFiles nixOpsModel;
+  manifest = lib.generateManifest mergedNetwork targetProperty enableDisnix nixOpsModel useVMTesting useBackdoor;
   
   generateManifestXSL = @DISNIX_PREFIX@/share/disnix/generatemanifest.xsl;
 in

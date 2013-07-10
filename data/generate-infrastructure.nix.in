@@ -19,6 +19,7 @@ pkgs.stdenv.mkDerivation {
         -e "s|@useBackdoor@|${if useBackdoor then "true" else "false"}|" \
         -e "s|@useVMTesting@|${if useVMTesting then "true" else "false"}|" \
         -e "s|@nixOpsModel@|${if nixOpsModel then "true" else "false"}|" \
+        -e "s|@prefix"@"|@prefix@|" \
         ${infrastructureNix} > $out
   '';
 }
