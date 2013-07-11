@@ -46,7 +46,11 @@
       <title>Utilities</title>
       
       <xi:include href="disnix-backdoor-client.xml" />
+      <xi:include href="disnix-nixops-client.xml" />
+      <xi:include href="disnixos-manifest.xml" />
+      <xi:include href="disnixos-instantiate.xml" />
       <xi:include href="disnixos-deploy-network.xml" />
+      <xi:include href="disnixos-collect-garbage.xml" />
       <xi:include href="disnixos-geninfra.xml" />
       <xi:include href="disnixos-gentests.xml" />
     </section>

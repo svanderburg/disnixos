@@ -1,23 +1,23 @@
 <refentry xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
-          xml:id="sec-disnixos-geninfra">
+          xml:id="sec-disnixos-collect-garbage">
           
 	<refmeta>
-		<refentrytitle>disnixos-geninfra</refentrytitle>
+		<refentrytitle>disnixos-collect-garbage</refentrytitle>
 		<manvolnum>1</manvolnum>
 		<refmiscinfo class="source">DisnixOS</refmiscinfo>
 		<refmiscinfo class="version"><xi:include href="version.txt" parse="text" /></refmiscinfo>
 	</refmeta>
 	
 	<refnamediv>
-		<refname>disnixos-geninfra</refname>
-		<refpurpose>Generate an infrastructure model from a network model</refpurpose>
+		<refname>disnixos-collect-garbage</refname>
+		<refpurpose>Delete garbage from a network of machines</refpurpose>
 	</refnamediv>
 	
 	<refsynopsisdiv>
 		<cmdsynopsis>
-			<command>disnixos-geninfra</command>
+			<command>disnixos-collect-garbage</command>
 			<arg><replaceable>options</replaceable></arg>
 			<arg choice="plain"><replaceable>network_expr</replaceable></arg>
 			<arg choice="opt"><replaceable>network_expr2 ...</replaceable></arg>
@@ -28,9 +28,8 @@
 		<title>Description</title>
 		
 		<para>
-			The command <command>disnixos-geninfra</command> generates an infrastructure model
-			from NixOS network models, so that properties of the machines can be used by the
-			basic Disnix toolset.
+			The command <command>disnixos-collect-garbage</command> collects all garbage from all the machines defined a network NixOS
+			expression and optionally removes all the older profiles.
 		</para>
 	</refsection>
 	
@@ -39,18 +38,27 @@
 		
 		<variablelist>
 			<varlistentry>
-				<term><option>--use-backdoor</option></term>
+				<term><option>-d</option>, <option>--delete-old</option></term>
 				<listitem>
 					<para>
-						Indicates that the backdoor must be enabled so that the VMs can be accessed through a socket.
+						Removes all the old Nix profile generations.
 					</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
-				<term><option>--use-vm-testing</option></term>
+				<term><option>--interface</option></term>
 				<listitem>
 					<para>
-						Indicates that we want to use the NixOS VM testing features, so that their relevant properties are taken into account.
+						Path to executable that communicates with a Disnix interface. Defaults to
+						<command>disnix-ssh-client</command>
+					</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>--target-property</option></term>
+				<listitem>
+					<para>
+						The target property of an infrastructure model, that specifies how to connect to the remote Disnix interface. (Defaults to hostname)
 					</para>
 				</listitem>
 			</varlistentry>
@@ -61,22 +69,6 @@
 						Specifies that NixOps is used to take care of the infrastructure deployment, so that it
 						properly interprets NixOps configurations and uses NixOps tooling instead of Disnix's deployment
 						facilities.
-					</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>--no-out-link</option></term>
-				<listitem>
-					<para>
-						Do not create a 'result' symlink.
-					</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>--show-trace</option></term>
-				<listitem>
-					<para>
-						Shows a trace of the output.
 					</para>
 				</listitem>
 			</varlistentry>
@@ -93,8 +85,26 @@
 	
 	<refsection>
 		<title>Environment variables</title>
-	  
+		
 		<variablelist>
+			<varlistentry>
+				<term><option>DISNIX_CLIENT_INTERFACE</option></term>
+				<listitem>
+					<para>
+						Sets the client interface (which defaults to
+						<command>disnix-ssh-client</command>)
+					</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>DISNIX_TARGET_PROPERTY</option></term>
+				<listitem>
+					<para>
+						Specifies which property in the infrastructure Nix expression specifies how to
+						connect to the remote interface (defaults to: hostname).
+					</para>
+				</listitem>
+			</varlistentry>
 			<varlistentry>
 				<term><option>DISNIXOS_USE_NIXOPS</option></term>
 				<listitem>

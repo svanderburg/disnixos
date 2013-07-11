@@ -1,24 +1,24 @@
 <refentry xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
-          xml:id="sec-disnixos-env">
+          xml:id="sec-disnixos-instantiate">
           
 	<refmeta>
-		<refentrytitle>disnixos-env</refentrytitle>
+		<refentrytitle>disnixos-instantiate</refentrytitle>
 		<manvolnum>1</manvolnum>
 		<refmiscinfo class="source">DisnixOS</refmiscinfo>
 		<refmiscinfo class="version"><xi:include href="version.txt" parse="text" /></refmiscinfo>
 	</refmeta>
 	
 	<refnamediv>
-		<refname>disnixos-env</refname>
-		<refpurpose>Installs or updates the services and infrastructure of a distributed system</refpurpose>
+		<refname>disnixos-instantiate</refname>
+		<refpurpose>Instantiate a distributed derivation from DisnixOS expressions</refpurpose>
 	</refnamediv>
 	
 	<refsynopsisdiv>
 		<cmdsynopsis>
-			<command>disnixos-env</command>
-			<arg choice="plain"><option>-s</option> <replaceable>services_expr</replaceable></arg>
+			<command>disnix-instantiate</command>
+			<arg choice="opt"><option>-s</option> <replaceable>services_expr</replaceable></arg>
 			<arg choice="plain"><option>-n</option> <replaceable>network_expr</replaceable></arg>
 			<arg choice="plain"><option>-d</option> <replaceable>distribution_expr</replaceable></arg>
 			<arg><replaceable>options</replaceable></arg>
@@ -29,36 +29,20 @@
 		<title>Description</title>
 		
 		<para>
-			The command <command>disnixos-env</command> is used to install or upgrade the services and infrastructure of distributed
-			system in a given environment.
-			This command requires three Nix expressions as input parameters; A services model capturing
-			the components of a distributed system and its inter-dependencies; A network model capturing
-			the NixOS configurations of machines in the network and its properties and a distribution model which maps services to machines.
+			The command <command>disnix-instantiate</command> generates a service distributed derivation file
+			from a services expression, one or more NixOS network expressions and distribution expression, which
+			can be used to build the services on the target machines from source code by using the
+			<command>disnix-build</command> command.
 		</para>
 		<para>
-			By invoking this command it will first build, distribute and activate all the NixOS configurations of the
-			machines in the network.
-			Then it will build all the services that are defined in the distribution
-			model from source code including all its dependencies. If all the services are successfully built,
-			the closures of the services are transferred to the target machines in the network. Finally, the
-			services are activated by traversing the inter-dependency graph of all the services.
-			In case of a failure a rollback is performed to bring the system back in its previous configuration.
+			If only network expressions are given without a services or distribution expression, then an infrastructure
+			distributed derivation file is generated.
 		</para>
 		<para>
-			When there is already a distributed system configuration deployed, an upgrade is performed. In this
-			phase only the changed parts of the system are deactivated and activated. In this process we
-			also deal with the inter-dependencies so that no services fails due to a missing inter-dependency.
-		</para>
-		<para>
-			This command is essentially a composition of the 
-			<link linkend="sec-disnixos-deploy-network"><command>disnixos-deploy-network</command></link>
-			command (which deploys the infrastructure) and <command>disnix-env</command> (which deploys the services of which
-			the system is composed).
-		</para>
-		<para>
-			Optionally this command can use <command>nixops</command> instead of <command>disnixos-deploy-network</command>,
-			by adding the <option>--use-nixops</option> command-line option or by setting <command>DISNIXOS_USE_NIXOPS</command>
-			environment variable.
+			Most users and developers don't need to use this command directly. The command
+			<link linkend="sec-disnixos-env"><command>disnixos-env</command></link>
+			performs instantiation of a distributed derivation automatically. It is mostly used for debugging purposes or to perform certain
+			tasks manually.
 		</para>
 	</refsection>
 	
@@ -103,19 +87,28 @@
 				</listitem>
 			</varlistentry>
 			<varlistentry>
-				<term><option>--interface</option></term>
+				<term><option>--no-out-link</option></term>
 				<listitem>
 					<para>
-						Path to executable that communicates with a Disnix interface. Defaults to
-						<command>disnix-ssh-client</command>.
+						Do not create a 'result' symlink
 					</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
-				<term><option>-p</option>, <option>--profile</option></term>
+				<term><option>--show-trace</option></term>
 				<listitem>
 					<para>
-						Name of the profile that is used for this system. Defaults to: default
+						Shows a trace of the output.
+					</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>--vm</option></term>
+				<listitem>
+					<para>
+						Enables all configuration settings for deploying a network of efficient QEMU machines which
+						includes adding the relevant QEMU settings and test instrumentation. It also sets the target
+						property to the backdoor.
 					</para>
 				</listitem>
 			</varlistentry>
@@ -140,14 +133,6 @@
 				</listitem>
 			</varlistentry>
 			<varlistentry>
-				<term><option>--show-trace</option></term>
-				<listitem>
-					<para>
-						Shows a trace of the output.
-					</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
 				<term><option>-h</option>, <option>--help</option></term>
 				<listitem>
 					<para>
@@ -162,15 +147,6 @@
 		<title>Environment variables</title>
 		
 		<variablelist>
-			<varlistentry>
-				<term><option>DISNIX_CLIENT_INTERFACE</option></term>
-				<listitem>
-					<para>
-						Sets the client interface (which defaults to
-						<command>disnix-ssh-client</command>)
-					</para>
-				</listitem>
-			</varlistentry>
 			<varlistentry>
 				<term><option>DISNIX_TARGET_PROPERTY</option></term>
 				<listitem>

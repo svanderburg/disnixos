@@ -51,6 +51,16 @@
 				</listitem>
 			</varlistentry>
 			<varlistentry>
+				<term><option>--use-nixops</option></term>
+				<listitem>
+					<para>
+						Specifies that NixOps is used to take care of the infrastructure deployment, so that it
+						properly interprets NixOps configurations and uses NixOps tooling instead of Disnix's deployment
+						facilities.
+					</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
 				<term><option>--no-out-link</option></term>
 				<listitem>
 					<para>
@@ -74,6 +84,23 @@
 					</para>
 				</listitem>
 			</varlistentry>	
+		</variablelist>
+	</refsection>
+	
+	<refsection>
+		<title>Environment variables</title>
+		
+		<variablelist>
+			<varlistentry>
+				<term><option>DISNIXOS_USE_NIXOPS</option></term>
+				<listitem>
+					<para>
+						When set to 1, it specifies that NixOps is used to take care of the infrastructure
+						deployment, so that it properly interprets NixOps configurations and uses NixOps
+						tooling instead of Disnix's deployment facilities.
+					</para>
+				</listitem>
+			</varlistentry>
 		</variablelist>
 	</refsection>
 </refentry>

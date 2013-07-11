@@ -70,6 +70,16 @@
 				</listitem>
 			</varlistentry>
 			<varlistentry>
+				<term><option>--disable-disnix</option></term>
+				<listitem>
+					<para>
+						To properly generate a Disnix infrastructure model, the Disnix service is automatically enabled in
+						a networked NixOS configuration. This option disables Disnix, which can be useful for development
+						purposes.
+					</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
 				<term><option>--show-trace</option></term>
 				<listitem>
 					<para>
