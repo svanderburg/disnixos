@@ -37,7 +37,7 @@
 			In most cases this command is not used directly, but is used by specifying the <option>--interface</option> option
 			for a Disnix command-line utility (such as <command>disnix-env</command>) or by setting the <replaceable>DISNIX_CLIENT_INTERFACE</replaceable>
 			environment variable. By using one of those properties, the Disnix tools will use the given interface instead
-			of the standard <command>disnix-client</command> which only provides loopback access.
+			of the standard <command>disnix-ssh-client</command> which provides remote access through SSH.
 		</para>
 	</refsection>
 	
