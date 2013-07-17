@@ -4,6 +4,7 @@
 , nixos ? <nixos>
 , enableDisnix ? true
 , nixOpsModel ? false
+, disnix ? builtins.storePath @DISNIX_PREFIX@
 }:
 
 let
@@ -14,7 +15,7 @@ let
   mergedNetwork = lib.generateMergedNetwork networkFiles nixOpsModel;
   distributedDerivation = lib.generateDistributedDerivation mergedNetwork targetProperty enableDisnix nixOpsModel false false;
   
-  generateDistributedDerivationXSL = @DISNIX_PREFIX@/share/disnix/generatedistributedderivation.xsl;
+  generateDistributedDerivationXSL = "${disnix}/share/disnix/generatedistributedderivation.xsl";
 in
 pkgs.stdenv.mkDerivation {
   name = "distributedDerivation.xml";

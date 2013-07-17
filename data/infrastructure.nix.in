@@ -1,14 +1,15 @@
 let
   networkFiles = [ @networkFiles@ ];
-  nixpkgs = "@nixpkgs@";
-  nixos = "@nixos@";
+  nixpkgs = builtins.storePath @nixpkgs@;
+  nixos = builtins.storePath @nixos@;
+  disnixos = builtins.storePath @disnixos@;
   useBackdoor = @useBackdoor@;
   useVMTesting = @useVMTesting@;
   nixOpsModel = @nixOpsModel@;
   
   pkgs = import nixpkgs {};
   
-  lib = import @datadir@/@PACKAGE@/lib.nix {
+  lib = import @disnixos@/share/@PACKAGE@/lib.nix {
     inherit nixpkgs nixos pkgs;
   };
   

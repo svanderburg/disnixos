@@ -2,6 +2,7 @@
 , targetProperty
 , nixpkgs ? <nixpkgs>
 , nixos ? <nixos>
+, disnix ? builtins.storePath @DISNIX_PREFIX@
 , enableDisnix ? true
 , nixOpsModel ? false
 , useVMTesting ? false
@@ -16,7 +17,7 @@ let
   mergedNetwork = lib.generateMergedNetwork networkFiles nixOpsModel;
   manifest = lib.generateManifest mergedNetwork targetProperty enableDisnix nixOpsModel useVMTesting useBackdoor;
   
-  generateManifestXSL = @DISNIX_PREFIX@/share/disnix/generatemanifest.xsl;
+  generateManifestXSL = "${disnix}/share/disnix/generatemanifest.xsl";
 in
 pkgs.stdenv.mkDerivation {
   name = "manifest.xml";

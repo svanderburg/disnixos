@@ -1,15 +1,15 @@
 { networkFiles
 , manifestFile
 , nixpkgs ? <nixpkgs>
-, disnix ? @DISNIX_PREFIX@
-, disnixos ? @prefix@
+, disnix ? builtins.storePath @DISNIX_PREFIX@
+, disnixos ? builtins.storePath @prefix@
 , nixOpsModel ? false
 }:
 
 let
   pkgs = import nixpkgs {};
   
-  lib = import @prefix@/share/@PACKAGE@/lib.nix {
+  lib = import ./lib.nix {
     inherit pkgs nixpkgs;
     nixos = null;
   };

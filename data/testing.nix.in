@@ -1,8 +1,8 @@
 { nixpkgs ? <nixpkgs>
 , nixos ? <nixos>
 , system ? builtins.currentSystem
-, disnix ? @DISNIX_PREFIX@
-, disnixos ? @prefix@
+, disnix ? builtins.storePath @DISNIX_PREFIX@
+, disnixos ? builtins.storePath @prefix@
 }:
 
 let
