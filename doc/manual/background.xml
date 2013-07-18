@@ -318,6 +318,6 @@ $ disnixos-deploy-network network-logical.nix network-physical.nix
 	<para>
 		Physical network models can also refer to virtual machine properties hosted in an IaaS environment, such as Amazon EC2.
 		If DisnixOS is used with NixOps, these machines can be automatically instantiated and deployed as well. Consult
-		the NixOps manual for more details on VM details.
+		the NixOps manual for more details on VM instantiation and provisioning.
 	</para>
 </chapter>
