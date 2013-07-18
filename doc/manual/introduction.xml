@@ -12,14 +12,18 @@
 	</para>
 
 	<para>
-		The purpose of Disnix is to manage the deployment of distributable
-		components (or <emphasis>services</emphasis>) in a network of machines.
-		Disnix, however, does not manage the deployment of the infrastructure itself. Normally,
-		a system administrator must manually install machines in the network by
-		following the installation steps of the operating system. Moreover, a system administrator
-		or developer must also manually write an infrastructure model, matching the
+		The purpose of Disnix is to manage the deployment of distributable application
+		components (or <emphasis>services</emphasis>) in a network of machines. Application
+		components can be anything ranging from web services, web applications, databases,
+		and ordinary processes.
+	</para>
+	<para>
+		Disnix, however, does not manage the deployment of the infrastructure itself and their
+		system configurations. Normally, a system administrator must manually install machines in the network
+		having the required characteristics by following the installation steps of the operating system.
+		Moreover, a system administrator or developer must also manually write an infrastructure model, matching the
 		actual configuration of the network in order to correctly deploy a service-oriented
-		system, which is sometimes a lot of work and error prone.
+		system, which may be a lot of work and error prone.
 	</para>
 	
 	<para>
@@ -46,7 +50,7 @@
 		<simplesect>
 			<title>Infrastructure virtualisation</title>
 			<para>
-				DisnixOS uses the virtualisation features of NixOS to build a network of virtual machines
+				DisnixOS uses the NixOS test driver to build a network of virtual machines
 				closely matching the actual network and automatically deploys the service-oriented system
 				in the virtual network,	so that it can be easily tested by developers.
 			</para>
@@ -55,11 +59,20 @@
 		<simplesect>
 			<title>Automated testing of a service-oriented system</title>
 			<para>
-				DisnixOS uses the virtualisation test techniques, used for the NixOS
+				DisnixOS uses the NixOS test driver techniques, used for the NixOS
 				testsuite, to automatically script the deployment and testcases in a distributed
 				environment, so that a service-oriented system can be automatically tested, and run on
 				<link xlink:href="http://nixos.org/hydra">Hydra</link>,
 				a continuous build and integration server built on top of Nix.
+			</para>
+		</simplesect>
+		
+		<simplesect>
+			<title>Infrastructure instantiation and provisioning</title>
+			<para>
+				DisnixOS can also be used in combination with <link xlink:href="http://github.com/nixos/nixops">NixOps</link>,
+				a tool that can deploy networks of NixOS configurations and automatically instantiate and provision
+				virtual machines in an IaaS environment, such as Amazon EC2.
 			</para>
 		</simplesect>
 	</section>

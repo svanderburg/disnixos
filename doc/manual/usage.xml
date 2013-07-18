@@ -22,6 +22,20 @@ $ disnixos-deploy-network network.nix
 			By executing the command above, all the system configurations are built from the NixOS specifications,
 			then distributed to the machines in the network and finally activated.
 		</para>
+
+		<para>
+			The same command can also take multiple network models:
+		</para>
+		
+<screen>
+$ disnixos-deploy-network network-logical.nix network-physical.nix
+</screen>
+
+		<para>
+			By executing the command above, the machine configurations in the logical and physical model are
+			merged together by the NixOS module system into a single network configuration. Then the configurations are
+			built, distributed and activated.
+		</para>
 	</section>
 		
 	<section>
@@ -37,17 +51,66 @@ $ disnixos-env -s services.nix -n network.nix -d distribution.nix
 </screen>
 		
 		<para>
-			This command is essentially a combination of the <command>nixos-deploy-network</command> (which
+			This command is essentially a combination of the <command>disnixos-deploy-network</command> (which
 			deploys the infrastructure) and
 			<command>disnix-env</command> (which deploys the services) commands.
 		</para>
+		
+		<para>
+			Likewise, it can also take multiple networks that get merged together:
+		</para>
+		
+<screen>
+$ disnixos-env -s services.nix -n network-logical.nix -n network-physical.nix -d distribution.nix
+</screen>
+		<para>
+			The <command>disnixos-env</command> supports most of the options that <command>disnix-env</command>
+			supports. For example, adding the <command>--build-on-targets</command> parameter builds all
+			system configurations on the target machines, instead of the coordinator machine.
+		</para>
+	</section>
+	
+	<section>
+		<title>Deploying services with DisnixOS and infrastructure with NixOps</title>
+		
+		<para>
+			Besides using Disnix for deploying infrastructure, we can also take the facilities of NixOps into account and
+			use its VM instantiation and provisioning properties. To easlily force all DisnixOS tools to use NixOps, we can
+			set the following environment variable:
+		</para>
+		
+<screen>
+$ export DISNIXOS_USE_NIXOPS=1
+</screen>
+		
+		<para>
+			When this option is set, we can use NixOps to instantiate and deploy a network of NixOS machines in the cloud:
+		</para>
+		
+<screen>
+$ nixops create ./network-logical.nix ./network-physical.nix
+$ nixops deploy
+</screen>
+		
+		<para>
+			After NixOps is done deploying the system configurations, we can deploy the services into the network by running:
+		</para>
+		
+<screen>
+$ disnixos-env -s services.nix -n network-logical.nix -n network-physical.nix -d distribution.nix
+</screen>
+
+		<para>
+			DisnixOS automatically uses NixOps' SSH connection facilities to connect to remote machines and to execute remote deployment steps.
+		</para>
+		
 	</section>
 	
 	<section>
 		<title>Deploying a system in a virtual network</title>
 		
 		<para>
-			You can also deploy a system in a network of virtual machines, which is useful for testing.
+			You can also deploy a system in a network of efficient virtual machines provided by the NixOS test driver, which is useful for testing.
 			This can be done by executing the following instruction:
 		</para>
 		
@@ -59,6 +122,77 @@ $ disnixos-vm-env -s services.nix -n network.nix -d distribution.nix
 			except that it generates and launches a network of virtual machine instances. Moreover, this command
 			cannot be used to upgrade a system.
 		</para>
+	</section>
+	
+	<section>
+		<title>Collecting garbage</title>
+		<para>
+			The DisnixOS toolset provides a wrapper around Disnix's garbage collector command to take a collection
+			of network models instead of infrastructure model to automatically collect garbage from a network of
+			machines. The following instruction uses two network models to connect and removes old
+			generations of Nix profiles (through the <command>-d</command> option) as well:
+		</para>
+		
+<screen>
+$ disnixos-collect-garbage -d network-logical.nix network-physical.nix
+</screen>
+	</section>
+	
+	<section>
+		<title>Building a system on the coordinator machine</title>
+		
+		<para>
+			In order to just build the services on the coordinator machines, without distributing
+			or activating, the following instruction can be used:
+		</para>
+		
+<screen>
+$ disnixos-manifest -s services.nix -n network-logical.nix -n network-physical.nix -d distribution.nix
+</screen>
+		
+		<para>
+			Apart from building services, we can also build the system configurations by using the same
+			command:
+		</para>
+		
+<screen>
+$ disnixos-manifest -n network-logical.nix -n network-physical.nix 
+</screen>
+		<para>
+			Omitting the services and distribution models, cause <command>disnixos-manifest</command> to build the NixOS system configurations.
+			The resulting manifest files can be distributed to the target machines and activated by using the <command>disnix-distribute</command>
+			and <command>disnix-activate</command> commands.
+		</para>
+	</section>
+	
+	<section>
+		<title>Building system components on target machines</title>
+		
+		<para>
+			As with the basic Disnix toolset we can also delegate builds to the target machines in the network.
+			The following command generates a distributed derivation file for the services:
+		</para>
+		
+<screen>
+$ disnixos-instantiate -s services.nix -n network-logical.nix -n network-physical.nix -d distribution.nix
+</screen>
+		
+		<para>
+			Omitting the services and distribution models, cause <command>disnixos-instantiate</command> to generate
+			a distributed derivation file for the system configurations (infrastructure):
+		</para>
+		
+<screen>
+$ disnixos-instantiate -n network-logical.nix -n network-physical.nix
+</screen>
+
+		<para>
+			The resulting distributed derivation files for the services and infrastructure can be built by running:
+		</para>
+		
+<screen>
+$ disnix-build ./result
+</screen>
 	</section>
 	
 	<section>

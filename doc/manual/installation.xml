@@ -8,7 +8,7 @@
 		This chapter explains how DisnixOS can be installed. Except for the basic 
 		<link xlink:href="http://nixos.org/disnix">Disnix</link> 
 		toolset, only the coordinator machine needs the DisnixOS
-		exentension tools. 
+		extension tools. 
 	</para>
 	
 	<section>
@@ -32,6 +32,10 @@
 				Moreover, for network communication, DisnixOS uses
 				<link xlink:href="http://www.dest-unreach.org/socat">socat</link>,
 				which must also be present on the system.
+				For infrastructure instantiation and provisioning,
+				<link xlink:href="http://github.com/nixos/nixops">NixOps</link>
+				must be installed. Have a look at the NixOps manual
+				for more information.
 			</para>
 		</section>
 
@@ -115,20 +119,20 @@ EOF
 	</section>
 	
 	<section>
-		<title>Using the virtualization features on a regular Linux distribution</title>
+		<title>Using NixOS infrastructure deployment features on a regular Linux distribution</title>
 		
 		<para>
-			To use the NixOS virtualization features on a regular Linux distribution, you need a
-			copy of the NixOS source code, which can be obtained from our Subversion repository by typing:
+			To use the NixOS deployment features and test driver on a regular Linux distribution, you need a
+			copy of the NixOS source code, which can be obtained from our Git repository by typing:
 			
 <screen>
-$ svn co https://svn.nixos.org/repos/nix/nixos/trunk nixos
+$ git clone https://github.com/NixOS/nixos.git
 </screen>
 		</para>
 		
 		<para>
 			DisnixOS also needs to know where to find the NixOS source code, provided by the
-			<code>NIX_PATH</code> environment variable. On other Linux systems, this environment variable must
+			<code>NIX_PATH</code> environment variable. On regular Linux systems, this environment variable must
 			point to the path where the NixOS source is stored.
 			This variable can be configured by adding the following lines to your
 			<filename>~/.bash_profile</filename> configuration (or another configuration

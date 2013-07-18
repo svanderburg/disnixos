@@ -114,7 +114,7 @@ $ nixos-rebuild switch
 </screen>
 
 	<para>
-		 NixOS configurations can also be used in an attributeset, describing a network
+		 NixOS configurations can also be used in an attribute set, describing a network
 		 of machines:
 	</para>
 
@@ -156,12 +156,168 @@ $ nixos-rebuild switch
 	</para>
 	
 <screen>
-$ nixos-deploy-network network.nix
+$ disnixos-deploy-network network.nix
+</screen>
+	
+	<para>
+		In distributed environments, there are several more advanced features that may be desired to use.
+		For example, each individual machine configuration has properties that are portable among any machine (such
+		as the system services and end-user packages to run) and
+		some properties are machine dependent, such as the partitions and boot loader settings.
+		Moreover, system configurations may also have dependencies on other machines in the network.
+	</para>
+	<para>
+		NixOS network models also allow to separate machine configuration aspects in seperate files and
+		to allow one machine configuration to refer to another.
+		The following example shows a more advanced configuration capturing the logical aspects of machines
+		in a network. Furthermore, the system configurations have references to each other:
+	</para>
+	
+	<example xml:id="ex-3-network-logical">
+		<title>A logical NixOS network model</title>
+<programlisting>
+{
+  tomcat = {pkgs, ...}:
+  
+    {
+      services = {
+        openssh = {
+          enable = true;
+        };
+
+        tomcat = {
+          enable = true; <co xml:id='co-1-tomcat' />
+        };
+      };
+    };
+  
+  httpd = {pkgs, nodes, ...}:
+    
+    {
+       services = {
+        openssh = {
+          enable = true;
+        };
+	
+	httpd = {
+	  enable = true;
+	  adminAddr = "admin@example.com";
+	  extraModules = [ "proxy_balancer "];
+	  extraConfig = ''
+	    &lt;Proxy balancer://cluster&gt;
+              Allow from all
+              BalancerMember http://${nodes.tomcat.config.networking.hostName}:8080 retry=0 <co xml:id='co-2-reverseproxy' />
+            &lt;/Proxy&gt;
+
+            ProxyStatus       full
+            ProxyPass         /server-status !
+            ProxyPass         /       balancer://cluster/
+            ProxyPassReverse  /       balancer://cluster/
+	  '';
+	};
+      };
+    };
+
+}
+</programlisting>
+	</example>
+	
+	<para>
+		The model in <xref linkend="ex-3-network-logical" /> is an attribute set in which each value refers to a
+		NixOS configuration:
+	</para>
+	
+	<calloutlist>
+		<callout arearefs='co-1-tomcat'>
+			<para>
+				The <varname>tomcat</varname> machine is a simple configuration hosting Apache Tomcat serving
+				an arbitrary number of web applications and an OpenSSH server.
+			</para>
+		</callout>
+		<callout arearefs='co-2-reverseproxy'>
+			<para>
+				The <varname>httpd</varname> machine runs a reverse proxy that forwards all incoming requests to the Apache Tomcat server.
+				It fetches the hostname of the <varname>tomcat</varname> machine's configuration through the <varname>nodes</varname>
+				parameter.
+			</para>
+		</callout>
+	</calloutlist>
+	
+	<para>
+		The logical network model above only captures machine independent properties and can be used in combination with a physical network model, capturing
+		machine specific properties, such as the partitions and bootloader settings:
+	</para>
+
+	<example xml:id="ex-4-network-physical">
+		<title>A physical NixOS network model</title>
+<programlisting>
+{
+  tomcat = {pkgs, ...}:
+  
+    {
+      boot = {
+        loader = {
+          grub = {
+            device = "/dev/sda";
+          };
+        };
+      };
+
+      fileSystems = [
+        { mountPoint = "/";
+          device = "/dev/sda2";
+        }
+      ];
+
+      swapDevices = [
+        { device = "/dev/sda1"; }
+      ];
+    };
+  
+  httpd = {pkgs, ...}:
+    
+    {
+      boot = {
+        loader = {
+          grub = {
+            device = "/dev/sda";
+          };
+        };
+      };
+
+      fileSystems = [
+        { mountPoint = "/";
+          device = "/dev/sda3";
+        }
+      ];
+
+      swapDevices = [
+        { device = "/dev/sda2"; }
+      ];
+    };
+}
+</programlisting>
+	</example>
+
+	<para>
+		The network in model shown in <xref linkend="ex-4-network-physical" /> captures machine-specific properties, such as partition and bootloader
+		settings. With the following command the network can be deployed taking both the given logical and physical
+		properties into account:
+	</para>
+	
+<screen>
+$ disnixos-deploy-network network-logical.nix network-physical.nix
 </screen>
 	
 	<para>
 		Disnix is a toolset supporting the deployment of services. DisnixOS combines the latter feature
-		of using <command>nixos-deploy-network</command> to deploy networks of NixOS machines,
+		of using <command>disnixos-deploy-network</command> to deploy networks of NixOS machines,
 		as addition to Disnix to provide infrastructure deployment.
+	</para>
+	
+	<para>
+		Physical network models can also refer to virtual machine properties hosted in an IaaS environment, such as Amazon EC2.
+		If DisnixOS is used with NixOps, these machines can be automatically instantiated and deployed as well. Consult
+		the NixOps manual for more details on VM details.
 	</para>
 </chapter>
