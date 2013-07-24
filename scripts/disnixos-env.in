@@ -23,17 +23,18 @@ showUsage()
     echo "Usage: $0 -s services.nix -n network.nix [ -n network2.nix ... ] -d distribution.nix [options]"
     echo "Options:"
     echo
-    echo "-s,--services       Services Nix expression which describes all components of the distributed system"
-    echo "-n,--network        Network Nix expression which declares a NixOS configuration for each machine in the network"
-    echo "-d,--distribution   Distribution Nix expression which maps services to machines in the network"
-    echo "--target-property   The target property of an infrastructure model, that specifies how to "
-    echo "                    connect to the remote Disnix interface. (Defaults to hostname)"
-    echo "--interface         Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
-    echo "-p,--profile        Name of the profile that is used for this system. Defaults to: default"
-    echo "--use-nixops        Use NixOps instead of Disnix's deployment facilities"
-    echo "--disable-disnix    Do not enable the Disnix service on the target machines by default"
-    echo "--show-trace        Shows a trace of the output"
-    echo "-h,--help           Shows the usage of this command"
+    echo "-s,--services         Services Nix expression which describes all components of the distributed system"
+    echo "-n,--network          Network Nix expression which declares a NixOS configuration for each machine in the network"
+    echo "-d,--distribution     Distribution Nix expression which maps services to machines in the network"
+    echo "--target-property     The target property of an infrastructure model, that specifies how to "
+    echo "                      connect to the remote Disnix interface. (Defaults to hostname)"
+    echo "--interface           Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
+    echo "-p,--profile          Name of the profile that is used for this system. Defaults to: default"
+    echo "--use-nixops          Use NixOps instead of Disnix's deployment facilities"
+    echo "--disable-disnix      Do not enable the Disnix service on the target machines by default"
+    echo "--no-infra-deployment Only deploy the services, not the infrastructure"
+    echo "--show-trace          Shows a trace of the output"
+    echo "-h,--help             Shows the usage of this command"
 }
 
 # Autoconf settings
@@ -47,7 +48,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o s:n:d:p:h -l services:,network:,distribution:,profile:,target-property:,interface:,use-nixops,disable-disnix,show-trace,help -- "$@"`
+PARAMS=`getopt -n $0 -o s:n:d:p:h -l services:,network:,distribution:,profile:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,show-trace,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -86,6 +87,9 @@ do
 	--disable-disnix)
 	    disableDisnixArg="--disable-disnix"
 	    ;;
+	--no-infra-deployment)
+	    noInfraDeployment=1
+	    ;;
 	--show-trace)
 	    showTrace=1
 	    ;;
@@ -118,7 +122,7 @@ checkShowTrace
 # Generate infrastructure model from network model
 infrastructureFile=`disnixos-geninfra --no-out-link $noNixOpsArg $networkFiles`
 
-if [ "$useNixOps" != "1" ]
+if [ "$useNixOps" != "1" ] && [ "$noInfraDeployment" != "1" ]
 then
     # Upgrade the NixOS configurations through Disnix if NixOps is not used
     disnixos-deploy-network --target-property $targetProperty --interface $interface $disableDisnixArg $profileArg $showTraceArg $networkFiles

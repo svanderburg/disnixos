@@ -5,6 +5,7 @@ let
   disnixos = builtins.storePath @disnixos@;
   useBackdoor = @useBackdoor@;
   useVMTesting = @useVMTesting@;
+  enableDisnix = @enableDisnix@;
   nixOpsModel = @nixOpsModel@;
   
   pkgs = import nixpkgs {};
@@ -15,6 +16,6 @@ let
   
   network = lib.generateMergedNetwork networkFiles nixOpsModel;
 
-  configurations = lib.generateConfigurations network true nixOpsModel useVMTesting useBackdoor;
+  configurations = lib.generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor;
 in
 pkgs.lib.mapAttrs (targetName: machine: machine.config.services.disnix.infrastructure) configurations

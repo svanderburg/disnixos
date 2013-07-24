@@ -84,7 +84,7 @@ checkClientInterface
 checkTargetProperty
 checkShowTrace
 
-if [ "$@" = "" ]
+if [ "$1" = "" ]
 then
     echo "ERROR: At least one network expression must be specified!" >&2
     exit 1
@@ -96,11 +96,9 @@ else
     done
 fi
 
-echo IM HERE NOW BITCHES >&2
 # Create a manifest file
 manifest=`disnixos-manifest $networkFileArgs --target-property $targetProperty --no-out-link $disableDisnixArg $showTraceArg`
 
-echo DONE MANIFEST >&2
 # Distribute system derivations
 disnix-distribute --interface $interface $manifest
 

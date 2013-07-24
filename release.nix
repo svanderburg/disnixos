@@ -100,61 +100,43 @@ let
           name = "network-physical.nix";
           
           text = ''
+            let
+              machine = {hostname}: {pkgs, ...}:
+            
+              {
+                require = [
+                  "${nixos}/modules/virtualisation/qemu-vm.nix"
+                  "${nixos}/modules/testing/test-instrumentation.nix"
+                ];
+                boot.loader.grub.enable = false;
+                services.disnix.infrastructure.hostname = hostname;
+                services.nixosManual.enable = false;
+                services.dbus.enable = true;
+                
+                # Create dummy Disnix job that does nothing. This prevents it from stopping.
+                jobs.disnix =
+                  { description = "Disnix dummy server";
+
+                    wantedBy = [ "multi-user.target" ];
+                    restartIfChanged = false;
+                    script = "true";
+                  };
+              };
+            in
             {
-              testtarget1 = {pkgs, ...}:
-            
-              {
-                require = [
-                  "${nixos}/modules/virtualisation/qemu-vm.nix"
-                  "${nixos}/modules/testing/test-instrumentation.nix"
-                ];
-                boot.loader.grub.enable = false;
-                services.disnix.infrastructure.hostname = "testtarget1";
-                services.nixosManual.enable = false;
-                
-                services.dbus.enable = true;
-                
-                # Create dummy Disnix job that does nothing. This prevents it from stopping.
-                jobs.disnix =
-                  { description = "Disnix dummy server";
-
-                    wantedBy = [ "multi-user.target" ];
-                    restartIfChanged = false;
-                    script = "true";
-                  };
-              };
-            
-              testtarget2 = {pkgs, ...}:
-              
-              {
-                require = [
-                  "${nixos}/modules/virtualisation/qemu-vm.nix"
-                  "${nixos}/modules/testing/test-instrumentation.nix"
-                ];
-                boot.loader.grub.enable = false;
-                services.disnix.infrastructure.hostname = "testtarget2";
-                services.nixosManual.enable = false;
-                
-                services.dbus.enable = true;
-                
-                # Create dummy Disnix job that does nothing. This prevents it from stopping.
-                jobs.disnix =
-                  { description = "Disnix dummy server";
-
-                    wantedBy = [ "multi-user.target" ];
-                    restartIfChanged = false;
-                    script = "true";
-                  };
-              };
+              testtarget1 = machine { hostname = "testtarget1"; };
+              testtarget2 = machine { hostname = "testtarget2"; };
             }
           '';
         };
       
         machine =
           {config, pkgs, ...}:
-            
+          
           {
             virtualisation.writableStore = true;
+            virtualisation.memorySize = 1024;
+            virtualisation.diskSize = 10240;
             
             ids.gids = { disnix = 200; };
             users.extraGroups = [ { gid = 200; name = "disnix"; } ];
@@ -183,11 +165,13 @@ let
               
             environment.systemPackages = [ pkgs.stdenv pkgs.nix disnix disnixos pkgs.busybox pkgs.module_init_tools pkgs.hello pkgs.zip ];
           };
+          
+          manifestTests = ./tests/manifest;
       in
       with import "${nixos}/lib/testing.nix" { system = builtins.currentSystem; };
       
       {
-        deployment = simpleTest {
+        deploymentInfra = simpleTest {
           nodes = {
             coordinator = machine;
             testtarget1 = machine;
@@ -213,9 +197,8 @@ let
               $coordinator->copyFileFromHost("key", "/root/.ssh/id_dsa");
               $coordinator->mustSucceed("chmod 600 /root/.ssh/id_dsa");
               
-              # Deploy the test NixOS network expression
-              
-              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-deploy-network ${logicalNetworkNix} ${physicalNetworkNix} --disable-disnix --show-trace >&2");
+              # Deploy the test NixOS network expression. This test should succeed.
+              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-deploy-network ${logicalNetworkNix} ${physicalNetworkNix} --disable-disnix");
               
               # Check if zip is installed on the correct machine
               $testtarget1->mustSucceed("zip -h");
@@ -224,6 +207,43 @@ let
               # Check if hello is installed on the correct machine
               $testtarget2->mustSucceed("hello");
               $testtarget1->mustFail("hello");
+            '';
+        };
+        
+        deploymentServices = simpleTest {
+          nodes = {
+            coordinator = machine;
+            testtarget1 = machine;
+            testtarget2 = machine;
+          };
+          testScript = 
+            ''
+              startAll;
+              $coordinator->waitForJob("network-interfaces.target");
+              $testtarget1->waitForJob("disnix");
+              $testtarget2->waitForJob("disnix");
+              
+              # Initialise ssh stuff by creating a key pair for communication
+              my $key=`${pkgs.openssh}/bin/ssh-keygen -t dsa -f key -N ""`;
+    
+              $testtarget1->mustSucceed("mkdir -m 700 /root/.ssh");
+              $testtarget1->copyFileFromHost("key.pub", "/root/.ssh/authorized_keys");
+
+              $testtarget2->mustSucceed("mkdir -m 700 /root/.ssh");
+              $testtarget2->copyFileFromHost("key.pub", "/root/.ssh/authorized_keys");
+              
+              $coordinator->mustSucceed("mkdir -m 700 /root/.ssh");
+              $coordinator->copyFileFromHost("key", "/root/.ssh/id_dsa");
+              $coordinator->mustSucceed("chmod 600 /root/.ssh/id_dsa");
+              
+              # Deploy a NixOS network and services in a network specified by a NixOS network expression simultaneously
+              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-env -s ${manifestTests}/services.nix -n ${physicalNetworkNix} -d ${manifestTests}/distribution.nix --disable-disnix --no-infra-deployment");
+              
+              # Use disnixos-query to see if the right services are installed on
+              # the right target platforms. This test should succeed.
+              #my @lines = split('\n',
+              #$coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-query ${physicalNetworkNix} >&2");
+              #);
             '';
         };
       };

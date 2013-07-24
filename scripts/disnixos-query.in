@@ -23,7 +23,7 @@ showUsage()
     echo "Usage: $0 network.nix [ network2.nix ... ] [options]"
     echo "Options:"
     echo
-    echo "-d,--delete-old     Delete old generations of the Nix profiles"
+    echo "-p,--profile        Disnix profile to use (defaults to: default)"
     echo "--target-property   The target property of an infrastructure model, that specifies how to "
     echo "                    connect to the remote Disnix interface. (Defaults to hostname)"
     echo "--interface         Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
@@ -42,7 +42,7 @@ source @datadir@/@PACKAGE@/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o dh -l delete-old,target-property:,interface:,use-nixops,help -- "$@"`
+PARAMS=`getopt -n $0 -o p:h -l profile:,target-property:,interface:,use-nixops,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -57,8 +57,8 @@ eval set -- "$PARAMS"
 while [ "$1" != "--" ]
 do
     case "$1" in
-	-d|--deleteOld)
-	    deleteOldArg="-d"
+	-p|--profile)
+	    profileArg="-p $2"
 	    ;;
 	--target-property)
 	    targetPropertyArg=$2
@@ -105,4 +105,4 @@ fi
 infrastructureFile=`disnixos-geninfra --no-out-link $nixOpsArg $networkFiles`
 
 # Execute operation
-disnix-collect-garbage $deleteOldArg $targetPropertyArg --interface $interface $infrastructureFile
+disnix-query $profileArg $targetPropertyArg --interface $interface $infrastructureFile
