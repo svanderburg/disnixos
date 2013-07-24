@@ -28,6 +28,7 @@ showUsage()
     echo "--interface         Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
     echo "-p,--profile        Name of the profile that is used for this system. Defaults to: default"
     echo "--disable-disnix    Do not enable the Disnix service on the target machines by default"
+    echo "--build-on-targets  Build the services on the target machines in the network instead of managing the build by the coordinator"
     echo "--show-trace        Shows a trace of the output"
     echo "-h,--help           Shows the usage of this command"
 }
@@ -37,7 +38,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o p:h -l profile:,target-property:,interface:,show-trace,disable-disnix,help -- "$@"`
+PARAMS=`getopt -n $0 -o p:h -l profile:,target-property:,interface:,show-trace,disable-disnix,build-on-targets,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -67,6 +68,9 @@ do
 	--disable-disnix)
 	    disableDisnixArg="--disable-disnix"
 	    ;;
+	--build-on-targets)
+	    buildOnTargets=1
+	    ;;
 	-h|--help)
 	    showUsage
 	    exit 0
@@ -94,6 +98,13 @@ else
 	networkFileArgs="$networkFileArgs -n $(readlink -f $1)"
 	shift
     done
+fi
+
+if [ "$buildOnTargets" = "1" ]
+then
+    # Build the components on the target machines if requested
+    distributedDerivation=`disnixos-instantiate --target-property $targetProperty --no-out-link $disableDisnixArg $showTraceArg $networkFileArgs`
+    disnix-build --interface $interface $distributedDerivation
 fi
 
 # Create a manifest file

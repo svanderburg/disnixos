@@ -33,6 +33,7 @@ showUsage()
     echo "--use-nixops          Use NixOps instead of Disnix's deployment facilities"
     echo "--disable-disnix      Do not enable the Disnix service on the target machines by default"
     echo "--no-infra-deployment Only deploy the services, not the infrastructure"
+    echo "--build-on-targets    Build the services on the target machines in the network instead of managing the build by the coordinator"
     echo "--show-trace          Shows a trace of the output"
     echo "-h,--help             Shows the usage of this command"
 }
@@ -48,7 +49,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o s:n:d:p:h -l services:,network:,distribution:,profile:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,show-trace,help -- "$@"`
+PARAMS=`getopt -n $0 -o s:n:d:p:h -l services:,network:,distribution:,profile:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,show-trace,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -90,6 +91,9 @@ do
 	--no-infra-deployment)
 	    noInfraDeployment=1
 	    ;;
+	--build-on-targets)
+	    buildOnTargetsArg="--build-on-targets"
+	    ;;
 	--show-trace)
 	    showTrace=1
 	    ;;
@@ -125,8 +129,8 @@ infrastructureFile=`disnixos-geninfra --no-out-link $noNixOpsArg $networkFiles`
 if [ "$useNixOps" != "1" ] && [ "$noInfraDeployment" != "1" ]
 then
     # Upgrade the NixOS configurations through Disnix if NixOps is not used
-    disnixos-deploy-network --target-property $targetProperty --interface $interface $disableDisnixArg $profileArg $showTraceArg $networkFiles
+    disnixos-deploy-network --target-property $targetProperty --interface $interface $disableDisnixArg $profileArg $buildOnTargetsArg $showTraceArg $networkFiles
 fi
 
 # Upgrade the services
-disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $profileArg $showTraceArg
+disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $profileArg $buildOnTargetsArg $showTraceArg

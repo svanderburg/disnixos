@@ -140,6 +140,22 @@
 				</listitem>
 			</varlistentry>
 			<varlistentry>
+				<term><option>--no-infra-deployment</option></term>
+				<listitem>
+					<para>
+						Only deploy the services, not the infrastructure.
+					</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>--build-on-targets</option></term>
+				<listitem>
+					<para>
+						Build the services on the target machines in the network instead of managing the build by the coordinator.
+					</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
 				<term><option>--show-trace</option></term>
 				<listitem>
 					<para>
