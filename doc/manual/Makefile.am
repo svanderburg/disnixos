@@ -15,12 +15,9 @@ dblatex_opts = \
  -P latex.output.revhistory=0
 
 man1_MANS = disnix-backdoor-client.1 disnix-nixops-client.1 disnixos-deploy-network.1 \
-  disnixos-env.1 disnixos-geninfra.1 disnixos-gentests.1 disnixos-vm-env.1
+  disnixos-env.1 disnixos-geninfra.1 disnixos-gentests.1 disnixos-vm-env.1 disnixos-query.1
 
 MANUAL_SRCS = index.xml introduction.xml background.xml installation.xml images style.css \
-  disnixos-env.xml disnixos-vm-env.xml disnix-backdoor-client.xml disnix-nixops-client.xml \
-  disnixos-manifest.xml disnixos-instantiate.xml disnixos-deploy-network.xml \
-  disnixos-geninfra.xml disnixos-gentests.xml \
   $(man1_MANS:.1=.xml)
 
 version.txt:
