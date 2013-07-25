@@ -40,13 +40,19 @@ rec {
   generateConfigurations = network: enableDisnix: nixOpsModel: useVMTesting: useBackdoor:
     pkgs.lib.mapAttrs (targetName: configuration:
       evalConfig {
-        modules = configuration
+        modules = configuration ++ [
+          ./disnix-infrastructure-module.nix
+        ] ++ [
+          {
+            key = "disnix-infrastructure";
+            networking.hostName = pkgs.lib.mkOverride 900 targetName;
+            disnixInfrastructure.enable = true;
+            disnixInfrastructure.enableAuthentication = true;
+          }
+        ]
         ++ pkgs.lib.optional enableDisnix {
           key = "enable-disnix";
           services.disnix.enable = true;
-          services.disnix.publishInfrastructure.enable = true;
-          services.disnix.publishInfrastructure.enableAuthentication = true;
-          networking.hostName = pkgs.lib.mkOverride 900 targetName;
         }
         ++ pkgs.lib.optionals useVMTesting [
           "${nixos}/modules/virtualisation/qemu-vm.nix"
@@ -54,7 +60,7 @@ rec {
         ]
         ++ pkgs.lib.optional useBackdoor {
           key = "backdoor";
-          services.disnix.infrastructure.backdoor = "TCP:${targetName}:512";
+          disnixInfrastructure.infrastructure.backdoor = "TCP:${targetName}:512";
         }
         ++ pkgs.lib.optional nixOpsModel {
           key = "nixops-stuff";
@@ -82,7 +88,7 @@ rec {
     map (targetName:
       let
         machine = getAttr targetName configurations;
-        infrastructure = machine.config.services.disnix.infrastructure;
+        infrastructure = machine.config.disnixInfrastructure.infrastructure;
       in
       {
         profile = machine.config.system.build.toplevel.outPath;
@@ -105,7 +111,7 @@ rec {
     map (targetName:
       let
         machine = getAttr targetName configurations;
-        infrastructure = machine.config.services.disnix.infrastructure;
+        infrastructure = machine.config.disnixInfrastructure.infrastructure;
       in
       { name = targetName;
         service = machine.config.system.build.toplevel.outPath;
@@ -131,7 +137,7 @@ rec {
     map (targetName:
       let
         machine = getAttr targetName configurations;
-        infrastructure = machine.config.services.disnix.infrastructure;
+        infrastructure = machine.config.disnixInfrastructure.infrastructure;
       in
       getAttr targetProperty infrastructure
     ) (attrNames configurations)
@@ -183,7 +189,7 @@ rec {
     map (targetName:
       let
         machine = getAttr targetName configurations;
-        infrastructure = machine.config.services.disnix.infrastructure;
+        infrastructure = machine.config.disnixInfrastructure.infrastructure;
       in
       { derivation = unsafeDiscardOutputDependency (machine.config.system.build.toplevel.drvPath);
         target = getAttr targetProperty infrastructure;

@@ -109,7 +109,8 @@ let
                   "${nixos}/modules/testing/test-instrumentation.nix"
                 ];
                 boot.loader.grub.enable = false;
-                services.disnix.infrastructure.hostname = hostname;
+                disnixInfrastructure.enable = true;
+                disnixInfrastructure.infrastructure.hostname = hostname;
                 services.nixosManual.enable = false;
                 services.dbus.enable = true;
                 
@@ -198,7 +199,7 @@ let
               $coordinator->mustSucceed("chmod 600 /root/.ssh/id_dsa");
               
               # Deploy the test NixOS network expression. This test should succeed.
-              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-deploy-network ${logicalNetworkNix} ${physicalNetworkNix} --disable-disnix");
+              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-deploy-network ${logicalNetworkNix} ${physicalNetworkNix} --disable-disnix --show-trace");
               
               # Check if zip is installed on the correct machine
               $testtarget1->mustSucceed("zip -h");

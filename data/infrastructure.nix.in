@@ -18,4 +18,4 @@ let
 
   configurations = lib.generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor;
 in
-pkgs.lib.mapAttrs (targetName: machine: machine.config.services.disnix.infrastructure) configurations
+pkgs.lib.mapAttrs (targetName: machine: machine.config.disnixInfrastructure.infrastructure) configurations
