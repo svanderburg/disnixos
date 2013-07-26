@@ -281,9 +281,25 @@ let
               
               # Use disnixos-query to see if the right services are installed on
               # the right target platforms. This test should succeed.
-              #my @lines = split('\n',
-              #$coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-query ${physicalNetworkNix} >&2");
-              #);
+              my @lines = split('\n', $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-query ${physicalNetworkNix}"));
+              
+              if(@lines[3] =~ /\-testService1/) {
+                  print "Found testService1 on disnix-query output line 3\n";
+              } else {
+                  die "disnix-query output line 3 does not contain testService1!\n";
+              }
+              
+              if(@lines[7] =~ /\-testService2/) {
+                  print "Found testService2 on disnix-query output line 7\n";
+              } else {
+                  die "disnix-query output line 7 does not contain testService2!\n";
+              }
+              
+              if(@lines[8] =~ /\-testService3/) {
+                  print "Found testService3 on disnix-query output line 8\n";
+              } else {
+                  die "disnix-query output line 8 does not contain testService3!\n";
+              }
             '';
         };
         
@@ -318,9 +334,25 @@ let
               
               # Use disnixos-query to see if the right services are installed on
               # the right target platforms. This test should succeed.
-              #my @lines = split('\n',
-              #$coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-query ${physicalNetworkNix} >&2");
-              #);
+              my @lines = split('\n', $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-query ${physicalNetworkNix}"));
+              
+              if(@lines[3] =~ /\-testService1/) {
+                  print "Found testService1 on disnix-query output line 3\n";
+              } else {
+                  die "disnix-query output line 3 does not contain testService1!\n";
+              }
+              
+              if(@lines[7] =~ /\-testService2/) {
+                  print "Found testService2 on disnix-query output line 7\n";
+              } else {
+                  die "disnix-query output line 7 does not contain testService2!\n";
+              }
+              
+              if(@lines[8] =~ /\-testService3/) {
+                  print "Found testService3 on disnix-query output line 8\n";
+              } else {
+                  die "disnix-query output line 8 does not contain testService3!\n";
+              }
             '';
         };
       };
