@@ -84,6 +84,7 @@ do
 	    ;;
 	--use-nixops)
 	    useNixOps=1
+	    useNixOpsArg="--use-nixops"
 	    ;;
 	--disable-disnix)
 	    disableDisnixArg="--disable-disnix"
@@ -124,7 +125,7 @@ checkTargetProperty
 checkShowTrace
 
 # Generate infrastructure model from network model
-infrastructureFile=`disnixos-geninfra --no-out-link $noNixOpsArg $networkFiles`
+infrastructureFile=`disnixos-geninfra --no-out-link $useNixOpsArg $networkFiles`
 
 if [ "$useNixOps" != "1" ] && [ "$noInfraDeployment" != "1" ]
 then

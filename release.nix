@@ -355,6 +355,142 @@ let
               }
             '';
         };
+        
+        deploymentNixOps = 
+          let
+            machine =
+              {config, pkgs, ...}:
+          
+              {
+                virtualisation.writableStore = true;
+                virtualisation.memorySize = 1024;
+                virtualisation.diskSize = 10240;
+            
+                ids.gids = { disnix = 200; };
+                users.extraGroups = [ { gid = 200; name = "disnix"; } ];
+            
+                services.dbus.enable = true;
+                services.dbus.packages = [ disnix ];
+                services.openssh.enable = true;
+            
+                jobs.ssh.restartIfChanged = false;
+            
+                jobs.disnix =
+                  { description = "Disnix server";
+
+                    wantedBy = [ "multi-user.target" ];
+                    after = [ "dbus.service" ];
+                
+                    path = [ pkgs.nix disnix ];
+
+                    script =
+                      ''
+                        export HOME=/root
+                        disnix-service --dysnomia-modules-dir=${dysnomia}/libexec/dysnomia
+                      '';
+                   };
+              
+                environment.systemPackages = [ pkgs.stdenv pkgs.nix disnix disnixos pkgs.busybox pkgs.module_init_tools pkgs.hello pkgs.zip pkgs.nixops ];
+              };
+              
+              physicalNetworkNix = pkgs.writeTextFile {
+                name = "network-physical.nix";
+          
+                text = ''
+                  let
+                    machine = {pkgs, ...}:
+                    
+                    {
+                      require = [
+                        "${nixos}/modules/virtualisation/qemu-vm.nix"
+                        "${nixos}/modules/testing/test-instrumentation.nix"
+                      ];
+                      boot.loader.grub.enable = false;
+                      services.nixosManual.enable = false;
+                      services.dbus.enable = true;
+                      services.openssh.enable = true;
+                      
+                      # Create dummy Disnix job that does nothing. This prevents it from stopping.
+                      jobs.disnix =
+                        { description = "Disnix dummy server";
+
+                          wantedBy = [ "multi-user.target" ];
+                          restartIfChanged = false;
+                          script = "true";
+                        };
+                      
+                      environment.systemPackages = [ "${disnix}" ];
+                      
+                      deployment.targetEnv = "none";
+                    };
+                  in
+                  {
+                    testtarget1 = machine;
+                    testtarget2 = machine;
+                  }
+                '';
+              };
+          in
+          simpleTest {
+            nodes = {
+              coordinator = machine;
+              testtarget1 = machine;
+              testtarget2 = machine;
+            };
+            testScript =
+              ''
+                startAll;
+                $coordinator->waitForJob("network-interfaces.target");
+                $testtarget1->waitForJob("disnix");
+                $testtarget2->waitForJob("disnix");
+                
+                # Initialise ssh stuff by creating a key pair for communication
+                my $key=`${pkgs.openssh}/bin/ssh-keygen -t dsa -f key -N ""`;
+    
+                $testtarget1->mustSucceed("mkdir -m 700 /root/.ssh");
+                $testtarget1->copyFileFromHost("key.pub", "/root/.ssh/authorized_keys");
+
+                $testtarget2->mustSucceed("mkdir -m 700 /root/.ssh");
+                $testtarget2->copyFileFromHost("key.pub", "/root/.ssh/authorized_keys");
+              
+                $coordinator->mustSucceed("mkdir -m 700 /root/.ssh");
+                $coordinator->copyFileFromHost("key", "/root/.ssh/id_dsa");
+                $coordinator->mustSucceed("chmod 600 /root/.ssh/id_dsa");
+                
+                # Test SSH connectivity
+                $coordinator->succeed("ssh -o StrictHostKeyChecking=no -v testtarget1 ls /");
+                $coordinator->succeed("ssh -o StrictHostKeyChecking=no -v testtarget2 ls /");
+                
+                # Deploy infrastructure with NixOps
+                $coordinator->mustSucceed("nixops create ${logicalNetworkNix} ${physicalNetworkNix}");
+                $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} nixops deploy");
+                
+                # Deploy services with disnixos-env
+                $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos}:nixops=${pkgs.nixops}/share/nix/nixops disnixos-env -s ${manifestTests}/services.nix -n ${physicalNetworkNix} -d ${manifestTests}/distribution.nix --use-nixops");
+                
+                # Use disnixos-query to see if the right services are installed on
+                # the right target platforms. This test should succeed.
+                my @lines = split('\n', $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos}:nixops=${pkgs.nixops}/share/nix/nixops disnixos-query ${physicalNetworkNix} --use-nixops"));
+              
+                if(@lines[3] =~ /\-testService1/) {
+                    print "Found testService1 on disnix-query output line 3\n";
+                } else {
+                    die "disnix-query output line 3 does not contain testService1!\n";
+                }
+              
+                if(@lines[7] =~ /\-testService2/) {
+                    print "Found testService2 on disnix-query output line 7\n";
+                } else {
+                    die "disnix-query output line 7 does not contain testService2!\n";
+                }
+              
+                if(@lines[8] =~ /\-testService3/) {
+                    print "Found testService3 on disnix-query output line 8\n";
+                } else {
+                    die "disnix-query output line 8 does not contain testService3!\n";
+                }
+              '';
+          };
       };
       
   };
