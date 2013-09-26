@@ -466,7 +466,7 @@ let
                 $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} nixops deploy");
                 
                 # Deploy services with disnixos-env
-                $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos}:nixops=${pkgs.nixops}/share/nix/nixops disnixos-env -s ${manifestTests}/services.nix -n ${physicalNetworkNix} -d ${manifestTests}/distribution.nix --use-nixops");
+                $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos}:nixops=${pkgs.nixops}/share/nix/nixops disnixos-env -s ${manifestTests}/services.nix -n ${logicalNetworkNix} -n ${physicalNetworkNix} -d ${manifestTests}/distribution.nix --use-nixops");
                 
                 # Use disnixos-query to see if the right services are installed on
                 # the right target platforms. This test should succeed.
