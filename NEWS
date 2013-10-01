@@ -3,6 +3,13 @@ Version 0.2
 
 - Machines in the network model can refer to each other through the 'node' parameter
 
-- Multiple network models are also supported, so you can capture concerns separately
+- Multiple network models are also supported, allowing someone to capture concerns separately
+
+- Added some more infrastructure level equivalents of certain core Disnix utilities:
+  disnixos-{manifest,instantiate,collect-garbage,query}
+
+- NixOps can be used for infrastructure deployment instead of the core Disnix toolset
 
 - Various bug fixes
+
+- Implemented a test suite for the most common use cases
