@@ -1,7 +1,7 @@
-{nixpkgs, nixos, pkgs}:
+{nixpkgs, pkgs}:
 
 let
-  evalConfig = import "${nixos}/lib/eval-config.nix";
+  evalConfig = import "${nixpkgs}/nixos/lib/eval-config.nix";
   inherit (builtins) getAttr attrNames removeAttrs unsafeDiscardOutputDependency;
 in
 rec {
@@ -55,8 +55,8 @@ rec {
           services.disnix.enable = true;
         }
         ++ pkgs.lib.optionals useVMTesting [
-          "${nixos}/modules/virtualisation/qemu-vm.nix"
-          "${nixos}/modules/testing/test-instrumentation.nix"
+          "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
+          "${nixpkgs}/nixos/modules/testing/test-instrumentation.nix"
         ]
         ++ pkgs.lib.optional useBackdoor {
           key = "backdoor";

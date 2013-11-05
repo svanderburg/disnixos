@@ -1,7 +1,6 @@
 let
   networkFiles = [ @networkFiles@ ];
   nixpkgs = builtins.storePath @nixpkgs@;
-  nixos = builtins.storePath @nixos@;
   disnixos = builtins.storePath @disnixos@;
   useBackdoor = @useBackdoor@;
   useVMTesting = @useVMTesting@;
@@ -11,7 +10,7 @@ let
   pkgs = import nixpkgs {};
   
   lib = import @disnixos@/share/@PACKAGE@/lib.nix {
-    inherit nixpkgs nixos pkgs;
+    inherit nixpkgs pkgs;
   };
   
   network = lib.generateMergedNetwork networkFiles nixOpsModel;

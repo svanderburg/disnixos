@@ -1,7 +1,6 @@
 { networkFiles
 , targetProperty
 , nixpkgs ? <nixpkgs>
-, nixos ? <nixos>
 , enableDisnix ? true
 , nixOpsModel ? false
 , disnix ? builtins.storePath @DISNIX_PREFIX@
@@ -10,7 +9,7 @@
 let
   pkgs = import nixpkgs {};
 
-  lib = import ./lib.nix { inherit nixpkgs nixos pkgs; };
+  lib = import ./lib.nix { inherit nixpkgs pkgs; };
   
   mergedNetwork = lib.generateMergedNetwork networkFiles nixOpsModel;
   distributedDerivation = lib.generateDistributedDerivation mergedNetwork targetProperty enableDisnix nixOpsModel false false;

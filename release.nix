@@ -5,7 +5,7 @@ let
     tarball =
       { disnixos ? {outPath = ./.; rev = 1234;}
       , officialRelease ? false
-      , disnix ? (import ../disnix/release.nix {}).build {}
+      , disnix ? builtins.getAttr (builtins.currentSystem) ((import ../disnix/release.nix {}).build {}) {}
       }:
 
       with import nixpkgs {};
@@ -51,7 +51,7 @@ let
     build =
       { tarball ? jobs.tarball { inherit disnix; }
       , system ? builtins.currentSystem
-      , disnix ? (import ../disnix/release.nix {}).build {}
+      , disnix ? builtins.getAttr (builtins.currentSystem) ((import ../disnix/release.nix {}).build {}) {}
       }:
 
       with import nixpkgs { inherit system; };
@@ -63,8 +63,7 @@ let
       };
 
     tests = 
-      { nixos ? <nixos>
-      , disnix ? (import ../disnix/release.nix {}).build {}
+      { disnix ? (import ../disnix/release.nix {}).build {}
       , dysnomia ? (import ../dysnomia/release.nix {}).build {}
       }:
       
@@ -105,8 +104,8 @@ let
             
               {
                 require = [
-                  "${nixos}/modules/virtualisation/qemu-vm.nix"
-                  "${nixos}/modules/testing/test-instrumentation.nix"
+                  "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
+                  "${nixpkgs}/nixos/modules/testing/test-instrumentation.nix"
                 ];
                 boot.loader.grub.enable = false;
                 disnixInfrastructure.enable = true;
@@ -169,7 +168,7 @@ let
           
           manifestTests = ./tests/manifest;
       in
-      with import "${nixos}/lib/testing.nix" { system = builtins.currentSystem; };
+      with import "${nixpkgs}/lib/testing.nix" { system = builtins.currentSystem; };
       
       {
         deploymentInfra = simpleTest {
@@ -199,7 +198,7 @@ let
               $coordinator->mustSucceed("chmod 600 /root/.ssh/id_dsa");
               
               # Deploy the test NixOS network expression. This test should succeed.
-              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-deploy-network ${logicalNetworkNix} ${physicalNetworkNix} --disable-disnix --show-trace");
+              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-deploy-network ${logicalNetworkNix} ${physicalNetworkNix} --disable-disnix --show-trace");
               
               # Check if zip is installed on the correct machine
               $testtarget1->mustSucceed("zip -h");
@@ -238,7 +237,7 @@ let
               $coordinator->mustSucceed("chmod 600 /root/.ssh/id_dsa");
               
               # Deploy the test NixOS network expression. This test should succeed.
-              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-deploy-network ${logicalNetworkNix} ${physicalNetworkNix} --disable-disnix --build-on-targets");
+              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-deploy-network ${logicalNetworkNix} ${physicalNetworkNix} --disable-disnix --build-on-targets");
               
               # Check if zip is installed on the correct machine
               $testtarget1->mustSucceed("zip -h");
@@ -277,11 +276,11 @@ let
               $coordinator->mustSucceed("chmod 600 /root/.ssh/id_dsa");
               
               # Deploy a NixOS network and services in a network specified by a NixOS network expression simultaneously
-              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-env -s ${manifestTests}/services.nix -n ${physicalNetworkNix} -d ${manifestTests}/distribution.nix --disable-disnix --no-infra-deployment");
+              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-env -s ${manifestTests}/services.nix -n ${physicalNetworkNix} -d ${manifestTests}/distribution.nix --disable-disnix --no-infra-deployment");
               
               # Use disnixos-query to see if the right services are installed on
               # the right target platforms. This test should succeed.
-              my @lines = split('\n', $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-query ${physicalNetworkNix}"));
+              my @lines = split('\n', $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-query ${physicalNetworkNix}"));
               
               if(@lines[3] =~ /\-testService1/) {
                   print "Found testService1 on disnix-query output line 3\n";
@@ -330,11 +329,11 @@ let
               $coordinator->mustSucceed("chmod 600 /root/.ssh/id_dsa");
               
               # Deploy a NixOS network and services in a network specified by a NixOS network expression simultaneously
-              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-env -s ${manifestTests}/services.nix -n ${physicalNetworkNix} -d ${manifestTests}/distribution.nix --disable-disnix --no-infra-deployment --build-on-targets");
+              $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-env -s ${manifestTests}/services.nix -n ${physicalNetworkNix} -d ${manifestTests}/distribution.nix --disable-disnix --no-infra-deployment --build-on-targets");
               
               # Use disnixos-query to see if the right services are installed on
               # the right target platforms. This test should succeed.
-              my @lines = split('\n', $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-query ${physicalNetworkNix}"));
+              my @lines = split('\n', $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-query ${physicalNetworkNix}"));
               
               if(@lines[3] =~ /\-testService1/) {
                   print "Found testService1 on disnix-query output line 3\n";
@@ -402,8 +401,8 @@ let
                     
                     {
                       require = [
-                        "${nixos}/modules/virtualisation/qemu-vm.nix"
-                        "${nixos}/modules/testing/test-instrumentation.nix"
+                        "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
+                        "${nixpkgs}/nixos/modules/testing/test-instrumentation.nix"
                       ];
                       boot.loader.grub.enable = false;
                       services.nixosManual.enable = false;
@@ -463,14 +462,14 @@ let
                 
                 # Deploy infrastructure with NixOps
                 $coordinator->mustSucceed("nixops create ${logicalNetworkNix} ${physicalNetworkNix}");
-                $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos} nixops deploy");
+                $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} nixops deploy");
                 
                 # Deploy services with disnixos-env
-                $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos}:nixops=${pkgs.nixops}/share/nix/nixops disnixos-env -s ${manifestTests}/services.nix -n ${logicalNetworkNix} -n ${physicalNetworkNix} -d ${manifestTests}/distribution.nix --use-nixops");
+                $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixops=${pkgs.nixops}/share/nix/nixops disnixos-env -s ${manifestTests}/services.nix -n ${logicalNetworkNix} -n ${physicalNetworkNix} -d ${manifestTests}/distribution.nix --use-nixops");
                 
                 # Use disnixos-query to see if the right services are installed on
                 # the right target platforms. This test should succeed.
-                my @lines = split('\n', $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixos}:nixops=${pkgs.nixops}/share/nix/nixops disnixos-query ${physicalNetworkNix} --use-nixops"));
+                my @lines = split('\n', $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixops=${pkgs.nixops}/share/nix/nixops disnixos-query ${physicalNetworkNix} --use-nixops"));
               
                 if(@lines[3] =~ /\-testService1/) {
                     print "Found testService1 on disnix-query output line 3\n";

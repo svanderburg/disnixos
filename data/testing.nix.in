@@ -1,5 +1,4 @@
 { nixpkgs ? <nixpkgs>
-, nixos ? <nixos>
 , system ? builtins.currentSystem
 , disnix ? builtins.storePath @DISNIX_PREFIX@
 , disnixos ? builtins.storePath @prefix@
@@ -32,7 +31,7 @@ let
           ''
             cat > $out <<EOF
             {
-              ${lib.concatMapStrings (targetName: "${targetName} = \"${nixos}/${moduleName}\";\n") (builtins.attrNames network)}
+              ${lib.concatMapStrings (targetName: "${targetName} = \"${nixpkgs}/nixos/${moduleName}\";\n") (builtins.attrNames network)}
             }
             EOF
           '';
@@ -75,7 +74,7 @@ in
         networkFiles = [ (if externalNetworkFile then networkFile else "${manifestSrc}/${networkFile}") ];
         useVMTesting = true;
         useBackdoor = true;
-        inherit nixpkgs nixos;
+        inherit nixpkgs;
       };
       
       manifest = import "${disnix}/share/disnix/manifest.nix" {
@@ -105,7 +104,7 @@ in
       
       network = if externalNetworkFile then import networkFile else import "${manifestSrc}/${networkFile}";
     in
-    with import "${nixos}/lib/testing.nix" { inherit system; };
+    with import "${nixpkgs}/nixos/lib/testing.nix" { inherit system; };
     with import nixpkgs { inherit system; };
     
     simpleTest {

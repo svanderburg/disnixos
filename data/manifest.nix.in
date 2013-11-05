@@ -1,7 +1,6 @@
 { networkFiles
 , targetProperty
 , nixpkgs ? <nixpkgs>
-, nixos ? <nixos>
 , disnix ? builtins.storePath @DISNIX_PREFIX@
 , enableDisnix ? true
 , nixOpsModel ? false
@@ -12,7 +11,7 @@
 let
   pkgs = import nixpkgs {};
 
-  lib = import ./lib.nix { inherit nixpkgs nixos pkgs; };
+  lib = import ./lib.nix { inherit nixpkgs pkgs; };
   
   mergedNetwork = lib.generateMergedNetwork networkFiles nixOpsModel;
   manifest = lib.generateManifest mergedNetwork targetProperty enableDisnix nixOpsModel useVMTesting useBackdoor;

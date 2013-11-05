@@ -4,7 +4,6 @@
 , enableDisnix ? true
 , nixOpsModel ? false
 , nixpkgs ? <nixpkgs>
-, nixos ? <nixos>
 }:
 
 let
@@ -18,7 +17,6 @@ pkgs.stdenv.mkDerivation {
 
     sed -e "s|@networkFiles@|${toString networkFiles}|" \
         -e "s|@nixpkgs@|${nixpkgs}|" \
-        -e "s|@nixos@|${nixos}|" \
         -e "s|@useBackdoor@|${if useBackdoor then "true" else "false"}|" \
         -e "s|@useVMTesting@|${if useVMTesting then "true" else "false"}|" \
         -e "s|@enableDisnix@|${if enableDisnix then "true" else "false"}|" \
