@@ -5,7 +5,6 @@ let
     tarball =
       { disnixos ? {outPath = ./.; rev = 1234;}
       , officialRelease ? false
-      , disnix ? (import ../disnix/release.nix {}).build {}
       }:
 
       with import nixpkgs {};
@@ -49,9 +48,8 @@ let
       };
 
     build =
-      { tarball ? jobs.tarball { inherit disnix; }
+      { tarball ? jobs.tarball {}
       , system ? builtins.currentSystem
-      , disnix ? (import ../disnix/release.nix {}).build {}
       }:
 
       with import nixpkgs { inherit system; };
@@ -63,16 +61,11 @@ let
       };
 
     tests = 
-      { disnix ? (import ../disnix/release.nix {}).build {}
-      , dysnomia ? (import ../dysnomia/release.nix {}).build {}
-      }:
-      
       let
         pkgs = import nixpkgs {};
         
         disnixos = build {
           system = builtins.currentSystem;
-          inherit disnix;
         };
         
         logicalNetworkNix = pkgs.writeTextFile {
@@ -142,7 +135,7 @@ let
             users.extraGroups = [ { gid = 200; name = "disnix"; } ];
             
             services.dbus.enable = true;
-            services.dbus.packages = [ disnix ];
+            services.dbus.packages = [ pkgs.disnix ];
             services.openssh.enable = true;
             
             jobs.ssh.restartIfChanged = false;
@@ -153,7 +146,7 @@ let
                 wantedBy = [ "multi-user.target" ];
                 after = [ "dbus.service" ];
                 
-                path = [ pkgs.nix pkgs.getopt disnix dysnomia ];
+                path = [ pkgs.nix pkgs.getopt pkgs.disnix pkgs.dysnomia ];
                 environment = {
                   HOME = "/root";
                 };
@@ -161,7 +154,7 @@ let
                 exec = "disnix-service";
                };
               
-            environment.systemPackages = [ pkgs.stdenv pkgs.nix disnix disnixos pkgs.busybox pkgs.module_init_tools pkgs.hello pkgs.zip ];
+            environment.systemPackages = [ pkgs.stdenv pkgs.nix pkgs.disnix disnixos pkgs.busybox pkgs.module_init_tools pkgs.hello pkgs.zip ];
           };
           
           manifestTests = ./tests/manifest;
@@ -367,7 +360,7 @@ let
                 users.extraGroups = [ { gid = 200; name = "disnix"; } ];
             
                 services.dbus.enable = true;
-                services.dbus.packages = [ disnix ];
+                services.dbus.packages = [ pkgs.disnix ];
                 services.openssh.enable = true;
             
                 jobs.ssh.restartIfChanged = false;
@@ -378,7 +371,7 @@ let
                     wantedBy = [ "multi-user.target" ];
                     after = [ "dbus.service" ];
                 
-                    path = [ pkgs.nix disnix ];
+                    path = [ pkgs.nix pkgs.disnix ];
 
                     script =
                       ''
@@ -416,7 +409,7 @@ let
                           script = "true";
                         };
                       
-                      environment.systemPackages = [ "${disnix}" ];
+                      environment.systemPackages = [ "${pkgs.disnix}" ];
                       
                       deployment.targetEnv = "none";
                     };
