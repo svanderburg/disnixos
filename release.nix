@@ -5,7 +5,7 @@ let
     tarball =
       { disnixos ? {outPath = ./.; rev = 1234;}
       , officialRelease ? false
-      , disnix ? builtins.getAttr (builtins.currentSystem) ((import ../disnix/release.nix {}).build {}) {}
+      , disnix ? (import ../disnix/release.nix {}).build {}
       }:
 
       with import nixpkgs {};
@@ -51,7 +51,7 @@ let
     build =
       { tarball ? jobs.tarball { inherit disnix; }
       , system ? builtins.currentSystem
-      , disnix ? builtins.getAttr (builtins.currentSystem) ((import ../disnix/release.nix {}).build {}) {}
+      , disnix ? (import ../disnix/release.nix {}).build {}
       }:
 
       with import nixpkgs { inherit system; };
@@ -153,14 +153,12 @@ let
                 wantedBy = [ "multi-user.target" ];
                 after = [ "dbus.service" ];
                 
-                path = [ pkgs.nix disnix ];
-                restartIfChanged = false; # Important, otherwise we cannot upgrade
+                path = [ pkgs.nix pkgs.getopt disnix dysnomia ];
+                environment = {
+                  HOME = "/root";
+                };
 
-                script =
-                  ''
-                    export HOME=/root
-                    disnix-service --dysnomia-modules-dir=${dysnomia}/libexec/dysnomia
-                  '';
+                exec = "disnix-service";
                };
               
             environment.systemPackages = [ pkgs.stdenv pkgs.nix disnix disnixos pkgs.busybox pkgs.module_init_tools pkgs.hello pkgs.zip ];
@@ -168,7 +166,7 @@ let
           
           manifestTests = ./tests/manifest;
       in
-      with import "${nixpkgs}/lib/testing.nix" { system = builtins.currentSystem; };
+      with import "${nixpkgs}/nixos/lib/testing.nix" { system = builtins.currentSystem; };
       
       {
         deploymentInfra = simpleTest {
