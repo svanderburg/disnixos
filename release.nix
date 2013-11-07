@@ -371,16 +371,16 @@ let
                     wantedBy = [ "multi-user.target" ];
                     after = [ "dbus.service" ];
                 
-                    path = [ pkgs.nix pkgs.disnix ];
+                    path = [ pkgs.nix pkgs.disnix pkgs.dysnomia ];
+                    
+                    environment = {
+                      HOME = "/root";
+                    };
 
-                    script =
-                      ''
-                        export HOME=/root
-                        disnix-service --dysnomia-modules-dir=${dysnomia}/libexec/dysnomia
-                      '';
-                   };
+                    exec = "disnix-service";
+                  };
               
-                environment.systemPackages = [ pkgs.stdenv pkgs.nix disnix disnixos pkgs.busybox pkgs.module_init_tools pkgs.hello pkgs.zip pkgs.nixops ];
+                environment.systemPackages = [ pkgs.stdenv pkgs.nix pkgs.disnix disnixos pkgs.busybox pkgs.module_init_tools pkgs.hello pkgs.zip pkgs.nixops ];
               };
               
               physicalNetworkNix = pkgs.writeTextFile {
