@@ -1,6 +1,6 @@
 #!/bin/bash -e
 # Disnix - A distributed application layer for Nix
-# Copyright (C) 2008-2010  Sander van der Burg
+# Copyright (C) 2008-2013  Sander van der Burg
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -38,7 +38,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`getopt -n $0 -o p:h -l profile:,target-property:,interface:,show-trace,disable-disnix,build-on-targets,help -- "$@"`
+PARAMS=`@getopt@ -n $0 -o p:h -l profile:,target-property:,interface:,show-trace,disable-disnix,build-on-targets,help -- "$@"`
 
 if [ $? != 0 ]
 then

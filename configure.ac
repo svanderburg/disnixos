@@ -16,6 +16,7 @@ fi
 AC_PROG_INSTALL
 PKG_PROG_PKG_CONFIG
 NEED_PROG(socat, socat)
+NEED_PROG(getopt, getopt)
 AC_PATH_PROG(xmllint, xmllint, false)
 AC_PATH_PROG(xsltproc, xsltproc, false)
 AC_PATH_PROG(dblatex, dblatex)

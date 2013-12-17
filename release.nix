@@ -15,7 +15,7 @@ let
         src = disnixos;
         inherit officialRelease;
 
-        buildInputs = [ socat pkgconfig libxml2 libxslt disnix dblatex tetex nukeReferences ];
+        buildInputs = [ socat getopt pkgconfig libxml2 libxslt disnix dblatex tetex nukeReferences ];
         
         # Add documentation in the tarball
         configureFlags = ''
@@ -57,7 +57,7 @@ let
       releaseTools.nixBuild {
         name = "disnixos";
         src = tarball;
-        buildInputs = [ socat pkgconfig disnix ];
+        buildInputs = [ socat getopt pkgconfig disnix ];
       };
 
     tests = 
