@@ -464,7 +464,7 @@ let
                 
                 # Deploy infrastructure with NixOps
                 $coordinator->mustSucceed("nixops create ${logicalNetworkNix} ${physicalNetworkNix}");
-                $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} nixops deploy");
+                $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixpkgs}/nixos nixops deploy");
                 
                 # Deploy services with disnixos-env
                 $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixops=${pkgs.nixops}/share/nix/nixops disnixos-env -s ${manifestTests}/services.nix -n ${logicalNetworkNix} -n ${physicalNetworkNix} -d ${manifestTests}/distribution.nix --use-nixops");
