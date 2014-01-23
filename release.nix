@@ -1,14 +1,21 @@
-{ nixpkgs ? <nixpkgs> }:
+{ nixpkgs ? <nixpkgs>
+, systems ? [ "i686-linux" "x86_64-linux" ]
+, disnixos ? { outPath = ./.; rev = 1234; }
+, officialRelease ? false
+, disnixJobset ? import ../disnix/release.nix { inherit nixpkgs systems officialRelease; }
+, dysnomiaJobset ? import ../disnix/release.nix { inherit nixpkgs systems officialRelease; }
+}:
 
 let
+  pkgs = import nixpkgs {};
+  
   jobs = rec {
     tarball =
-      { disnixos ? {outPath = ./.; rev = 1234;}
-      , officialRelease ? false
-      }:
+      with pkgs;
 
-      with import nixpkgs {};
-
+      let
+        disnix = builtins.getAttr (builtins.currentSystem) (disnixJobset.build);
+      in
       releaseTools.sourceTarball {
         name = "disnixos-tarball";
         version = builtins.readFile ./version;
@@ -48,25 +55,29 @@ let
       };
 
     build =
-      { tarball ? jobs.tarball {}
-      , system ? builtins.currentSystem
-      }:
-
-      with import nixpkgs { inherit system; };
-
-      releaseTools.nixBuild {
-        name = "disnixos";
-        src = tarball;
-        buildInputs = [ socat getopt pkgconfig disnix ];
-      };
+      pkgs.lib.genAttrs systems (system:
+        
+        with import nixpkgs { inherit system; };
+        
+        let
+          disnix = builtins.getAttr system (disnixJobset.build);
+        in
+        releaseTools.nixBuild {
+          name = "disnixos";
+          src = tarball;
+          buildInputs = [ socat pkgconfig disnix ];
+        }
+      );
 
     tests = 
       let
         pkgs = import nixpkgs {};
         
-        disnixos = build {
-          system = builtins.currentSystem;
-        };
+        disnix = builtins.getAttr (builtins.currentSystem) (disnixJobset.build);
+        
+        dysnomia = builtins.getAttr (builtins.currentSystem) (dysnomiaJobset.build);
+        
+        disnixos = builtins.getAttr (builtins.currentSystem) build;
         
         logicalNetworkNix = pkgs.writeTextFile {
           name = "network-logical.nix";
