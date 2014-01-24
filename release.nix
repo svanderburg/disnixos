@@ -65,7 +65,7 @@ let
         releaseTools.nixBuild {
           name = "disnixos";
           src = tarball;
-          buildInputs = [ socat pkgconfig disnix ];
+          buildInputs = [ socat pkgconfig disnix getopt ];
         }
       );
 
