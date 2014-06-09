@@ -66,46 +66,46 @@ while [ "$1" != "--" ]
 do
     case "$1" in
         -s|--services)
-	    servicesFile=`readlink -f $2`
-	    ;;
-	-n|--network)
-	    networkFiles="$networkFiles `readlink -f $2`"
-	    ;;
-	-d|--distribution)
-	    distributionFile=`readlink -f $2`
-	    ;;
-	-p|--profile)
-	    profileArg="--profile $2"
-	    ;;
-	--target-property)
-	    targetProperty=$2
-	    ;;
-	--interface)
-	    interface=$2
-	    ;;
-	--use-nixops)
-	    useNixOps=1
-	    useNixOpsArg="--use-nixops"
-	    ;;
-	--disable-disnix)
-	    disableDisnixArg="--disable-disnix"
-	    ;;
-	--no-infra-deployment)
-	    noInfraDeployment=1
-	    ;;
-	--build-on-targets)
-	    buildOnTargetsArg="--build-on-targets"
-	    ;;
-	--no-upgrade)
-	    noUpgradeArg="--no-upgrade"
-	    ;;
-	--show-trace)
-	    showTrace=1
-	    ;;
-	-h|--help)
-	    showUsage
-	    exit 0
-	    ;;
+            servicesFile=`readlink -f $2`
+            ;;
+        -n|--network)
+            networkFiles="$networkFiles `readlink -f $2`"
+            ;;
+        -d|--distribution)
+            distributionFile=`readlink -f $2`
+            ;;
+        -p|--profile)
+            profileArg="--profile $2"
+            ;;
+        --target-property)
+            targetProperty=$2
+            ;;
+        --interface)
+            interface=$2
+            ;;
+        --use-nixops)
+            useNixOps=1
+            useNixOpsArg="--use-nixops"
+            ;;
+        --disable-disnix)
+            disableDisnixArg="--disable-disnix"
+            ;;
+        --no-infra-deployment)
+            noInfraDeployment=1
+            ;;
+        --build-on-targets)
+            buildOnTargetsArg="--build-on-targets"
+            ;;
+        --no-upgrade)
+            noUpgradeArg="--no-upgrade"
+            ;;
+        --show-trace)
+            showTrace=1
+            ;;
+        -h|--help)
+            showUsage
+            exit 0
+            ;;
     esac
     
     shift

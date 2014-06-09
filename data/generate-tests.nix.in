@@ -27,7 +27,7 @@ let
       ''
     ) (builtins.attrNames network)}
     
-    ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --interface ${disnixos}/bin/disnix-backdoor-client --no-coordinator-profile ${manifestFile}");
+    ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --interface ${disnixos}/bin/disnix-backdoor-client --no-coordinator-profile --no-lock ${manifestFile}");
     
     sleep 1e9;
   '';
