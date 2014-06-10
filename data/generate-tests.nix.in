@@ -22,7 +22,7 @@ let
       ''
         ${"\$"}${targetName}->waitForJob("network.target");
         ${"\$"}${targetName}->waitForJob("disnix.service");
-        ${"\$"}${targetName}->mustSucceed("iptables -I INPUT -p tcp --dport 512 -j ACCEPT");
+        ${"\$"}${targetName}->mustSucceed("[ ! -x \"\$(which iptables)\" ] || iptables -I INPUT -p tcp --dport 512 -j ACCEPT");
         my $pid = ${"\$"}${targetName}->mustSucceed("${pkgs.socat}/bin/socat tcp-listen:512,fork exec:/bin/sh & echo -n \$!");
         ${"\$"}${targetName}->mustSucceed("while [ \"\$(ps -p $pid | grep socat)\" = \"\" ]; do sleep 0.5; done");
       ''
