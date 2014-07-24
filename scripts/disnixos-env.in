@@ -122,6 +122,7 @@ checkUseNixOps
 if [ "$useNixOps" = "1" ] && [ "$interface" = "" ] && [ "$DISNIX_CLIENT_INTERFACE" = "" ]
 then
     interface=disnix-nixops-client
+    locateNixOps
 fi
 
 checkClientInterface

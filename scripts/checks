@@ -34,3 +34,8 @@ checkUseNixOps()
         useNixOps=1
     fi
 }
+
+locateNixOps()
+{
+    export NIX_PATH=$NIX_PATH:nixops=$(dirname $(readlink -f $(type -p nixops)))/../share/nix/nixops
+}
