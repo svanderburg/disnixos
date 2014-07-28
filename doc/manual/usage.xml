@@ -90,7 +90,7 @@ $ export DISNIXOS_USE_NIXOPS=1
 		
 <screen>
 $ nixops create ./network-logical.nix ./network-physical.nix -d test
-$ nixops deploy
+$ nixops deploy -d test
 </screen>
 		<para>
 			We can set the following environment variable to make <emphasis>test</emphasis> the default deployment and allowing it to be used
