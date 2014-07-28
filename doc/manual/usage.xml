@@ -84,14 +84,21 @@ $ export DISNIXOS_USE_NIXOPS=1
 </screen>
 		
 		<para>
-			When this option is set, we can use NixOps to instantiate and deploy a network of NixOS machines in the cloud:
+			When this option is set, we can use NixOps to instantiate and deploy a network (which has the deployment name: <emphasis>test</emphasis>)
+			of NixOS machines in the cloud:
 		</para>
 		
 <screen>
-$ nixops create ./network-logical.nix ./network-physical.nix
+$ nixops create ./network-logical.nix ./network-physical.nix -d test
 $ nixops deploy
 </screen>
-		
+		<para>
+			We can set the following environment variable to make <emphasis>test</emphasis> the default deployment and allowing it to be used
+			by any DisnixOS utility:
+		</para>
+<screen>
+$ export NIXOPS_DEPLOYMENT=test
+</screen>
 		<para>
 			After NixOps is done deploying the system configurations, we can deploy the services into the network by running:
 		</para>
