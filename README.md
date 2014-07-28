@@ -51,8 +51,8 @@ as a parameter, the system configuration will be deployed through Disnix:
 
     $ disnixos-deploy-network network.nix
 
-Deploying services and infrastructre at the same time
------------------------------------------------------
+Deploying services and infrastructure at the same time
+------------------------------------------------------
 Besides infrastructure only, we can also deploy services and infrastructure at
 the same time. For example:
 
@@ -89,7 +89,7 @@ called `test` that is deployed by NixOps:
 
 The following command deploys the services into the network deployed by NixOps:
     
-    $ disnixos-env -s services.nix -n network.nix -d distribution.nix --use-nixops
+    $ disnixos-env -s services.nix -n network.nix -n network-virtualbox.nix -d distribution.nix --use-nixops
 
 Manual
 ======
