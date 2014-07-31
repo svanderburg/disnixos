@@ -71,8 +71,6 @@ let
 
     tests = 
       let
-        pkgs = import nixpkgs {};
-        
         disnix = builtins.getAttr (builtins.currentSystem) (disnixJobset.build);
         
         dysnomia = builtins.getAttr (builtins.currentSystem) (dysnomiaJobset.build);
@@ -146,7 +144,7 @@ let
             users.extraGroups = [ { gid = 200; name = "disnix"; } ];
             
             services.dbus.enable = true;
-            services.dbus.packages = [ pkgs.disnix ];
+            services.dbus.packages = [ disnix ];
             services.openssh.enable = true;
             
             jobs.ssh.restartIfChanged = false;
@@ -157,7 +155,7 @@ let
                 wantedBy = [ "multi-user.target" ];
                 after = [ "dbus.service" ];
                 
-                path = [ pkgs.nix pkgs.getopt pkgs.disnix pkgs.dysnomia ];
+                path = [ pkgs.nix pkgs.getopt disnix dysnomia ];
                 environment = {
                   HOME = "/root";
                 };
@@ -165,7 +163,7 @@ let
                 exec = "disnix-service";
                };
               
-            environment.systemPackages = [ pkgs.stdenv pkgs.nix pkgs.disnix disnixos pkgs.busybox pkgs.module_init_tools pkgs.hello pkgs.zip ];
+            environment.systemPackages = [ pkgs.stdenv pkgs.nix disnix disnixos pkgs.busybox pkgs.module_init_tools pkgs.hello pkgs.zip ];
           };
           
           manifestTests = ./tests/manifest;
@@ -260,7 +258,7 @@ let
           testScript = 
             ''
               startAll;
-              $coordinator->waitForJob("network-interfaces.target");
+              #$coordinator->waitForJob("network-interfaces.target");
               $testtarget1->waitForJob("disnix");
               $testtarget2->waitForJob("disnix");
               
@@ -371,7 +369,7 @@ let
                 users.extraGroups = [ { gid = 200; name = "disnix"; } ];
             
                 services.dbus.enable = true;
-                services.dbus.packages = [ pkgs.disnix ];
+                services.dbus.packages = [ disnix ];
                 services.openssh.enable = true;
             
                 jobs.ssh.restartIfChanged = false;
@@ -382,7 +380,7 @@ let
                     wantedBy = [ "multi-user.target" ];
                     after = [ "dbus.service" ];
                 
-                    path = [ pkgs.nix pkgs.disnix pkgs.dysnomia ];
+                    path = [ pkgs.nix disnix dysnomia ];
                     
                     environment = {
                       HOME = "/root";
@@ -391,7 +389,7 @@ let
                     exec = "disnix-service";
                   };
               
-                environment.systemPackages = [ pkgs.stdenv pkgs.nix pkgs.disnix disnixos pkgs.busybox pkgs.module_init_tools pkgs.hello pkgs.zip pkgs.nixops ];
+                environment.systemPackages = [ pkgs.stdenv pkgs.nix disnix disnixos pkgs.busybox pkgs.module_init_tools pkgs.hello pkgs.zip pkgs.nixops ];
               };
               
               physicalNetworkNix = pkgs.writeTextFile {
@@ -420,7 +418,7 @@ let
                           script = "true";
                         };
                       
-                      environment.systemPackages = [ "${pkgs.disnix}" ];
+                      environment.systemPackages = [ "${disnix}" ];
                       
                       deployment.targetEnv = "none";
                     };
