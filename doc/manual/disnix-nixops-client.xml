@@ -282,4 +282,30 @@
 			</variablelist>
 		</refsection>
 	</refsection>
+	
+	<refsection>
+		<title>Environment variables</title>
+		
+		<variablelist>
+			<varlistentry>
+				<term><option>NIXOPS_OPTS</option></term>
+				<listitem>
+					<para>
+						Additional properties which are passed to the <command>nixops</command> command.
+					</para>
+				</listitem>
+			</varlistentry>
+		</variablelist>
+		<variablelist>
+			<varlistentry>
+				<term><option>DISNIX_PROFILE</option></term>
+				<listitem>
+					<para>
+						Sets the name of the profile that stores the manifest on the coordinator machine and the deployed
+						services per machine on each target (Defaults to: default).
+					</para>
+				</listitem>
+			</varlistentry>
+		</variablelist>
+	</refsection>
 </refentry>

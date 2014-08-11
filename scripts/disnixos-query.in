@@ -58,7 +58,7 @@ while [ "$1" != "--" ]
 do
     case "$1" in
 	-p|--profile)
-	    profileArg="-p $2"
+	    profileArg="--profile $2"
 	    ;;
 	--target-property)
 	    targetPropertyArg=$2
