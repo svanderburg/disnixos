@@ -139,7 +139,10 @@ rec {
         machine = getAttr targetName configurations;
         infrastructure = machine.config.disnixInfrastructure.infrastructure;
       in
-      getAttr targetProperty infrastructure
+      {
+        targetProperty = getAttr targetProperty infrastructure;
+        numOfCores = 1;
+      }
     ) (attrNames configurations)
   ;
 
