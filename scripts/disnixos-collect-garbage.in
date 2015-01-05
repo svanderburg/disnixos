@@ -86,6 +86,8 @@ checkUseNixOps
 
 if [ "$useNixOps" = "1" ]
 then
+    locateNixOps
+    interface=disnix-nixops-client
     nixOpsArg="--use-nixops"
 fi
 
