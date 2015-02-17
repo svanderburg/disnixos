@@ -186,6 +186,7 @@ rec {
    * Parameters:
    * network: An evaluated network with machine configurations
    * targetProperty: Attribute from the infrastructure model that is used to connect to the Disnix interface
+   * clientInterface: Path to the executable used to connect to the Disnix interface
    * enableDisnix: Indicates whether Disnix must be enabled
    * nixOpsModel: Indicates whether we should use NixOps specific settings
    * useVMTesting: Indicates whether we should enable NixOS test instrumentation and VM settings
@@ -194,18 +195,30 @@ rec {
    * Returns: 
    * An attributeset which should be exported to XML representing the distributed derivation
    */
-  generateDistributedDerivation = network: targetProperty: enableDisnix: nixOpsModel: useVMTesting: useBackdoor:
+  generateDistributedDerivation = network: targetProperty: clientInterface: enableDisnix: nixOpsModel: useVMTesting: useBackdoor:
     let
       configurations = generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor;
     in
-    map (targetName:
-      let
-        machine = getAttr targetName configurations;
-        infrastructure = machine.config.disnixInfrastructure.infrastructure;
-      in
-      { derivation = unsafeDiscardOutputDependency (machine.config.system.build.toplevel.drvPath);
-        target = getAttr targetProperty infrastructure;
-      }
-    ) (attrNames configurations)
+    {
+      build = map (targetName:
+        let
+          machine = getAttr targetName configurations;
+          infrastructure = machine.config.disnixInfrastructure.infrastructure;
+        in
+        { derivation = unsafeDiscardOutputDependency (machine.config.system.build.toplevel.drvPath);
+          target = getAttr targetProperty infrastructure;
+        }
+      ) (attrNames configurations);
+    
+      interfaces = map (targetName:
+        let
+          machine = getAttr targetName configurations;
+          infrastructure = machine.config.disnixInfrastructure.infrastructure;
+        in
+        { target = getAttr targetProperty infrastructure;
+          clientInterface = if infrastructure ? clientInterface then infrastructure.clientInterface else clientInterface;
+        }
+      ) (attrNames configurations);
+    }
   ;
 }

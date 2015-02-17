@@ -1,5 +1,6 @@
 { networkFiles
 , targetProperty
+, clientInterface
 , nixpkgs ? <nixpkgs>
 , enableDisnix ? true
 , nixOpsModel ? false
@@ -12,7 +13,7 @@ let
   lib = import ./lib.nix { inherit nixpkgs pkgs; };
   
   mergedNetwork = lib.generateMergedNetwork networkFiles nixOpsModel;
-  distributedDerivation = lib.generateDistributedDerivation mergedNetwork targetProperty enableDisnix nixOpsModel false false;
+  distributedDerivation = lib.generateDistributedDerivation mergedNetwork targetProperty clientInterface enableDisnix nixOpsModel false false;
   
   generateDistributedDerivationXSL = "${disnix}/share/disnix/generatedistributedderivation.xsl";
 in

@@ -104,7 +104,7 @@ if [ "$buildOnTargets" = "1" ]
 then
     # Build the components on the target machines if requested
     distributedDerivation=`disnixos-instantiate --target-property $targetProperty --interface $interface --no-out-link $disableDisnixArg $showTraceArg $networkFileArgs`
-    disnix-build $interface $distributedDerivation
+    disnix-build $distributedDerivation
 fi
 
 # Create a manifest file

@@ -130,6 +130,7 @@ then
 
     nix-build --arg networkFiles "[ $networkFiles ]" \
               --argstr targetProperty $targetProperty \
+              --argstr clientInterface $interface \
               $noOutLinkArg \
               $nixOpsArg \
               $disableDisnixArg \
