@@ -2,7 +2,7 @@
 
 let
   evalConfig = import "${nixpkgs}/nixos/lib/eval-config.nix";
-  inherit (builtins) getAttr attrNames removeAttrs unsafeDiscardOutputDependency;
+  inherit (builtins) getAttr attrNames removeAttrs unsafeDiscardOutputDependency hashString;
 in
 rec {
 
@@ -113,9 +113,15 @@ rec {
         machine = getAttr targetName configurations;
         infrastructure = machine.config.disnixInfrastructure.infrastructure;
       in
-      { name = targetName;
+      { _key = hashString "sha256" (builtins.toXML {
+          service = machine.config.system.build.toplevel.outPath;
+          name = targetName;
+          type = "nixos-configuration";
+          dependsOn = [];
+        });
+        name = targetName;
         service = machine.config.system.build.toplevel.outPath;
-        target = infrastructure;
+        target = if infrastructure ? targetProperty then getAttr (infrastructure.targetProperty) infrastructure else getAttr targetProperty infrastructure;
         dependsOn = [];
         type = "nixos-configuration";
         inherit targetProperty;
@@ -129,18 +135,20 @@ rec {
    * Parameters:
    * configurations: An attribute set with evaluated configurations
    * targetProperty: Attribute from the infrastructure model that is used to connect to the Disnix interface
+   * clientInterface: Path to the executable used to connect to the Disnix interface
    *
    * Returns:
    * A list of strings with connection attributes of each machine that is used
    */
-  generateTargetPropertyList = configurations: targetProperty:
+  generateTargetPropertyList = configurations: targetProperty: clientInterface:
     map (targetName:
       let
         machine = getAttr targetName configurations;
         infrastructure = machine.config.disnixInfrastructure.infrastructure;
       in
-      {
-        targetProperty = getAttr targetProperty infrastructure;
+      infrastructure // {
+        targetProperty = if infrastructure ? targetProperty then infrastructure.targetProperty else targetProperty;
+        clientInterface = if infrastructure ? clientInterface then infrastructure.clientInterface else clientInterface;
         numOfCores = 1;
       }
     ) (attrNames configurations)
@@ -153,6 +161,7 @@ rec {
    * Parameters:
    * network: An evaluated network with machine configurations
    * targetProperty: Attribute from the infrastructure model that is used to connect to the Disnix interface
+   * clientInterface: Path to the executable used to connect to the Disnix interface
    * enableDisnix: Indicates whether Disnix must be enabled
    * nixOpsModel: Indicates whether we should use NixOps specific settings
    * useVMTesting: Indicates whether we should enable NixOS test instrumentation and VM settings
@@ -161,13 +170,13 @@ rec {
    * Returns:
    * An attributeset which should be exported to XML representing the manifest
    */
-  generateManifest = network: targetProperty: enableDisnix: nixOpsModel: useVMTesting: useBackdoor:
+  generateManifest = network: targetProperty: clientInterface: enableDisnix: nixOpsModel: useVMTesting: useBackdoor:
     let
       configurations = generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor;
     in
     { profiles = generateProfiles configurations targetProperty;
       activation = generateActivationMappings configurations targetProperty;
-      targets = generateTargetPropertyList configurations targetProperty;
+      targets = generateTargetPropertyList configurations targetProperty clientInterface;
     };
   
   /*

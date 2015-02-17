@@ -1,5 +1,6 @@
 { networkFiles
 , targetProperty
+, clientInterface
 , nixpkgs ? <nixpkgs>
 , disnix ? builtins.storePath @DISNIX_PREFIX@
 , enableDisnix ? true
@@ -14,7 +15,7 @@ let
   lib = import ./lib.nix { inherit nixpkgs pkgs; };
   
   mergedNetwork = lib.generateMergedNetwork networkFiles nixOpsModel;
-  manifest = lib.generateManifest mergedNetwork targetProperty enableDisnix nixOpsModel useVMTesting useBackdoor;
+  manifest = lib.generateManifest mergedNetwork targetProperty clientInterface enableDisnix nixOpsModel useVMTesting useBackdoor;
   
   generateManifestXSL = "${disnix}/share/disnix/generatemanifest.xsl";
 in
