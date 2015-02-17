@@ -84,8 +84,8 @@ shift
 
 # Validate the given options
 
-checkClientInterface
 checkTargetProperty
+checkClientInterface
 checkShowTrace
 
 if [ "$1" = "" ]
@@ -103,15 +103,15 @@ fi
 if [ "$buildOnTargets" = "1" ]
 then
     # Build the components on the target machines if requested
-    distributedDerivation=`disnixos-instantiate --target-property $targetProperty --no-out-link $disableDisnixArg $showTraceArg $networkFileArgs`
-    disnix-build --interface $interface $distributedDerivation
+    distributedDerivation=`disnixos-instantiate --target-property $targetProperty --interface $interface --no-out-link $disableDisnixArg $showTraceArg $networkFileArgs`
+    disnix-build $interface $distributedDerivation
 fi
 
 # Create a manifest file
-manifest=`disnixos-manifest $networkFileArgs --target-property $targetProperty --no-out-link $disableDisnixArg $showTraceArg`
+manifest=`disnixos-manifest $networkFileArgs --target-property $targetProperty --interface $interface --no-out-link $disableDisnixArg $showTraceArg`
 
 # Distribute system derivations
-disnix-distribute --interface $interface $manifest
+disnix-distribute $manifest
 
 # Activate system derivations
-disnix-activate $profileArg --interface $interface --no-coordinator-profile --no-target-profiles --no-upgrade $manifest
+disnix-activate $profileArg --no-coordinator-profile --no-target-profiles --no-upgrade $manifest

@@ -30,6 +30,6 @@
     };
     
     environment.systemPackages = [ pkgs.stdenv pkgs.nix disnix disnixos pkgs.hello pkgs.zip
-      pkgs.busybox pkgs.module_init_tools pkgs.perlPackages.ArchiveCpio # Upgrades fail without this, because it is needed to rebuild the NixOS configuration
+      pkgs.busybox pkgs.paxctl pkgs.gnumake pkgs.patchelf pkgs.gcc pkgs.perlPackages.ArchiveCpio # Upgrades fail without this, because it is needed to rebuild the NixOS configuration
     ];
 }
