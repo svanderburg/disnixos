@@ -119,7 +119,7 @@ in
           ''
             ${"\$"}${targetName}->waitForUnit("network.target");
             ${"\$"}${targetName}->waitForJob("disnix");
-            ${"\$"}${targetName}->mustSucceed("iptables -I INPUT -p tcp --dport 512 -j ACCEPT");
+            ${"\$"}${targetName}->mustSucceed("iptables -I INPUT -p tcp --dport 512 -j ACCEPT || true");
             my $pid = ${"\$"}${targetName}->mustSucceed("${socat}/bin/socat tcp-listen:512,fork exec:/bin/sh & echo -n \$!");
             ${"\$"}${targetName}->mustSucceed("while [ \"\$(ps -p $pid | grep socat)\" = \"\" ]; do sleep 0.5; done");
     
