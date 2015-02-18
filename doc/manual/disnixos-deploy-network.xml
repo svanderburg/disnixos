@@ -42,7 +42,7 @@
 	<refsection>
 		<title>Options</title>
 		
-		<variablelist>			
+		<variablelist>
 			<varlistentry>
 				<term><option>--target-property</option></term>
 				<listitem>
