@@ -5,6 +5,23 @@ let
   inherit (builtins) getAttr attrNames removeAttrs unsafeDiscardOutputDependency hashString;
 in
 rec {
+  /**
+   * Fetches the key value that is used to refer to a target machine.
+   * If a target defines a 'targetProperty' then the corresponding attribute
+   * is used. If no targetProperty is provided by the target, then the global
+   * targetProperty is used.
+   *
+   * Parameters:
+   * targetProperty: Attribute from the infrastructure model that is used to connect to the Disnix interface
+   * target: An attributeset containing properties of a target machine
+   *
+   * Returns
+   * A string containing the key value
+   */
+  getTargetProperty = targetProperty: target:
+    if target ? targetProperty then getAttr (target.targetProperty) target
+    else getAttr targetProperty target
+  ;
 
   /*
    * Takes a collection of NixOS network expressions and zips them into a list of
@@ -92,7 +109,7 @@ rec {
       in
       {
         profile = machine.config.system.build.toplevel.outPath;
-        target = getAttr targetProperty infrastructure;
+        target = getTargetProperty targetProperty infrastructure;
       }
     ) (attrNames configurations)
   ;
@@ -121,7 +138,7 @@ rec {
         });
         name = targetName;
         service = machine.config.system.build.toplevel.outPath;
-        target = if infrastructure ? targetProperty then getAttr (infrastructure.targetProperty) infrastructure else getAttr targetProperty infrastructure;
+        target = getTargetProperty targetProperty infrastructure;
         dependsOn = [];
         type = "nixos-configuration";
         inherit targetProperty;
@@ -206,7 +223,7 @@ rec {
           infrastructure = machine.config.disnixInfrastructure.infrastructure;
         in
         { derivation = unsafeDiscardOutputDependency (machine.config.system.build.toplevel.drvPath);
-          target = getAttr targetProperty infrastructure;
+          target = getTargetProperty targetProperty infrastructure;
         }
       ) (attrNames configurations);
     
@@ -215,7 +232,7 @@ rec {
           machine = getAttr targetName configurations;
           infrastructure = machine.config.disnixInfrastructure.infrastructure;
         in
-        { target = getAttr targetProperty infrastructure;
+        { target = getTargetProperty targetProperty infrastructure;
           clientInterface = if infrastructure ? clientInterface then infrastructure.clientInterface else clientInterface;
         }
       ) (attrNames configurations);
