@@ -141,7 +141,6 @@ rec {
         target = getTargetProperty targetProperty infrastructure;
         dependsOn = [];
         type = "nixos-configuration";
-        inherit targetProperty;
       }
     ) (attrNames configurations)
   ;
