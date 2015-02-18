@@ -2,7 +2,6 @@
 , manifestFile
 , nixpkgs ? <nixpkgs>
 , disnix ? builtins.storePath @DISNIX_PREFIX@
-, disnixos ? builtins.storePath @prefix@
 , nixOpsModel ? false
 }:
 
@@ -22,13 +21,13 @@ let
       ''
         ${"\$"}${targetName}->waitForJob("network.target");
         ${"\$"}${targetName}->waitForJob("disnix.service");
-        ${"\$"}${targetName}->mustSucceed("[ ! -x \"\$(which iptables)\" ] || iptables -I INPUT -p tcp --dport 512 -j ACCEPT");
+        ${"\$"}${targetName}->mustSucceed("iptables -I INPUT -p tcp --dport 512 -j ACCEPT");
         my $pid = ${"\$"}${targetName}->mustSucceed("${pkgs.socat}/bin/socat tcp-listen:512,fork exec:/bin/sh & echo -n \$!");
         ${"\$"}${targetName}->mustSucceed("while [ \"\$(ps -p $pid | grep socat)\" = \"\" ]; do sleep 0.5; done");
       ''
     ) (builtins.attrNames network)}
     
-    ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --interface ${disnixos}/bin/disnix-backdoor-client --no-coordinator-profile --no-lock --no-upgrade ${manifestFile}");
+    ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --no-coordinator-profile --no-lock --no-upgrade ${manifestFile}");
     
     sleep 1e9;
   '';

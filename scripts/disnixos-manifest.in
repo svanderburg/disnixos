@@ -114,6 +114,7 @@ if [ "$useVM" = "1" ]
 then
     targetProperty=backdoor
     genInfraArgs="--use-backdoor --use-vm-testing"
+    interface="@prefix@/bin/disnix-backdoor-client"
 fi
 
 checkUseNixOps
