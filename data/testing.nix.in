@@ -14,7 +14,7 @@ let
       name = "${name}-manifest-src";
       buildCommand =
         ''
-          ensureDir $out
+          mkdir -p $out
           cd $out
           tar xfvj ${tarball}/tarballs/*.tar.bz2 --strip-components=1
         '';
@@ -52,7 +52,7 @@ in
           rm -Rf `find . -name .svn`
           mv * ../$name
           cd ..
-          ensureDir $out/tarballs
+          mkdir -p $out/tarballs
           tar cfvj $out/tarballs/$name.tar.bz2 $name
         '';
     };
@@ -82,12 +82,13 @@ in
         infrastructureFile = "${infrastructure}";
         distributionFile = if externalDistributionFile then distributionFile else "${manifestSrc}/${distributionFile}";
         targetProperty = "backdoor";
+        clientInterface = "${disnixos}/bin/disnix-backdoor-client";
         inherit nixpkgs;
       };
       
       installPhase =
         ''
-          ensureDir $out
+          mkdir -p $out
           ln -s $manifest $out/manifest.xml
         '';
 
@@ -118,12 +119,13 @@ in
           ''
             ${"\$"}${targetName}->waitForUnit("network.target");
             ${"\$"}${targetName}->waitForJob("disnix");
+            ${"\$"}${targetName}->mustSucceed("iptables -I INPUT -p tcp --dport 512 -j ACCEPT");
             my $pid = ${"\$"}${targetName}->mustSucceed("${socat}/bin/socat tcp-listen:512,fork exec:/bin/sh & echo -n \$!");
             ${"\$"}${targetName}->mustSucceed("while [ \"\$(ps -p $pid | grep socat)\" = \"\" ]; do sleep 0.5; done");
     
           '') (builtins.attrNames network)}
 
-          ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --interface ${disnixos}/bin/disnix-backdoor-client --no-coordinator-profile --no-lock ${manifest}/manifest.xml");
+          ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --no-coordinator-profile --no-lock --no-upgrade ${manifest}/manifest.xml");
   
           ${testScript}
         '';
