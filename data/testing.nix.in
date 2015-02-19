@@ -5,12 +5,12 @@
 }:
 
 let
+  pkgs = import nixpkgs {};
+  
   generateManifestSrc =
     {name, tarball}:
     
-    with import nixpkgs { inherit system; };
-    
-    stdenv.mkDerivation {
+    pkgs.stdenv.mkDerivation {
       name = "${name}-manifest-src";
       buildCommand =
         ''
@@ -19,31 +19,12 @@ let
           tar xfvj ${tarball}/tarballs/*.tar.bz2 --strip-components=1
         '';
     };
-    
-    generatePhysicalTestNetwork = networkFile: moduleName:
-      with import nixpkgs { inherit system; };
-      
-      let network = import networkFile;
-      in
-      stdenv.mkDerivation {
-        name = "physical.nix";
-        buildCommand =
-          ''
-            cat > $out <<EOF
-            {
-              ${lib.concatMapStrings (targetName: "${targetName} = \"${nixpkgs}/nixos/${moduleName}\";\n") (builtins.attrNames network)}
-            }
-            EOF
-          '';
-      };
 in
 {
   sourceTarball =
     {name, version, src, officialRelease}:
     
-    with import nixpkgs { inherit system; };
-    
-    releaseTools.sourceTarball {
+    pkgs.releaseTools.sourceTarball {
       inherit name version src officialRelease;
       
       distPhase =
@@ -60,9 +41,7 @@ in
   buildManifest = 
     {name, version, tarball, servicesFile, networkFile, externalNetworkFile ? false, distributionFile, externalDistributionFile ? false}:
     
-    with import nixpkgs { inherit system; };
-    
-    releaseTools.nixBuild rec {
+    pkgs.releaseTools.nixBuild rec {
       inherit name version;
       src = tarball;
       
@@ -106,7 +85,6 @@ in
       network = if externalNetworkFile then import networkFile else import "${manifestSrc}/${networkFile}";
     in
     with import "${nixpkgs}/nixos/lib/testing.nix" { inherit system; };
-    with import nixpkgs { inherit system; };
     
     simpleTest {
       nodes = network;
@@ -115,16 +93,16 @@ in
         ''
           startAll;
 
-          ${lib.concatMapStrings (targetName:
+          ${pkgs.lib.concatMapStrings (targetName:
           ''
-            ${"\$"}${targetName}->waitForUnit("network.target");
-            ${"\$"}${targetName}->waitForJob("disnix");
+            ${"\$"}${targetName}->waitForJob("network.target");
+            ${"\$"}${targetName}->waitForJob("disnix.service");
             ${"\$"}${targetName}->mustSucceed("iptables -I INPUT -p tcp --dport 512 -j ACCEPT || true");
-            my $pid = ${"\$"}${targetName}->mustSucceed("${socat}/bin/socat tcp-listen:512,fork exec:/bin/sh & echo -n \$!");
+            my $pid = ${"\$"}${targetName}->mustSucceed("${pkgs.socat}/bin/socat tcp-listen:512,fork exec:/bin/sh & echo -n \$!");
             ${"\$"}${targetName}->mustSucceed("while [ \"\$(ps -p $pid | grep socat)\" = \"\" ]; do sleep 0.5; done");
     
           '') (builtins.attrNames network)}
-
+          
           ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --no-coordinator-profile --no-lock --no-upgrade ${manifest}/manifest.xml");
   
           ${testScript}

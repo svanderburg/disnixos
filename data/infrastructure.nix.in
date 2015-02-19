@@ -9,7 +9,7 @@ let
   
   pkgs = import nixpkgs {};
   
-  lib = import @disnixos@/share/@PACKAGE@/lib.nix {
+  lib = import "${disnixos}/share/@PACKAGE@/lib.nix" {
     inherit nixpkgs pkgs;
   };
   
