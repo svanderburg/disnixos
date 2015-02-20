@@ -228,4 +228,98 @@ $ disnix-collect-garbage $(disnixos-geninfra network.nix)
 			The above command runs the Disnix garbage collector on machines defined in the network model.
 		</para>
 	</section>
+	
+	<section>
+		<title>Automated testing of Disnix deployments</title>
+		
+		<para>
+			Another use case of DisnixOS is to automatically package a Disnix project, build the corresponding manifest and run
+			automated tests non-interactively from Nix expressions.
+		</para>
+		<para>
+			<example xml:id="ex-5-disnixosjobset">
+				<title>A Nix expression jobset for testing Disnix projects</title>
+				<programlisting>
+			
+{ nixpkgs ? &lt;nixpkgs&gt;
+, system ? builtins.currentSystem
+}:
+
+let
+  pkgs = import nixpkgs { inherit system; };
+  
+  disnixos = import "${pkgs.disnixos}/share/disnixos/testing.nix" { <co xml:id='co-1-importDisnixos' />
+    inherit nixpkgs system;
+  };
+  
+  version = "1.0";
+in
+rec {
+  tarball = disnixos.sourceTarball { <co xml:id='co-2-sourceTarball' />
+    name = "testproject-zip";
+    inherit version;
+    src = ./.;
+    officialRelease = false;
+  };
+  
+  manifest = 
+    disnixos.buildManifest { <co xml:id='co-3-buildManifest' />
+    name = "test-project-manifest";
+    version = builtins.readFile ./version;
+    inherit tarball;
+    servicesFile = "deployment/DistributedDeployment/services.nix";
+    networkFile = "deployment/DistributedDeployment/network.nix";
+    distributionFile = "deployment/DistributedDeployment/distribution.nix";
+  };
+
+  tests =
+    disnixos.disnixTest { <co xml:id='co-4-disnixTest' />
+      name = "test-project-tests";
+      inherit tarball manifest;
+      networkFile = "deployment/DistributedDeployment/network.nix";
+      testScript =
+        ''
+          # Wait until the front-end application is deployed
+          $test1->waitForFile("/var/tomcat/webapps/testapp");
+           
+          # Wait a little longer and capture the output of the entry page
+          my $result = $test1->mustSucceed("sleep 10; curl --fail http://test2:8080/testapp");
+        '';
+    };
+}
+				</programlisting>
+			</example>
+		</para>
+		
+		<para>
+			<xref linkend="ex-5-disnixosjobset" /> shows a Nix expression defining three jobs:
+		</para>
+		<calloutlist>
+			<callout arearefs='co-1-importDisnixos'>
+				<para>
+					This line imports the testing function abstractions provided by DisnixOS.
+				</para>
+			</callout>
+			<callout arearefs='co-2-sourceTarball'>
+				<para>
+				      This function invocation constructs a Zip file containing all files belonging to a Disnix project.
+				</para>
+			</callout>
+			<callout arearefs='co-3-buildManifest'>
+				<para>
+					Here, the three DisnixOS models provided by a source distribution are built from source code and a
+					<filename>manifest.xml</filename> is produced. Basically this function abstraction does the same thing
+					as the <command>disnixos-manifest</command> command.
+				</para>
+			</callout>
+			<callout arearefs='co-4-disnixTest'>
+				<para>
+					This job spawns a network of QEMU machines inside a build, consults DisnixOS to deploy the system and performs some testcases.
+					Basically this function abstraction does mostly what the command <command>disnixos-vm-env</command> does, but in an non-interactive
+					manner. Moreover, it also takes a test script that is implemented in Perl. Test scripts are implemented using the exact same
+					convention as the NixOS test driver. Consult the NixOS manual for more details on how to write test scripts.
+				</para>
+			</callout>
+	      </calloutlist>
+      </section>
 </chapter>

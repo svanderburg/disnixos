@@ -91,6 +91,12 @@ The following command deploys the services into the network deployed by NixOps:
     
     $ disnixos-env -s services.nix -n network.nix -n network-virtualbox.nix -d distribution.nix --use-nixops
 
+Automated testing of Disnix deployments
+---------------------------------------
+Another feature of this package are function abstractions that can be used to
+non-interactively test a Disnix deployment from within a Nix build for testing
+purposes. Consult the manual for more details on this.
+
 Manual
 ======
 DisnixOS has a nice Docbook manual that can be compiled yourself. However, it is
