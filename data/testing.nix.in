@@ -49,7 +49,7 @@ in
         inherit name tarball;
       };
       
-      infrastructure = import "${disnixos}/share/disnixos/generate-infrastructure.nix" {
+      infrastructure = import ./generate-infrastructure.nix {
         networkFiles = [ (if externalNetworkFile then networkFile else "${manifestSrc}/${networkFile}") ];
         useVMTesting = true;
         useBackdoor = true;
@@ -89,23 +89,11 @@ in
     simpleTest {
       nodes = network;
       
-      testScript =
-        ''
-          startAll;
-
-          ${pkgs.lib.concatMapStrings (targetName:
-          ''
-            ${"\$"}${targetName}->waitForJob("network.target");
-            ${"\$"}${targetName}->waitForJob("disnix.service");
-            ${"\$"}${targetName}->mustSucceed("iptables -I INPUT -p tcp --dport 512 -j ACCEPT || true");
-            my $pid = ${"\$"}${targetName}->mustSucceed("${pkgs.socat}/bin/socat tcp-listen:512,fork exec:/bin/sh & echo -n \$!");
-            ${"\$"}${targetName}->mustSucceed("while [ \"\$(ps -p $pid | grep socat)\" = \"\" ]; do sleep 0.5; done");
-    
-          '') (builtins.attrNames network)}
-          
-          ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --no-coordinator-profile --no-lock --no-upgrade ${manifest}/manifest.xml");
-  
-          ${testScript}
-        '';
+      testScript = import ./generate-testscript.nix {
+        inherit network testScript disnix;
+        inherit (pkgs) socat;
+        inherit (pkgs.lib) concatMapStrings;
+        manifestFile = "${manifest}/manifest.xml";
+      };
     };
 }

@@ -14,23 +14,12 @@ let
   
   network = lib.generateMergedNetwork networkFiles nixOpsModel;
   
-  testScript = ''
-    startAll;
-    
-    ${pkgs.lib.concatMapStrings (targetName:
-      ''
-        ${"\$"}${targetName}->waitForJob("network.target");
-        ${"\$"}${targetName}->waitForJob("disnix.service");
-        ${"\$"}${targetName}->mustSucceed("iptables -I INPUT -p tcp --dport 512 -j ACCEPT || true");
-        my $pid = ${"\$"}${targetName}->mustSucceed("${pkgs.socat}/bin/socat tcp-listen:512,fork exec:/bin/sh & echo -n \$!");
-        ${"\$"}${targetName}->mustSucceed("while [ \"\$(ps -p $pid | grep socat)\" = \"\" ]; do sleep 0.5; done");
-      ''
-    ) (builtins.attrNames network)}
-    
-    ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --no-coordinator-profile --no-lock --no-upgrade ${manifestFile}");
-    
-    sleep 1e9;
-  '';
+  testScript = import ./generate-testscript.nix {
+    inherit network disnix manifestFile;
+    inherit (pkgs) socat;
+    inherit (pkgs.lib) concatMapStrings;
+    testScript = "sleep 1e9";
+  };
 in
 pkgs.stdenv.mkDerivation {
   name = "testScript";
