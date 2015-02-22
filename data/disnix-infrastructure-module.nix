@@ -37,7 +37,8 @@ in
       // optionalAttrs (config.services.svnserve.enable) { svnBaseDir = config.services.svnserve.svnBaseDir; }
       // optionalAttrs (cfg.enableAuthentication) (
           optionalAttrs (config.services.mysql.enable) { mysqlUsername = "root"; mysqlPassword = builtins.readFile config.services.mysql.rootPassword; }
-        );
+        )
+      // config.services.disnix.infrastructure;
 
   };
 }
