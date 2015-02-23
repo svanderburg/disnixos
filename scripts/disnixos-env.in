@@ -23,20 +23,21 @@ showUsage()
     echo "Usage: $0 -s services.nix -n network.nix [ -n network2.nix ... ] -d distribution.nix [options]"
     echo "Options:"
     echo
-    echo "-s,--services         Services Nix expression which describes all components of the distributed system"
-    echo "-n,--network          Network Nix expression which declares a NixOS configuration for each machine in the network"
-    echo "-d,--distribution     Distribution Nix expression which maps services to machines in the network"
-    echo "--target-property     The target property of an infrastructure model, that specifies how to "
-    echo "                      connect to the remote Disnix interface. (Defaults to hostname)"
-    echo "--interface           Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
-    echo "-p,--profile          Name of the profile that is used for this system. Defaults to: default"
-    echo "--use-nixops          Use NixOps instead of Disnix's deployment facilities"
-    echo "--disable-disnix      Do not enable the Disnix service on the target machines by default"
-    echo "--no-infra-deployment Only deploy the services, not the infrastructure"
-    echo "--build-on-targets    Build the services on the target machines in the network instead of managing the build by the coordinator"
-    echo "--no-upgrade          Do not perform an upgrade, but activate all services of the new configuration"
-    echo "--show-trace          Shows a trace of the output"
-    echo "-h,--help             Shows the usage of this command"
+    echo "-s,--services                 Services Nix expression which describes all components of the distributed system"
+    echo "-n,--network                  Network Nix expression which declares a NixOS configuration for each machine in the network"
+    echo "-d,--distribution             Distribution Nix expression which maps services to machines in the network"
+    echo "--target-property             The target property of an infrastructure model, that specifies how to "
+    echo "                              connect to the remote Disnix interface. (Defaults to hostname)"
+    echo "--interface                   Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
+    echo "-p,--profile                  Name of the profile that is used for this system. Defaults to: default"
+    echo "-m,--max-concurrent-transfers Maximum amount of concurrent closure transfers. Defauls to: 2"
+    echo "--use-nixops                  Use NixOps instead of Disnix's deployment facilities"
+    echo "--disable-disnix              Do not enable the Disnix service on the target machines by default"
+    echo "--no-infra-deployment         Only deploy the services, not the infrastructure"
+    echo "--build-on-targets            Build the services on the target machines in the network instead of managing the build by the coordinator"
+    echo "--no-upgrade                  Do not perform an upgrade, but activate all services of the new configuration"
+    echo "--show-trace                  Shows a trace of the output"
+    echo "-h,--help                     Shows the usage of this command"
 }
 
 # Autoconf settings
@@ -50,7 +51,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:p:h -l services:,network:,distribution:,profile:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,no-upgrade,show-trace,help -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:p:m:h -l services:,network:,distribution:,profile:,max-concurrent-transfers:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,no-upgrade,show-trace,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -76,6 +77,9 @@ do
             ;;
         -p|--profile)
             profileArg="--profile $2"
+            ;;
+        -m|--max-concurrent-transfers)
+            maxConcurrentTransfersArg="-m $2"
             ;;
         --target-property)
             targetProperty=$2
@@ -135,8 +139,8 @@ infrastructureFile=`disnixos-geninfra --no-out-link $useNixOpsArg $networkFiles`
 if [ "$useNixOps" != "1" ] && [ "$noInfraDeployment" != "1" ]
 then
     # Upgrade the NixOS configurations through Disnix if NixOps is not used
-    disnixos-deploy-network --target-property $targetProperty --interface $interface $disableDisnixArg $profileArg $buildOnTargetsArg $showTraceArg $networkFiles
+    disnixos-deploy-network --target-property $targetProperty --interface $interface $disableDisnixArg $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $showTraceArg $networkFiles
 fi
 
 # Upgrade the services
-disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $profileArg $buildOnTargetsArg $noUpgradeArg $showTraceArg
+disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $noUpgradeArg $showTraceArg

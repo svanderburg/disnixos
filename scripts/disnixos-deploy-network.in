@@ -23,14 +23,15 @@ showUsage()
     echo "Usage: $0 [options] network_expr ..."
     echo "Options:"
     echo
-    echo "--target-property   The target property of an infrastructure model, that specifies how to "
-    echo "                    connect to the remote Disnix interface. (Defaults to hostname)"
-    echo "--interface         Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
-    echo "-p,--profile        Name of the profile that is used for this system. Defaults to: default"
-    echo "--disable-disnix    Do not enable the Disnix service on the target machines by default"
-    echo "--build-on-targets  Build the services on the target machines in the network instead of managing the build by the coordinator"
-    echo "--show-trace        Shows a trace of the output"
-    echo "-h,--help           Shows the usage of this command"
+    echo "--target-property             The target property of an infrastructure model, that specifies how to "
+    echo "                              connect to the remote Disnix interface. (Defaults to hostname)"
+    echo "--interface                   Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
+    echo "-p,--profile                  Name of the profile that is used for this system. Defaults to: default"
+    echo "-m,--max-concurrent-transfers Maximum amount of concurrent closure transfers. Defauls to: 2"
+    echo "--disable-disnix              Do not enable the Disnix service on the target machines by default"
+    echo "--build-on-targets            Build the services on the target machines in the network instead of managing the build by the coordinator"
+    echo "--show-trace                  Shows a trace of the output"
+    echo "-h,--help                     Shows the usage of this command"
 }
 
 # Import checks
@@ -38,7 +39,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o p:h -l profile:,target-property:,interface:,show-trace,disable-disnix,build-on-targets,help -- "$@"`
+PARAMS=`@getopt@ -n $0 -o p:m:h -l profile:,max-concurrent-transfers:,target-property:,interface:,show-trace,disable-disnix,build-on-targets,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -55,6 +56,9 @@ do
     case "$1" in
 	-p|--profile)
 	    profileArg="--profile $2"
+	    ;;
+	-m|--max-concurrent-transfers)
+	    maxConcurrentTransfersArg="-m $2"
 	    ;;
 	--target-property)
 	    targetProperty=$2
@@ -104,14 +108,14 @@ if [ "$buildOnTargets" = "1" ]
 then
     # Build the components on the target machines if requested
     distributedDerivation=`disnixos-instantiate --target-property $targetProperty --interface $interface --no-out-link $disableDisnixArg $showTraceArg $networkFileArgs`
-    disnix-build $distributedDerivation
+    disnix-build $maxConcurrentTransfersArg $distributedDerivation
 fi
 
 # Create a manifest file
 manifest=`disnixos-manifest $networkFileArgs --target-property $targetProperty --interface $interface --no-out-link $disableDisnixArg $showTraceArg`
 
 # Distribute system derivations
-disnix-distribute $manifest
+disnix-distribute $maxConcurrentTransfersArg $manifest
 
 # Activate system derivations
 disnix-activate $profileArg --no-coordinator-profile --no-target-profiles --no-upgrade $manifest
