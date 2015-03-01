@@ -6,7 +6,7 @@
 
 	<para>
 		<link xlink:href="http://nixos.org/nixos">NixOS</link>
-		is a GNU/Linux distribution, which uses the Nix package manager to manage
+		is a GNU/Linux distribution using the Nix package manager to manage
 		all packages, system components (such as the Linux kernel) and configuration files.
 		In NixOS, system configurations are derived from declarative specifications describing
 		properties of the system, such as kernel modules, partitions, services and
@@ -104,9 +104,9 @@
 	</calloutlist>
 	
 	<para>
-		The specification in <xref linkend="ex-1-nixos-configuration" /> can be stored in the
-		at <filename>/etc/nixos/configuration.nix</filename> and 
-		the complete configuration can be built from source code and activated by running:
+		The specification in <xref linkend="ex-1-nixos-configuration" /> should be stored in the
+		following location: <filename>/etc/nixos/configuration.nix</filename>. 
+		The complete configuration can be built from source code and activated by running:
 	</para>
 	
 <screen>

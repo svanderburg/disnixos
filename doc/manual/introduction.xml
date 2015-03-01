@@ -5,9 +5,11 @@
 	<title>Introduction</title>
 
 	<para>
-		Disnix is a toolset used to perform distributed deployment tasks
-		and is built on top of Nix; a package manager which has some distinct
-		features compared to conventional package
+		Disnix is a distributed service deployment toolset which main
+		purpose is to deploy service oriented systems (i.e. systems that can be
+		decomposed into "distributable units") into networks of machines
+		having various characteristics (such as operating systems) and is built on top of Nix;
+		a package manager which has some unique features compared to conventional package
 		managers to make deployment safe and reliable.
 	</para>
 
@@ -18,10 +20,14 @@
 		and ordinary processes.
 	</para>
 	<para>
-		Disnix, however, does not manage the deployment of the infrastructure itself and their
+		Disnix, however, expects the underlying infrastructure, such as machines running
+		certain kinds of operating systems with certain containers (e.g. a DBMS or application server) to
+		be present already. It does not manage the deployment of the infrastructure and their
 		system configurations. Normally, a system administrator must manually install machines in the network
 		having the required characteristics by following the installation steps of the operating system.
-		Moreover, a system administrator or developer must also manually write an infrastructure model, matching the
+	</para>
+	<para>
+		Moreover, a system administrator or developer must manually write an infrastructure model, matching the
 		actual configuration of the network in order to correctly deploy a service-oriented
 		system, which may be a lot of work and error prone.
 	</para>
@@ -32,12 +38,15 @@
 		<link xlink:href="http://nixos.org/nixos">NixOS</link>,
 		a GNU/Linux distribution built around the Nix package manager. NixOS is a distribution
 		in which complete system configurations can be built from declarative specifications and
-		also allows atomic upgrades and rollbacks of complete system configurations.
+		supports atomic upgrades and rollbacks of complete system configurations.
 	</para>
 	
 	<section>
 		<title>Features</title>
 		
+		<para>
+			DisnixOS adds the following features to the basic Disnix toolset:
+		</para>
 		<simplesect>
 			<title>Infrastructure deployment</title>
 			<para>
@@ -71,7 +80,7 @@
 			<title>Infrastructure instantiation and provisioning</title>
 			<para>
 				DisnixOS can also be used in combination with <link xlink:href="http://github.com/nixos/nixops">NixOps</link>,
-				a tool that can deploy networks of NixOS configurations and automatically instantiate and provision
+				a tool that deploys networks of NixOS configurations and automatically instantiate and provisions
 				virtual machines in an IaaS environment, such as Amazon EC2.
 			</para>
 		</simplesect>

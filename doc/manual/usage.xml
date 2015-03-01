@@ -5,7 +5,7 @@
 	<title>Usage</title>
 
         <para>
-		DisnixOS offers some additional features to the basic Disnix toolset, which are shown in this section.
+		DisnixOS offers some additional use cases in addition to the ones provided by the basic Disnix toolset, which are shown in this section.
         </para>
         
 	<section>
@@ -39,7 +39,7 @@ $ disnixos-deploy-network network-logical.nix network-physical.nix
 	</section>
 		
 	<section>
-		<title>Deploying the services and infrastructure at once</title>
+		<title>Deploying the services and infrastructure at the same time</title>
 		
 		<para>
 			In order to automatically deploy NixOS configurations in a network machines and the services of
@@ -57,7 +57,7 @@ $ disnixos-env -s services.nix -n network.nix -d distribution.nix
 		</para>
 		
 		<para>
-			Likewise, it can also take multiple networks that get merged together:
+			Likewise, it can also take multiple network models that get merged together:
 		</para>
 		
 <screen>
@@ -108,7 +108,7 @@ $ disnixos-env -s services.nix -n network-logical.nix -n network-physical.nix -d
 </screen>
 
 		<para>
-			DisnixOS automatically uses NixOps' SSH connection facilities to connect to remote machines and to execute remote deployment steps.
+			DisnixOS automatically uses NixOps' SSH connection facilities to connect to remote machines and execute remote deployment steps.
 		</para>
 		
 	</section>
@@ -117,7 +117,7 @@ $ disnixos-env -s services.nix -n network-logical.nix -n network-physical.nix -d
 		<title>Deploying a system in a virtual network</title>
 		
 		<para>
-			You can also deploy a system in a network of efficient virtual machines provided by the NixOS test driver, which is useful for testing.
+			You can also deploy a system in a network of cheaply instantiated virtual machines provided by the NixOS test driver, which is useful for testing.
 			This can be done by executing the following instruction:
 		</para>
 		
@@ -166,7 +166,7 @@ $ disnixos-manifest -s services.nix -n network-logical.nix -n network-physical.n
 $ disnixos-manifest -n network-logical.nix -n network-physical.nix 
 </screen>
 		<para>
-			Omitting the services and distribution models, cause <command>disnixos-manifest</command> to build the NixOS system configurations.
+			Omitting the services and distribution models, causes <command>disnixos-manifest</command> to build the NixOS system configurations.
 			The resulting manifest files can be distributed to the target machines and activated by using the <command>disnix-distribute</command>
 			and <command>disnix-activate</command> commands.
 		</para>
@@ -185,7 +185,7 @@ $ disnixos-instantiate -s services.nix -n network-logical.nix -n network-physica
 </screen>
 		
 		<para>
-			Omitting the services and distribution models, cause <command>disnixos-instantiate</command> to generate
+			Omitting the services and distribution models, causes <command>disnixos-instantiate</command> to generate
 			a distributed derivation file for the system configurations (infrastructure):
 		</para>
 		
@@ -302,7 +302,7 @@ rec {
 			</callout>
 			<callout arearefs='co-2-sourceTarball'>
 				<para>
-				      This function invocation constructs a Zip file containing all files belonging to a Disnix project.
+				      This function invocation constructs a bzip2 compressed tarball containing all files belonging to a Disnix project.
 				</para>
 			</callout>
 			<callout arearefs='co-3-buildManifest'>
@@ -314,10 +314,10 @@ rec {
 			</callout>
 			<callout arearefs='co-4-disnixTest'>
 				<para>
-					This job spawns a network of QEMU machines inside a build, consults DisnixOS to deploy the system and performs some testcases.
+					This job spawns a network of QEMU machines inside a Nix build, consults DisnixOS to deploy the system and performs some testcases.
 					Basically this function abstraction does mostly what the command <command>disnixos-vm-env</command> does, but in an non-interactive
-					manner. Moreover, it also takes a test script that is implemented in Perl. Test scripts are implemented using the exact same
-					convention as the NixOS test driver. Consult the NixOS manual for more details on how to write test scripts.
+					manner. Moreover, it also takes a test script as a parameter that is written in Perl. Test scripts use the facilities
+					of the NixOS test driver for execution. Consult the NixOS manual for more details on how to write test scripts.
 				</para>
 			</callout>
 	      </calloutlist>

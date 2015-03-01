@@ -47,7 +47,7 @@
 		<para>
 			When there is already a distributed system configuration deployed, an upgrade is performed. In this
 			phase only the changed parts of the system are deactivated and activated. In this process we
-			also deal with the inter-dependencies so that no services fails due to a missing inter-dependency.
+			also deal with the inter-dependencies so that no service deployment fails due to a missing inter-dependency.
 		</para>
 		<para>
 			This command is essentially a composition of the 

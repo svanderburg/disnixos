@@ -5,7 +5,7 @@
 	<title>Installation</title>
 
 	<para>
-		This chapter explains how DisnixOS can be installed. Except for the basic 
+		This chapter explains how DisnixOS can be installed. Apart from the basic 
 		<link xlink:href="http://nixos.org/disnix">Disnix</link> 
 		toolset, only the coordinator machine needs the DisnixOS
 		extension tools. 
@@ -29,7 +29,7 @@
 				<link xlink:href="http://nixos.org/disnix">Disnix</link>,
 				the core Disnix toolset must be installed. Have a look for 
 				installation instructions in the Disnix manual.
-				Moreover, for network communication, DisnixOS uses
+				Moreover, for network communication with the NixOS test driver, DisnixOS uses
 				<link xlink:href="http://www.dest-unreach.org/socat">socat</link>,
 				which must also be present on the system.
 				For infrastructure instantiation and provisioning,
@@ -54,7 +54,7 @@ $ make install
 			</para>
 
 			<para>
-				When building from the Subversion repository, these should be
+				When building from the Git repository, these should be
 				preceded by the command:
 
 <screen>
@@ -116,44 +116,5 @@ export NIX_PATH
 # End Nixpkgs addition
 EOF
 </screen>
-	</section>
-	
-	<section>
-		<title>Using NixOS infrastructure deployment features on a regular Linux distribution</title>
-		
-		<para>
-			To use the NixOS deployment features and test driver on a regular Linux distribution, you need a
-			copy of the NixOS source code, which can be obtained from our Git repository by typing:
-			
-<screen>
-$ git clone https://github.com/NixOS/nixos.git
-</screen>
-		</para>
-		
-		<para>
-			DisnixOS also needs to know where to find the NixOS source code, provided by the
-			<code>NIX_PATH</code> environment variable. On regular Linux systems, this environment variable must
-			point to the path where the NixOS source is stored.
-			This variable can be configured by adding the following lines to your
-			<filename>~/.bash_profile</filename> configuration (or another configuration
-			file, if you use a different shell):
-		</para>
-		
-<screen>
-$ cat &gt;&gt; ~/.bash_profile &lt;&lt;EOF
-# Begin NixOS addition
-
-NIX_PATH="$NIX_PATH:nixos=/path/to/nixos"
-export NIX_PATH
-
-# End NixOS addition
-EOF
-</screen>
-		
-		<para>
-			Moreover, for efficiency you need a system capable of running
-			<link xlink:href="http://www.linux-kvm.org">KVM</link>, check your host Linux
-			distribution for more instructions.
-		</para>
 	</section>
 </chapter>
