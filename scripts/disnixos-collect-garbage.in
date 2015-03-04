@@ -57,7 +57,7 @@ eval set -- "$PARAMS"
 while [ "$1" != "--" ]
 do
     case "$1" in
-	-d|--deleteOld)
+	-d|--delete-old)
 	    deleteOldArg="-d"
 	    ;;
 	--target-property)
