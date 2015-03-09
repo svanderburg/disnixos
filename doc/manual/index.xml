@@ -11,10 +11,6 @@
         <firstname>Sander</firstname>
         <surname>van der Burg</surname>
       </personname>
-      <affiliation>
-        <orgname>Delft University of Technology</orgname>
-        <orgdiv>Department of Software Technology</orgdiv>
-      </affiliation>
       <contrib>Author</contrib>
     </author>
 
