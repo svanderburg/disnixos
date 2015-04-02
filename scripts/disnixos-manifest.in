@@ -119,7 +119,6 @@ fi
 
 checkUseNixOps
 
-
 # Build the manifest file
 
 if [ "$servicesFile" = "" ] || [ "$distributionFile" = "" ]
@@ -147,6 +146,7 @@ else
     if [ "$useNixOps" = "1" ]
     then
         nixOpsArg="--use-nixops"
+        interface=disnix-nixops-client
         locateNixOps
     fi
 

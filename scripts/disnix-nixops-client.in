@@ -34,6 +34,14 @@ showUsage()
     echo "  --deactivate --type type --arguments arguments derivation"
     echo "  --lock [{-p|--profile} profile]"
     echo "  --unlock [{-p|--profile} profile]"
+    echo "  --snapshot --type type --arguments arguments derivation"
+    echo "  --restore --type type --arguments arguments derivation"
+    echo "  --query-all-snapshots --container container --component component"
+    echo "  --query-latest-snapshot --container container --component component"
+    echo "  --print-missing-snapshots snapshots"
+    echo "  --import-snapshots paths"
+    echo "  --export-snapshots paths"
+    echo "  --resolve-snapshots snapshots"
     echo "  {-h | --help}"
 }
 
@@ -45,7 +53,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o rqp:d -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,help -- "$@"`
+PARAMS=`@getopt@ -n $0 -o rqp:d -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,snapshot,restore,query-all-snapshots,query-latest-snapshot,print-missing-snapshots,import-snapshots,export-snapshots,resolve-snapshots,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,container:,component:,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -100,6 +108,32 @@ do
             operation="unlock";
             path=$2
             ;;
+        --snapshot)
+            operation="snapshot"
+            path=$2
+            ;;
+        --restore)
+            operation="restore"
+            path=$2
+            ;;
+        --query-all-snapshots)
+            operation="query-all-snapshots"
+            ;;
+        --query-latest-snapshot)
+            operation="query-latest-snapshot"
+            ;;
+        --print-missing-snapshots)
+            operation="print-missing-snapshots"
+            ;;
+        --import-snapshots)
+            operation="import-snapshots"
+            ;;
+        --export-snapshots)
+            operation="export-snapshots"
+            ;;
+        --resolve-snapshots)
+            operation="resolve-snapshots"
+            ;;
         --target)
             target=$2
             ;;
@@ -120,6 +154,12 @@ do
             ;;
         --arguments)
             argsArg="$argsArg --arguments \"$2\""
+            ;;
+        -C|--container)
+            container=$2
+            ;;
+        -c|--component)
+            component=$2
             ;;
         -h|--help)
             showUsage
@@ -215,5 +255,60 @@ case "$operation" in
         ;;
     unlock)
         nixops ssh $NIXOPS_OPTS $target "disnix-client --unlock $profileArg"
+        ;;
+    snapshot)
+        if [ "$type" = "" ]
+        then
+            echo "ERROR: A type must be specified!" >&2
+            exit 1
+        fi
+        
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type $argsArg --snapshot $@"
+        ;;
+    restore)
+        if [ "$type" = "" ]
+        then
+            echo "ERROR: A type must be specified!" >&2
+            exit 1
+        fi
+        
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type $argsArg --restore $@"
+        ;;
+    query-all-snapshots)
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --query-all-snapshots --container $container --component $component"
+        ;;
+    query-latest-snapshot)
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --query-latest-snapshot --container $container --component $component"
+        ;;
+    print-missing-snapshots)
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --print-missing-snapshots $@"
+        ;;
+    import-snapshots)
+        if [ "$localfile" != "1" ] && [ "$remotefile" != "1" ]
+        then
+            echo "ERROR: Either a remote or a localfile must be specified!" >&2
+            exit 1
+        fi
+        
+        # A localfile must first be transferred
+        if [ "$localfile" = "1" ]
+        then
+            remotefile=`nixops ssh $NIXOPS_OPTS $target "mktemp -d -p $TMPDIR"`
+            nixops scp $NIXOPS_OPTS --to $target $@ $remotefile
+        fi
+        
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --container $container --component $component --import-snapshots "$remotefile/*
+        ;;
+    export-snapshots)
+        tmpdir=`mktemp -d -p $TMPDIR`
+        for i in $@
+        do
+            nixops scp $NIXOPS_OPTS --from $target $i $tmpdir
+        done
+        
+        echo $tmpdir
+        ;;
+    resolve-snapshots)
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --resolve-snapshots $@"
         ;;
 esac
