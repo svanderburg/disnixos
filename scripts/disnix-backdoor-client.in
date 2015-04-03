@@ -55,70 +55,70 @@ while [ "$1" != "--" ]
 do
     case "$1" in
         --import)
-	    operation="import";
-	    ;;
-	--export)
-	    operation="export";
-	    ;;
-	--print-invalid)
-	    operation="print-invalid";
-	    ;;
-	-r|--realise)
-	    operation="realise";
-	    ;;
-	--set)
-	    operation="set";
-	    ;;
-	-q|--query-installed)
-	    operation="query-installed";
-	    ;;
-	--query-requisites)
-	    operation="query-requisites";
-	    ;;
-	--collect-garbage)
-	    operation="collect-garbage";
-	    ;;
-	--activate)
-	    operation="activate";
-	    path=$2
-	    ;;
-	--deactivate)
-	    operation="deactivate";
-	    path=$2
-	    ;;
-	--lock)
-	    operation="lock";
-	    path=$2
-	    ;;
-	--unlock)
-	    operation="unlock";
-	    path=$2
-	    ;;
-	--target)
-	    target=$2
-	    ;;
-	--localfile)
-	    localfile=1
-	    ;;
-	--remotefile)
-	    remotefile=1
-	    ;;
-	-p|--profile)
-	    profileArg="--profile $2"
-	    ;;
-	-d|--delete-old)
-	    deleteOldArg="-d"
-	    ;;
-	--type)
-	    type=$2
-	    ;;
-	--arguments)
-	    argsArg="$argsArg --arguments \"$2\""
-	    ;;
-	-h|--help)
-	    showUsage
-	    exit 0
-	    ;;
+            operation="import"
+            ;;
+        --export)
+            operation="export"
+            ;;
+        --print-invalid)
+            operation="print-invalid"
+            ;;
+        -r|--realise)
+            operation="realise"
+            ;;
+        --set)
+            operation="set"
+            ;;
+        -q|--query-installed)
+            operation="query-installed"
+            ;;
+        --query-requisites)
+            operation="query-requisites"
+            ;;
+        --collect-garbage)
+            operation="collect-garbage"
+            ;;
+        --activate)
+            operation="activate"
+            path=$2
+            ;;
+        --deactivate)
+            operation="deactivate"
+            path=$2
+            ;;
+        --lock)
+            operation="lock"
+            path=$2
+            ;;
+        --unlock)
+            operation="unlock"
+            path=$2
+            ;;
+        --target)
+            target=$2
+            ;;
+        --localfile)
+            localfile=1
+            ;;
+        --remotefile)
+            remotefile=1
+            ;;
+        -p|--profile)
+            profileArg="--profile $2"
+            ;;
+        -d|--delete-old)
+            deleteOldArg="-d"
+            ;;
+        --type)
+            type=$2
+            ;;
+        --arguments)
+            argsArg="$argsArg --arguments \"$2\""
+            ;;
+        -h|--help)
+            showUsage
+            exit 0
+            ;;
     esac
     
     shift
@@ -146,95 +146,95 @@ export PATH=$PATH:$(dirname @socat@)
 case "$operation" in
     import)
         # Returns always true since host Nix store == guest Nix store
-	;;
+        ;;
     export)
         # Returns always true since host Nix store == guest Nix store
         ;;
     print-invalid)
-	# Everything is always valid since we have no Nix DB
-	;;
+        # Everything is always valid since we have no Nix DB
+        ;;
     realise)
         outputFile=$(mktemp -p $TMPDIR)
         echo "disnix-client --realise $@; echo \$?" | socat stdio $target > $outputFile
-	exitStatus=$(tail -1 $outputFile)
-	head -n -1 $outputFile
-	rm -f $outputFile
-	exit $exitStatus
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
         ;;
     set)
-	#outputFile=$(mktemp -p $TMPDIR)
+        #outputFile=$(mktemp -p $TMPDIR)
         #echo "disnix-client $profileArg --set $@; echo \$?" | socat stdio $target > $outputFile
-	#exitStatus=$(tail -1 $outputFile)
-	#head -n -1 $outputFile
-	#rm -f $outputFile
-	#exit $exitStatus
+        #exitStatus=$(tail -1 $outputFile)
+        #head -n -1 $outputFile
+        #rm -f $outputFile
+        #exit $exitStatus
         ;;
     query-installed)
-	outputFile=$(mktemp -p $TMPDIR)
+        outputFile=$(mktemp -p $TMPDIR)
         echo "disnix-client $profileArg --query-installed $@; echo \$?" | socat stdio $target > $outputFile
-	exitStatus=$(tail -1 $outputFile)
-	head -n -1 $outputFile
-	rm -f $outputFile
-	exit $exitStatus
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
         ;;
     query-requisites)
-	outputFile=$(mktemp -p $TMPDIR)
+        outputFile=$(mktemp -p $TMPDIR)
         echo "disnix-client --query-requisites $@; echo \$?" | socat stdio $target > $outputFile
-	exitStatus=$(tail -1 $outputFile)
-	head -n -1 $outputFile
-	rm -f $outputFile
-	exit $exitStatus
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
         ;;
     collect-garbage)
-	outputFile=$(mktemp -p $TMPDIR)
+        outputFile=$(mktemp -p $TMPDIR)
         echo "disnix-client --collect-garbage $deleteOldArg $@; echo \$?" | socat stdio $target > $outputFile
-	exitStatus=$(tail -1 $outputFile)
-	head -n -1 $outputFile
-	rm -f $outputFile
-	exit $exitStatus
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
         ;;
     activate)
-	if [ "$type" = "" ]
-	then
-	    echo "ERROR: A type must be specified!" >&2
-	    exit 1
-	fi
-	
-	outputFile=$(mktemp -p $TMPDIR)
-	echo "disnix-client --type $type $argsArg --activate $@; echo \$?" | socat stdio $target > $outputFile
-	exitStatus=$(tail -1 $outputFile)
-	head -n -1 $outputFile
-	rm -f $outputFile
-	exit $exitStatus
-	;;
+        if [ "$type" = "" ]
+        then
+            echo "ERROR: A type must be specified!" >&2
+            exit 1
+        fi
+        
+        outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client --type $type $argsArg --activate $@; echo \$?" | socat stdio $target > $outputFile
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
+        ;;
     deactivate)
-	if [ "$type" = "" ]
-	then
-	    echo "ERROR: A type must be specified!" >&2
-	    exit 1
-	fi
-	
-	outputFile=$(mktemp -p $TMPDIR)
-	echo "disnix-client --type $type $argsArg --deactivate $@; echo \$?" | socat stdio $target > $outputFile
-	exitStatus=$(tail -1 $outputFile)
-	head -n -1 $outputFile
-	rm -f $outputFile
-	exit $exitStatus
-	;;
+        if [ "$type" = "" ]
+        then
+            echo "ERROR: A type must be specified!" >&2
+            exit 1
+        fi
+        
+        outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client --type $type $argsArg --deactivate $@; echo \$?" | socat stdio $target > $outputFile
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
+        ;;
     lock)
-	outputFile=$(mktemp -p $TMPDIR)
+        outputFile=$(mktemp -p $TMPDIR)
         echo "disnix-client --lock $profileArg; echo \$?" | socat stdio $target > $outputFile
-	exitStatus=$(tail -1 $outputFile)
-	head -n -1 $outputFile
-	rm -f $outputFile
-	exit $exitStatus
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
         ;;
     unlock)
-	outputFile=$(mktemp -p $TMPDIR)
+        outputFile=$(mktemp -p $TMPDIR)
         echo "disnix-client --unlock $profileArg; echo \$?" | socat stdio $target > $outputFile
-	exitStatus=$(tail -1 $outputFile)
-	head -n -1 $outputFile
-	rm -f $outputFile
-	exit $exitStatus
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
         ;;
 esac

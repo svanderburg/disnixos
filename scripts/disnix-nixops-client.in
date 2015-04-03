@@ -69,43 +69,43 @@ while [ "$1" != "--" ]
 do
     case "$1" in
         --import)
-            operation="import";
+            operation="import"
             ;;
         --export)
-            operation="export";
+            operation="export"
             ;;
         --print-invalid)
-            operation="print-invalid";
+            operation="print-invalid"
             ;;
         -r|--realise)
-            operation="realise";
+            operation="realise"
             ;;
         --set)
-            operation="set";
+            operation="set"
             ;;
         -q|--query-installed)
-            operation="query-installed";
+            operation="query-installed"
             ;;
         --query-requisites)
-            operation="query-requisites";
+            operation="query-requisites"
             ;;
         --collect-garbage)
-            operation="collect-garbage";
+            operation="collect-garbage"
             ;;
         --activate)
-            operation="activate";
+            operation="activate"
             path=$2
             ;;
         --deactivate)
-            operation="deactivate";
+            operation="deactivate"
             path=$2
             ;;
         --lock)
-            operation="lock";
+            operation="lock"
             path=$2
             ;;
         --unlock)
-            operation="unlock";
+            operation="unlock"
             path=$2
             ;;
         --snapshot)
