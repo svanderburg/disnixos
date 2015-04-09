@@ -35,6 +35,7 @@ showUsage()
     echo "--disable-disnix              Do not enable the Disnix service on the target machines by default"
     echo "--no-infra-deployment         Only deploy the services, not the infrastructure"
     echo "--build-on-targets            Build the services on the target machines in the network instead of managing the build by the coordinator"
+    echo "--deploy-state                Indicates whether to globally deploy state (disabled by default)"
     echo "--no-upgrade                  Do not perform an upgrade, but activate all services of the new configuration"
     echo "--show-trace                  Shows a trace of the output"
     echo "-h,--help                     Shows the usage of this command"
@@ -51,7 +52,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:p:m:h -l services:,network:,distribution:,profile:,max-concurrent-transfers:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,no-upgrade,show-trace,help -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:p:m:h -l services:,network:,distribution:,profile:,max-concurrent-transfers:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,deploy-state,no-upgrade,show-trace,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -100,6 +101,9 @@ do
         --build-on-targets)
             buildOnTargetsArg="--build-on-targets"
             ;;
+        --deploy-state)
+            deployStateArg="--deploy-state"
+            ;;
         --no-upgrade)
             noUpgradeArg="--no-upgrade"
             ;;
@@ -143,4 +147,4 @@ then
 fi
 
 # Upgrade the services
-disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $noUpgradeArg $showTraceArg
+disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $deployStateArg $noUpgradeArg $showTraceArg
