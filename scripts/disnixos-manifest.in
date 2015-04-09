@@ -29,6 +29,7 @@ showUsage()
     echo "--target-property   The target property of an infrastructure model, that specifies how to "
     echo "                    connect to the remote Disnix interface. (Defaults to hostname)"
     echo "--interface         Path to executable that communicates with a Disnix interface. Defaults to disnix-ssh-client"
+    echo "--deploy-state      Indicates whether to globally deploy state (disabled by default)"
     echo "--no-out-link       Do not create a 'result' symlink"
     echo "--show-trace        Shows a trace of the output"
     echo "--vm                Configures a manifest used for the NixOS test driver"
@@ -48,7 +49,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:h -l services:,network:,distribution:,target-property:,interface:,no-out-link,show-trace,vm,use-nixops,disable-disnix,help -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:h -l services:,network:,distribution:,target-property:,interface:,deploy-state,no-out-link,show-trace,vm,use-nixops,disable-disnix,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -77,6 +78,9 @@ do
             ;;
         --interface)
             interface=$2
+            ;;
+        --deploy-state)
+            deployStateArg="--deploy-state"
             ;;
         --no-out-link)
             noOutLink=1
@@ -153,5 +157,5 @@ else
     # Generate infrastructure model from network model
     infrastructureFile=`disnixos-geninfra --no-out-link $genInfraArgs $nixOpsArg $networkFiles`
     
-    disnix-manifest -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $noOutLinkArg $showTraceArg
+    disnix-manifest -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $deployStateArg $noOutLinkArg $showTraceArg
 fi
