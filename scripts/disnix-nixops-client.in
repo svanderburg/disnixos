@@ -42,6 +42,7 @@ showUsage()
     echo "  --import-snapshots paths"
     echo "  --export-snapshots paths"
     echo "  --resolve-snapshots snapshots"
+    echo "  --clean-snapshots"
     echo "  {-h | --help}"
 }
 
@@ -53,7 +54,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o rqp:d -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,snapshot,restore,query-all-snapshots,query-latest-snapshot,print-missing-snapshots,import-snapshots,export-snapshots,resolve-snapshots,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,container:,component:,help -- "$@"`
+PARAMS=`@getopt@ -n $0 -o rqp:d -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,snapshot,restore,query-all-snapshots,query-latest-snapshot,print-missing-snapshots,import-snapshots,export-snapshots,resolve-snapshots,clean-snapshots,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,container:,component:,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -310,5 +311,8 @@ case "$operation" in
         ;;
     resolve-snapshots)
         nixops ssh $NIXOPS_OPTS $target "disnix-client --resolve-snapshots $@"
+        ;;
+    clean-snapshots)
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --clean-snapshots $@"
         ;;
 esac
