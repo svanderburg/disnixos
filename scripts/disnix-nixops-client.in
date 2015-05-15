@@ -43,7 +43,7 @@ showUsage()
     echo "  --import-snapshots paths"
     echo "  --export-snapshots paths"
     echo "  --resolve-snapshots snapshots"
-    echo "  --clean-snapshots"
+    echo "  --clean-snapshots [--keep num]"
     echo "  {-h | --help}"
 }
 
@@ -55,7 +55,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o rqp:d -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,snapshot,restore,delete-state,query-all-snapshots,query-latest-snapshot,print-missing-snapshots,import-snapshots,export-snapshots,resolve-snapshots,clean-snapshots,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,container:,component:,help -- "$@"`
+PARAMS=`@getopt@ -n $0 -o rqp:d -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,snapshot,restore,delete-state,query-all-snapshots,query-latest-snapshot,print-missing-snapshots,import-snapshots,export-snapshots,resolve-snapshots,clean-snapshots,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,container:,component:,keep:,help -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -139,6 +139,9 @@ do
         --resolve-snapshots)
             operation="resolve-snapshots"
             ;;
+        --clean-snapshots)
+            operation="clean-snapshots"
+            ;;
         --target)
             target=$2
             ;;
@@ -166,6 +169,9 @@ do
         -c|--component)
             component=$2
             ;;
+        --keep)
+            keep=$2
+            ;;
         -h|--help)
             showUsage
             exit 0
@@ -181,6 +187,11 @@ shift
 
 checkTarget
 checkTmpDir
+
+if [ "$keep" = "" ]
+then
+    keep=1
+fi
 
 # Execute selected operation
 
@@ -326,6 +337,6 @@ case "$operation" in
         nixops ssh $NIXOPS_OPTS $target "disnix-client --resolve-snapshots $@"
         ;;
     clean-snapshots)
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --clean-snapshots $@"
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --clean-snapshots --keep $keep $@"
         ;;
 esac
