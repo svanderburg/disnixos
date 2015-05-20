@@ -5,6 +5,7 @@
   virtualisation.writableStore = true;
   virtualisation.memorySize = 1024;
   virtualisation.diskSize = 10240;
+  virtualisation.pathsInNixDB = [ pkgs.stdenv ];
   
   ids.gids = { disnix = 200; };
   users.extraGroups = [ { gid = 200; name = "disnix"; } ];
@@ -29,7 +30,5 @@
       exec = "disnix-service";
     };
     
-    environment.systemPackages = [ pkgs.stdenv pkgs.nix disnix disnixos pkgs.hello pkgs.zip
-      pkgs.busybox pkgs.paxctl pkgs.gnumake pkgs.patchelf pkgs.gcc pkgs.perlPackages.ArchiveCpio # Upgrades fail without this, because it is needed to rebuild the NixOS configuration
-    ];
+    environment.systemPackages = [ pkgs.nix disnix disnixos pkgs.hello pkgs.zip ];
 }
