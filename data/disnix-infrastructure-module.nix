@@ -1,6 +1,4 @@
-{ config, pkgs, ... }:
-
-with pkgs.lib;
+{ config, pkgs, lib, ... }:
 
 let
   cfg = config.disnixInfrastructure;
@@ -8,35 +6,35 @@ in
 {
   options = {
     disnixInfrastructure = {
-      enable = mkOption {
+      enable = lib.mkOption {
         default = false;
         description = "Whether to enable infrastructure publishing";
       };
     
-      enableAuthentication = mkOption {
+      enableAuthentication = lib.mkOption {
         default = false;
         description = "Whether to publish authentication credentials through the infrastructure attribute (not recommended in combination with Avahi)";
       };
     
-      infrastructure = mkOption {
+      infrastructure = lib.mkOption {
         default = {};
         description = "An attribute set containing infrastructure model properties";
       };
     };
   };
   
-  config = mkIf cfg.enable {
+  config = lib.mkIf cfg.enable {
     disnixInfrastructure.infrastructure =
       { hostname = config.networking.hostName;
         system = if config.nixpkgs.system == "" then builtins.currentSystem else config.nixpkgs.system;
       }
-      // optionalAttrs (config.services.disnix.useWebServiceInterface) { targetEPR = "http://${config.networking.hostName}:8080/DisnixWebService/services/DisnixWebService"; }
-      // optionalAttrs (config.services.httpd.enable) { documentRoot = config.services.httpd.documentRoot; }
-      // optionalAttrs (config.services.mysql.enable) { mysqlPort = config.services.mysql.port; }
-      // optionalAttrs (config.services.tomcat.enable) { tomcatPort = 8080; }
-      // optionalAttrs (config.services.svnserve.enable) { svnBaseDir = config.services.svnserve.svnBaseDir; }
-      // optionalAttrs (cfg.enableAuthentication) (
-          optionalAttrs (config.services.mysql.enable) { mysqlUsername = "root"; mysqlPassword = builtins.readFile config.services.mysql.rootPassword; }
+      // lib.optionalAttrs (config.services.disnix.useWebServiceInterface) { targetEPR = "http://${config.networking.hostName}:8080/DisnixWebService/services/DisnixWebService"; }
+      // lib.optionalAttrs (config.services.httpd.enable) { documentRoot = config.services.httpd.documentRoot; }
+      // lib.optionalAttrs (config.services.mysql.enable) { mysqlPort = config.services.mysql.port; }
+      // lib.optionalAttrs (config.services.tomcat.enable) { tomcatPort = 8080; }
+      // lib.optionalAttrs (config.services.svnserve.enable) { svnBaseDir = config.services.svnserve.svnBaseDir; }
+      // lib.optionalAttrs (cfg.enableAuthentication) (
+          lib.optionalAttrs (config.services.mysql.enable) { mysqlUsername = "root"; mysqlPassword = builtins.readFile config.services.mysql.rootPassword; }
         )
       // config.services.disnix.infrastructure;
 
