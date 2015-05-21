@@ -77,5 +77,26 @@ simpleTest {
       } else {
           die "result should be: 1";
       }
+      
+      # Run the clean snapshots operation to wipe out all snapshots on the target
+      # machines and check if they are really removed.
+      
+      $coordinator->mustSucceed("SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' NIX_PATH=nixpkgs=${nixpkgs} disnixos-clean-snapshots --keep 0 ${physicalNetworkNix}");
+      
+      $result = $testtarget1->mustSucceed("dysnomia-snapshots --query-all --container wrapper --component testService1 | wc -l");
+      
+      if($result == 0) {
+          print "result is: 0\n";
+      } else {
+          die "result should be: 0, but it is: $result";
+      }
+      
+      $result = $testtarget2->mustSucceed("dysnomia-snapshots --query-all --container wrapper --component testService2 | wc -l");
+      
+      if($result == 0) {
+          print "result is: 0\n";
+      } else {
+          die "result should be: 0, but it is: $result";
+      }
     '';
 }
