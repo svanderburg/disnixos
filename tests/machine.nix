@@ -30,5 +30,5 @@
       exec = "disnix-service";
     };
     
-    environment.systemPackages = [ pkgs.nix disnix disnixos pkgs.hello pkgs.zip ];
+    environment.systemPackages = [ pkgs.nix dysnomia disnix disnixos pkgs.hello pkgs.zip ];
 }
