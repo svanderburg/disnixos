@@ -5,7 +5,7 @@
   virtualisation.writableStore = true;
   virtualisation.memorySize = 1024;
   virtualisation.diskSize = 10240;
-  virtualisation.pathsInNixDB = [ pkgs.stdenv ];
+  virtualisation.pathsInNixDB = [ pkgs.stdenv pkgs.perlPackages.ArchiveCpio pkgs.busybox ];
   
   ids.gids = { disnix = 200; };
   users.extraGroups = [ { gid = 200; name = "disnix"; } ];

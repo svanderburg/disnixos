@@ -1,3 +1,9 @@
+Version 0.3
+===========
+- Implement snapshot and restore operations
+
+- Fix disnixos-manifest to correctly generate manifests that work with NixOps
+
 Version 0.2
 ===========
 
