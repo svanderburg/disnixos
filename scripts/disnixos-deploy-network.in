@@ -20,18 +20,55 @@
 
 showUsage()
 {
-    echo "Usage: $0 [options] network_expr ..."
-    echo "Options:"
-    echo
-    echo "--target-property             The target property of an infrastructure model, that specifies how to "
-    echo "                              connect to the remote Disnix interface. (Defaults to hostname)"
-    echo "--interface                   Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
-    echo "-p,--profile                  Name of the profile that is used for this system. Defaults to: default"
-    echo "-m,--max-concurrent-transfers Maximum amount of concurrent closure transfers. Defauls to: 2"
-    echo "--disable-disnix              Do not enable the Disnix service on the target machines by default"
-    echo "--build-on-targets            Build the services on the target machines in the network instead of managing the build by the coordinator"
-    echo "--show-trace                  Shows a trace of the output"
-    echo "-h,--help                     Shows the usage of this command"
+    cat <<EOF
+Usage: $0 [OPTION] network_expr ...
+
+The command \`disnixos-deploy-network' is used to install or upgrade the NixOS
+configurations of machines in a network through the Disnix service.
+
+Options:
+      --target-property=PROP          The target property of an infrastructure
+                                      model, that specifies how to
+                                      connect to the remote Disnix interface.
+                                      (Defaults to hostname)
+      --interface=INTERFACE           Process that communicates with the remote
+                                      disnix service. Defaults to:
+                                      disnix-ssh-client
+  -p, --profile=PROFILE               Name of the profile that is used for this
+                                      system. Defaults to: default
+  -m, --max-concurrent-transfers=NUM  Maximum amount of concurrent closure
+                                      transfers. Defauls to: 2
+      --disable-disnix                Do not enable the Disnix service on the
+                                      target machines by default
+      --build-on-targets              Build the services on the target machines
+                                      in the network instead of managing the
+                                      build by the coordinator
+      --show-trace                    Shows a trace of the output
+  -h, --help                          Shows the usage of this command
+  -v, --version                       Shows the version of this command
+
+Environment:
+  DISNIX_CLIENT_INTERFACE    Sets the client interface (which defaults to
+                             \`disnix-ssh-client')
+  DISNIX_TARGET_PROPERTY     Specifies which property in the infrastructure Nix
+                             expression specifies how to connect to the remote
+                             interface (defaults to: hostname)
+  DISNIX_PROFILE             Sets the name of the profile that stores the
+                             manifest on the coordinator machine and the
+                             deployed services per machine on each target
+                             (Defaults to: default).
+EOF
+}
+
+# Shows the version of this command to the user
+
+showVersion()
+{
+    cat <<EOF
+$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+
+Copyright (C) 2008-2015 Sander van der Burg
+EOF
 }
 
 # Import checks
@@ -39,7 +76,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o p:m:h -l profile:,max-concurrent-transfers:,target-property:,interface:,show-trace,disable-disnix,build-on-targets,help -- "$@"`
+PARAMS=`@getopt@ -n $0 -o p:m:hv -l profile:,max-concurrent-transfers:,target-property:,interface:,show-trace,disable-disnix,build-on-targets,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -54,31 +91,35 @@ eval set -- "$PARAMS"
 while [ "$1" != "--" ]
 do
     case "$1" in
-	-p|--profile)
-	    profileArg="--profile $2"
-	    ;;
-	-m|--max-concurrent-transfers)
-	    maxConcurrentTransfersArg="-m $2"
-	    ;;
-	--target-property)
-	    targetProperty=$2
-	    ;;
-	--interface)
-	    interface=$2
-	    ;;
-	--show-trace)
-	    showTrace=1
-	    ;;
-	--disable-disnix)
-	    disableDisnixArg="--disable-disnix"
-	    ;;
-	--build-on-targets)
-	    buildOnTargets=1
-	    ;;
-	-h|--help)
-	    showUsage
-	    exit 0
-	    ;;
+        -p|--profile)
+            profileArg="--profile $2"
+            ;;
+        -m|--max-concurrent-transfers)
+            maxConcurrentTransfersArg="-m $2"
+            ;;
+        --target-property)
+            targetProperty=$2
+            ;;
+        --interface)
+            interface=$2
+            ;;
+        --show-trace)
+            showTrace=1
+            ;;
+        --disable-disnix)
+            disableDisnixArg="--disable-disnix"
+            ;;
+        --build-on-targets)
+            buildOnTargets=1
+            ;;
+        -h|--help)
+            showUsage
+            exit 0
+            ;;
+        -v|--version)
+            showVersion
+            exit 0
+            ;;
     esac
     
     shift
@@ -99,8 +140,8 @@ then
 else
     while [ "$1" != "" ]
     do
-	networkFileArgs="$networkFileArgs -n $(readlink -f $1)"
-	shift
+        networkFileArgs="$networkFileArgs -n $(readlink -f $1)"
+        shift
     done
 fi
 

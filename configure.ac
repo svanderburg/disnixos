@@ -20,6 +20,8 @@ NEED_PROG(getopt, getopt)
 AC_PATH_PROG(xmllint, xmllint, false)
 AC_PATH_PROG(xsltproc, xsltproc, false)
 AC_PATH_PROG(dblatex, dblatex)
+AC_PATH_PROG(HELP2MAN, help2man, false)
+AC_PATH_PROG(DOCLIFTER, doclifter, false)
 
 # Checks for Docbook stuff
 AC_ARG_WITH(docbook-rng, AC_HELP_STRING([--with-docbook-rng=PATH],
@@ -33,7 +35,7 @@ AC_ARG_WITH(docbook-xsl, AC_HELP_STRING([--with-docbook-xsl=PATH],
 AC_SUBST(docbookxsl)
 
 # Checks for Disnix libraries
-DISNIX_REQUIRED=0.2
+DISNIX_REQUIRED=0.4
 PKG_CHECK_MODULES(DISNIX, disnix >= $DISNIX_REQUIRED)
 DISNIX_PREFIX=`pkg-config --variable=prefix disnix`
 AC_SUBST(DISNIX_PREFIX)

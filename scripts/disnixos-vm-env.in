@@ -20,14 +20,48 @@
 
 showUsage()
 {
-    echo "Usage: $0 -s services_expr -n network_expr [ -n network_expr2 ... ] -d distribution_expr [options]"
-    echo "Options:"
-    echo
-    echo "-s,--services       Services Nix expression which describes all components of the distributed system"
-    echo "-n,--network        Network Nix expression which declares a NixOS configuration for each machine in the network"
-    echo "-d,--distribution   Distribution Nix expression which maps services to machines in the network"
-    echo "--show-trace        Shows a trace of the output"
-    echo "-h,--help           Shows the usage of this command"
+    cat <<EOF
+Usage: $0 -s services_nix -n network_nix [ -n network_nix ... ] -d distribution_nix [OPTION]
+
+The command \`disnixos-vm-env' is used to generate and launch a network of
+virtual machines, closely matching the machine configurations defined in the
+network model.
+
+This command requires three Nix expressions as input parameters; A services
+model capturing the components of a distributed system and its
+inter-dependencies; A network model capturing the NixOS configurations of
+machines in the network and its properties and a distribution model which maps
+services to machines.
+
+By invoking this command, it will first build a network of virtual machines,
+closely matching the NixOS configurations in the network model. Then it will
+build all the services that are defined in the distribution model from source
+code including all its dependencies. Finally, it launches the virtual machines
+and deploys the system into the virtual network.
+
+Options:
+  -s, --services=services_nix          Services Nix expression which describes
+                                       all components of the distributed system
+  -n, --network=network_nix            Network Nix expression which declares a
+                                       NixOS configuration for each machine in
+                                       the network
+  -d, --distribution=distribution_nix  Distribution Nix expression which maps
+                                       services to machines in the network
+      --show-trace                     Shows a trace of the output
+  -h, --help                           Shows the usage of this command
+  -v, --version                        Shows the version of this command
+EOF
+}
+
+# Shows the version of this command to the user
+
+showVersion()
+{
+    cat <<EOF
+$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+
+Copyright (C) 2008-2015 Sander van der Burg
+EOF
 }
 
 # Autoconf settings
@@ -44,7 +78,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:h -l services:,network:,distribution:,show-trace,help -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:hv -l services:,network:,distribution:,show-trace,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -78,6 +112,9 @@ do
             showUsage
             exit 0
             ;;
+        -v|--version)
+            showVersion
+            exit 0
     esac
     
     shift

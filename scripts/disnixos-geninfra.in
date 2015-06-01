@@ -20,15 +20,42 @@
 
 showUsage()
 {
-    echo "Usage: $0 [options] network_expr"
-    echo "Options:"
-    echo
-    echo "--no-out-link     Do not create a 'result' symlink"
-    echo "--use-backdoor    Indicates that the backdoor must be enabled so that the VMs can be accessed through a socket"
-    echo "--use-vm-testing  Indicates that we generate virtual machines, so that the physical characteristics are automatically added"
-    echo "--use-nixops      Use NixOps instead of Disnix's deployment facilities"
-    echo "--show-trace      Shows a trace of the output"
-    echo "-h,--help         Shows the usage of this command"
+    cat <<EOF
+Usage: $0 [OPTION] network_nix [ network2_nix ... ]
+
+The command \`disnixos-geninfra' generates an infrastructure model from NixOS
+network models, so that properties of the machines can be used by the basic
+Disnix toolset.
+
+Options:
+      --no-out-link     Do not create a 'result' symlink
+      --use-backdoor    Indicates that the backdoor must be enabled so that the
+                        VMs can be accessed through a socket
+      --use-vm-testing  Indicates that we generate virtual machines, so that the
+                        physical characteristics are automatically added
+      --use-nixops      Use NixOps instead of Disnix's deployment facilities
+      --show-trace      Shows a trace of the output
+  -h, --help            Shows the usage of this command
+  -v, --version         Shows the version of this command
+
+Environment:
+  DISNIXOS_USE_NIXOPS        When set to 1, it specifies that NixOps is used to
+                             take care of the infrastructure deployment, so that
+                             it properly interprets NixOps configurations and
+                             uses NixOps tooling instead of Disnix's deployment
+                             facilities.
+EOF
+}
+
+# Shows the version of this command to the user
+
+showVersion()
+{
+    cat <<EOF
+$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+
+Copyright (C) 2008-2015 Sander van der Burg
+EOF
 }
 
 # Autoconf settings
@@ -42,7 +69,7 @@ source @datadir@/@PACKAGE@/checks
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o h -l no-out-link,use-backdoor,use-vm-testing,use-nixops,show-trace,help -- "$@"`
+PARAMS=`@getopt@ -n $0 -o hv -l no-out-link,use-backdoor,use-vm-testing,use-nixops,show-trace,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -57,25 +84,29 @@ eval set -- "$PARAMS"
 while [ "$1" != "--" ]
 do
     case "$1" in
-	--no-out-link)
-	    noOutLink=1
-	    ;;
-	--use-backdoor)
-	    useBackdoor=1
-	    ;;
-	--use-vm-testing)
-	    useVMTesting=1
-	    ;;
-	--use-nixops)
-	    useNixOps=1
-	    ;;
-	--show-trace)
-	    showTrace=1
-	    ;;
-	-h|--help)
-	    showUsage
-	    exit 0
-	    ;;
+        --no-out-link)
+            noOutLink=1
+            ;;
+        --use-backdoor)
+            useBackdoor=1
+            ;;
+        --use-vm-testing)
+            useVMTesting=1
+            ;;
+        --use-nixops)
+            useNixOps=1
+            ;;
+        --show-trace)
+            showTrace=1
+            ;;
+        -h|--help)
+            showUsage
+            exit 0
+            ;;
+        -v|--version)
+            showVersion
+            exit 0
+            ;;
     esac
     
     shift
@@ -113,8 +144,8 @@ then
 else
     while [ "$1" != "" ]
     do
-	networkFiles="$networkFiles $(readlink -f $1)"
-	shift
+        networkFiles="$networkFiles $(readlink -f $1)"
+        shift
     done
 fi
 

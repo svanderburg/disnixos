@@ -21,8 +21,9 @@ let
         version = builtins.readFile ./version;
         src = disnixos;
         inherit officialRelease;
+        dontBuild = false;
 
-        buildInputs = [ socat getopt pkgconfig libxml2 libxslt disnix dblatex tetex nukeReferences ];
+        buildInputs = [ socat getopt pkgconfig libxml2 libxslt disnix dblatex tetex help2man doclifter nukeReferences ];
         
         # Add documentation in the tarball
         configureFlags = ''

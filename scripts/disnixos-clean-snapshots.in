@@ -20,15 +20,47 @@
 
 showUsage()
 {
-    echo "Usage: $0 network.nix [ network2.nix ... ] [options]"
-    echo "Options:"
-    echo
-    echo "--keep              Number of snapshot generations to keep"
-    echo "--target-property   The target property of an infrastructure model, that specifies how to "
-    echo "                    connect to the remote Disnix interface. (Defaults to hostname)"
-    echo "--interface         Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
-    echo "--use-nixops        Use NixOps instead of Disnix for infrastructure deployment"
-    echo "-h,--help           Shows the usage of this command"
+    cat <<EOF
+Usage: $0 [OPTION] network_nix [ network2_nix ... ]
+
+The command \`disnixos-clean-snapshots' removes all older snapshot generations
+stored on the machines in the network.
+
+Options:
+      --interface=INTERFACE   Path to executable that communicates with a Disnix
+                              interface. Defaults to \`disnix-ssh-client'
+      --target-property=PROP  The target property of an infrastructure model,
+                              that specifies how to connect to the remote Disnix
+      --keep=NUM              Amount of snapshot generations to keep. Defaults
+                              to: 1
+      --use-nixops            Use NixOps instead of Disnix for infrastructure
+                              deployment
+  -h, --help                  Shows the usage of this command to the user
+  -v, --version               Shows the version of this command to the user
+
+Environment:
+  DISNIX_CLIENT_INTERFACE    Sets the client interface (which defaults to
+                             \`disnix-ssh-client'
+  DISNIX_TARGET_PROPERTY     Specifies which property in the infrastructure Nix
+                             expression specifies how to connect to the remote
+                             interface (defaults to: hostname)
+  DISNIXOS_USE_NIXOPS        When set to 1, it specifies that NixOps is used to
+                             take care of the infrastructure deployment, so that
+                             it properly interprets NixOps configurations and
+                             uses NixOps tooling instead of Disnix's deployment
+                             facilities.
+EOF
+}
+
+# Shows the version of this command to the user
+
+showVersion()
+{
+    cat <<EOF
+$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+
+Copyright (C) 2008-2015 Sander van der Burg
+EOF
 }
 
 # Autoconf settings
@@ -42,7 +74,7 @@ source @datadir@/@PACKAGE@/checks
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o dh -l keep:,target-property:,interface:,use-nixops,help -- "$@"`
+PARAMS=`@getopt@ -n $0 -o dhv -l keep:,target-property:,interface:,use-nixops,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -58,7 +90,7 @@ while [ "$1" != "--" ]
 do
     case "$1" in
         --keep)
-            keep=$2
+            keepArg="--keep $2"
             ;;
         --target-property)
             targetPropertyArg=$2
@@ -73,6 +105,9 @@ do
             showUsage
             exit 0
             ;;
+        -v|--version)
+            showVersion
+            exit 0
     esac
     
     shift
@@ -112,4 +147,4 @@ fi
 infrastructureFile=`disnixos-geninfra --no-out-link $nixOpsArg $networkFiles`
 
 # Execute operation
-disnix-clean-snapshots $targetPropertyArg --interface $interface --keep $keep $infrastructureFile
+disnix-clean-snapshots $targetPropertyArg --interface $interface $keepArg $infrastructureFile

@@ -20,15 +20,47 @@
 
 showUsage()
 {
-    echo "Usage: $0 network.nix [ network2.nix ... ] [options]"
-    echo "Options:"
-    echo
-    echo "-p,--profile        Disnix profile to use (defaults to: default)"
-    echo "--target-property   The target property of an infrastructure model, that specifies how to "
-    echo "                    connect to the remote Disnix interface. (Defaults to hostname)"
-    echo "--interface         Process that communicates with the remote disnix service. Defaults to disnix-ssh-client"
-    echo "--use-nixops        Use NixOps instead of Disnix for infrastructure deployment"
-    echo "-h,--help           Shows the usage of this command"
+    cat <<EOF
+Usage: $0 [OPTION] network_nix [ network2_nix ... ]
+
+The command \`disnixos-query' collects and displays all the installed services
+from the machines defined in a given infrastructure model.
+
+Options:
+  -p, --profile=PROFILE       Name of the profile in which the services are
+                              registered. Defaults to: default
+      --interface=INTERFACE   Path to executable that communicates with a Disnix
+                              interface. Defaults to \`disnix-ssh-client'
+      --target-property=PROP  The target property of an infrastructure model,
+                              that specifies how to connect to the remote Disnix
+                              interface. (Defaults to hostname)
+      --use-nixops            Use NixOps instead of Disnix for infrastructure
+                              deployment
+  -h, --help                  Shows the usage of this command to the user
+  -v, --version               Shows the version of this command to the user
+
+Environment:
+  DISNIX_CLIENT_INTERFACE    Sets the client interface (which defaults to
+                             \`disnix-ssh-client'
+  DISNIX_TARGET_PROPERTY     Specifies which property in the infrastructure Nix
+                             expression specifies how to connect to the remote
+                             interface (defaults to: hostname)
+  DISNIX_PROFILE             Sets the name of the profile that stores the
+                             manifest on the coordinator machine and the
+                             deployed services per machine on each target
+                             (Defaults to: default)
+EOF
+}
+
+# Shows the version of this command to the user
+
+showVersion()
+{
+    cat <<EOF
+$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+
+Copyright (C) 2008-2015 Sander van der Burg
+EOF
 }
 
 # Autoconf settings
@@ -42,7 +74,7 @@ source @datadir@/@PACKAGE@/checks
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o p:h -l profile:,target-property:,interface:,use-nixops,help -- "$@"`
+PARAMS=`@getopt@ -n $0 -o p:hv -l profile:,target-property:,interface:,use-nixops,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -57,22 +89,26 @@ eval set -- "$PARAMS"
 while [ "$1" != "--" ]
 do
     case "$1" in
-	-p|--profile)
-	    profileArg="--profile $2"
-	    ;;
-	--target-property)
-	    targetPropertyArg=$2
-	    ;;
-	--interface)
-	    interface=$2
-	    ;;
-	--use-nixops)
-	    useNixOps=1
-	    ;;
-	-h|--help)
-	    showUsage
-	    exit 0
-	    ;;
+        -p|--profile)
+            profileArg="--profile $2"
+            ;;
+        --target-property)
+            targetPropertyArg=$2
+            ;;
+        --interface)
+            interface=$2
+            ;;
+        --use-nixops)
+            useNixOps=1
+            ;;
+        -h|--help)
+            showUsage
+            exit 0
+            ;;
+        -v|--version)
+            showVersion
+            exit 0
+            ;;
     esac
     
     shift
@@ -97,8 +133,8 @@ then
 else
     while [ "$1" != "" ]
     do
-	networkFiles="$networkFiles $(readlink -f $1)"
-	shift
+        networkFiles="$networkFiles $(readlink -f $1)"
+        shift
     done
 fi
 

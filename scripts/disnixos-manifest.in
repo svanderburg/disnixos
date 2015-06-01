@@ -20,22 +20,75 @@
 
 showUsage()
 {
-    echo "Usage: $0 -n network_expr [ -n network_expr2 ] [ -s services_expr ] [ -d distribution_expr ] [options]"
-    echo "Options:"
-    echo
-    echo "-s,--services       Services Nix expression which describes all components of the distributed system"
-    echo "-n,--network        Network Nix expression which declares a NixOS configuration for each machine in the network"
-    echo "-d,--distribution   Distribution Nix expression which maps services to machines in the network"
-    echo "--target-property   The target property of an infrastructure model, that specifies how to "
-    echo "                    connect to the remote Disnix interface. (Defaults to hostname)"
-    echo "--interface         Path to executable that communicates with a Disnix interface. Defaults to disnix-ssh-client"
-    echo "--deploy-state      Indicates whether to globally deploy state (disabled by default)"
-    echo "--no-out-link       Do not create a 'result' symlink"
-    echo "--show-trace        Shows a trace of the output"
-    echo "--vm                Configures a manifest used for the NixOS test driver"
-    echo "--use-nixops        Use NixOps instead of Disnix's deployment facilities"
-    echo "--disable-disnix    Do not enable the Disnix service on the target machines by default"
-    echo "-h,--help           Shows the usage of this command to the user"
+    cat <<EOF
+Usage: $0 -s services_nix -n network_nix [ -n network2_nix ... ] -d distribution_nix [OPTION]
+
+The command \`disnixos-manifest' generates a manifest file from a service,
+network and distribution Nix expression, which can be used for the
+distribution of services to machines in the network and for the activation of
+services on target machines in the right order.
+
+Since the manifest file contains Nix store paths of every service, a side effect
+of running this command is that all the services that have to be activated are
+automatically built from source and stored in the Nix store of the coordinato"
+machine."
+
+Most users and developers don't need to use this command directly. The command
+\`disnixos-env' performs generation of a manifest automatically. It is mostly
+used for debugging purposes or to perform certain tasks manually.
+
+Options:
+  -s, --services=services_nix
+                              Services Nix expression which describes all
+                              components of the distributed system
+  -n, --network=network_nix   Network Nix expression which declares a NixOS
+                              configuration for each machine in the network
+  -d, --distribution=distribution_nix
+                              Distribution Nix expression which maps services to
+                              machines in the network
+      --target-property=PROP  The target property of an infrastructure model,
+                              that specifies how to connect to the remote Disnix
+                              interface. (Defaults to hostname)
+      --interface=INTERFACE   Path to executable that communicates with a Disnix
+                              interface. Defaults to: disnix-ssh-client
+      --deploy-state          Indicates whether to globally deploy state
+                              (disabled by default)
+      --no-out-link           Do not create a 'result' symlink
+      --show-trace            Shows a trace of the output
+      --vm                    Configures a manifest used for the NixOS test
+                              driver
+      --use-nixops            Use NixOps instead of Disnix's deployment
+                              facilities
+      --disable-disnix        Do not enable the Disnix service on the target
+                              machines by default
+  -h, --help                  Shows the usage of this command to the user
+  -v, --version               Shows the version of this command to the user
+
+Environment:
+  DISNIX_CLIENT_INTERFACE    Sets the client interface (defaults to:
+                             disnix-ssh-client)
+  DISNIX_TARGET_PROPERTY     Sets the target property of an infrastructure
+                             model, that specifies how to connect to the remote
+                             Disnix interface. (Defaults to: hostname)
+  DISNIX_DEPLOY_STATE        If set to 1 it also deploys the state of all
+                             components. (defaults to: 0)
+  DISNIXOS_USE_NIXOPS        When set to 1, it specifies that NixOps is used to
+                             take care of the infrastructure deployment, so that
+                             it properly interprets NixOps configurations and
+                             uses NixOps tooling instead of Disnix's deployment
+                             facilities.
+EOF
+}
+
+# Shows the version of this command to the user
+
+showVersion()
+{
+    cat <<EOF
+$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+
+Copyright (C) 2008-2015 Sander van der Burg
+EOF
 }
 
 # Autoconf settings
@@ -49,7 +102,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:h -l services:,network:,distribution:,target-property:,interface:,deploy-state,no-out-link,show-trace,vm,use-nixops,disable-disnix,help -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:hv -l services:,network:,distribution:,target-property:,interface:,deploy-state,no-out-link,show-trace,vm,use-nixops,disable-disnix,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -101,6 +154,9 @@ do
             showUsage
             exit 0
             ;;
+        -v|--version)
+            showVersion
+            exit 0
     esac
     
     shift

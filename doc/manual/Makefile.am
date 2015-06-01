@@ -14,11 +14,7 @@ dblatex_opts = \
  -P doc.collab.show=0 \
  -P latex.output.revhistory=0
 
-man1_MANS = disnix-backdoor-client.1 disnix-nixops-client.1 disnixos-deploy-network.1 \
-  disnixos-env.1 disnixos-geninfra.1 disnixos-gentests.1 disnixos-vm-env.1 disnixos-query.1
-
-MANUAL_SRCS = index.xml introduction.xml background.xml installation.xml images style.css \
-  $(man1_MANS:.1=.xml)
+MANUAL_SRCS = index.xml introduction.xml background.xml installation.xml images style.css
 
 version.txt:
 	echo -n $(VERSION) > version.txt
@@ -27,9 +23,6 @@ version.txt:
 manual.is-valid: $(MANUAL_SRCS) version.txt
 	$(XMLLINT) --noout --nonet --xinclude --noxincludenode --relaxng $(docbookrng)/docbook.rng $<
 	touch $@
-
-man $(MANS): $(MANUAL_SRCS) manual.is-valid
-	$(XSLTPROC) --nonet --xinclude $(docbookxsl)/manpages/docbook.xsl index.xml
 
 index.html: $(MANUAL_SRCS) manual.is-valid images
 	$(XSLTPROC) --nonet --xinclude --output index.html \
@@ -57,7 +50,7 @@ install-data-local: index.html
 	$(INSTALL_DATA) style.css $(DESTDIR)$(docdir)/manual
 	cp -r images $(DESTDIR)$(docdir)/manual/images
 
-KEEP = index.html manual.is-valid version.txt $(MANS)
+KEEP = index.html manual.is-valid version.txt
 
 EXTRA_DIST = $(MANUAL_SRCS) $(FIGURES) $(KEEP)
 

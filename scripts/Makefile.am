@@ -1,4 +1,80 @@
+disnix-backdoor-client.1: disnix-backdoor-client.in
+	$(HELP2MAN) --output=$@ --no-info --name 'Provides access to the disnix-service through a socket with public access' "$(SHELL) disnix-backdoor-client"
+
+disnix-backdoor-client.1.xml: disnix-backdoor-client.1
+	$(SHELL) ../maintenance/man2docbook.bash $<
+
+disnix-nixops-client.1: disnix-nixops-client.in
+	$(HELP2MAN) --output=$@ --no-info --name 'Provides access to the disnix-service through NixOps SSH interface' "$(SHELL) disnix-nixops-client"
+
+disnix-nixops-client.1.xml: disnix-nixops-client.1
+	$(SHELL) ../maintenance/man2docbook.bash $<
+
+disnixos-geninfra.1: disnixos-geninfra.in
+	$(HELP2MAN) --output=$@ --no-info --name 'Generate an infrastructure model from network models' "$(SHELL) disnixos-geninfra"
+
+disnixos-geninfra.1.xml: disnixos-geninfra.1
+	$(SHELL) ../maintenance/man2docbook.bash $<
+
+disnixos-gentests.1: disnixos-gentests.in
+	$(HELP2MAN) --output=$@ --no-info --name 'Generate initalialization steps of the test suite' "$(SHELL) disnixos-gentests"
+
+disnixos-gentests.1.xml: disnixos-gentests.1
+	$(SHELL) ../maintenance/man2docbook.bash $<
+
+disnixos-instantiate.1: disnixos-instantiate.in
+	$(HELP2MAN) --output=$@ --no-info --name 'Instantiate a distributed derivation from DisnixOS expressions' "$(SHELL) disnixos-instantiate"
+
+disnixos-instantiate.1.xml: disnixos-instantiate.1
+	$(SHELL) ../maintenance/man2docbook.bash $<
+
+disnixos-manifest.1: disnixos-manifest.in
+	$(HELP2MAN) --output=$@ --no-info --name 'Generate a manifest file from DisnixOS expressions' "$(SHELL) disnixos-manifest"
+
+disnixos-manifest.1.xml: disnixos-manifest.1
+	$(SHELL) ../maintenance/man2docbook.bash $<
+
+disnixos-env.1: disnixos-env.in
+	$(HELP2MAN) --output=$@ --no-info --name 'Installs or updates the services and infrastructure of a distributed system' "$(SHELL) disnixos-env"
+
+disnixos-env.1.xml: disnixos-env.1
+	$(SHELL) ../maintenance/man2docbook.bash $<
+
+disnixos-deploy-network.1: disnixos-deploy-network.in
+	$(HELP2MAN) --output=$@ --no-info --name 'Installs or updates the infrastructure of a distributed system' "$(SHELL) disnixos-deploy-network"
+
+disnixos-deploy-network.1.xml: disnixos-deploy-network.1
+	$(SHELL) ../maintenance/man2docbook.bash $<
+
+disnixos-collect-garbage.1: disnixos-collect-garbage.in
+	$(HELP2MAN) --output=$@ --no-info --name 'Delete garbage from a network of machines' "$(SHELL) disnixos-collect-garbage"
+
+disnixos-collect-garbage.1.xml: disnixos-collect-garbage.1
+	$(SHELL) ../maintenance/man2docbook.bash $<
+
+disnixos-clean-snapshots.1: disnixos-clean-snapshots.in
+	$(HELP2MAN) --output=$@ --no-info --name 'Delete older generation of snapshots from a network of machines' "$(SHELL) disnixos-clean-snapshots"
+
+disnixos-clean-snapshots.1.xml: disnixos-clean-snapshots.1
+	$(SHELL) ../maintenance/man2docbook.bash $<
+
+disnixos-query.1: disnixos-query.in
+	$(HELP2MAN) --output=$@ --no-info --name 'Query the installed services from machines' "$(SHELL) disnixos-query"
+
+disnixos-query.1.xml: disnixos-query.1
+	$(SHELL) ../maintenance/man2docbook.bash $<
+
+disnixos-vm-env.1: disnixos-vm-env.in
+	$(HELP2MAN) --output=$@ --no-info --name 'Deploys and runs a distributed system in a network of VMs spawned by the NixOS test driver' "$(SHELL) disnixos-vm-env"
+
+disnixos-vm-env.1.xml: disnixos-vm-env.1
+	$(SHELL) ../maintenance/man2docbook.bash $<
+
 bin_SCRIPTS = disnix-backdoor-client disnix-nixops-client disnixos-geninfra disnixos-gentests disnixos-instantiate disnixos-manifest disnixos-env disnixos-vm-env disnixos-deploy-network disnixos-collect-garbage disnixos-clean-snapshots disnixos-query
 pkgdata_SCRIPTS = checks
+noinst_DATA = disnix-backdoor-client.1.xml disnix-nixops-client.1.xml disnixos-geninfra.1.xml disnixos-gentests.1.xml disnixos-instantiate.1.xml disnixos-manifest.1.xml disnixos-env.1.xml disnixos-deploy-network.1.xml disnixos-collect-garbage.1.xml disnixos-clean-snapshots.1.xml disnixos-query.1.xml disnixos-vm-env.1.xml
+man1_MANS = disnix-backdoor-client.1 disnix-nixops-client.1 disnixos-geninfra.1 disnixos-gentests.1 disnixos-instantiate.1 disnixos-manifest.1 disnixos-env.1 disnixos-deploy-network.1 disnixos-collect-garbage.1 disnixos-clean-snapshots.1 disnixos-query.1 disnixos-vm-env.1
 
-EXTRA_DIST = checks disnix-backdoor-client.in disnix-nixops-client.in disnixos-geninfra.in disnixos-gentests.in disnixos-instantiate.in disnixos-manifest.in disnixos-env.in disnixos-vm-env.in disnixos-deploy-network.in disnixos-collect-garbage.in disnixos-clean-snapshots.in disnixos-query
+EXTRA_DIST = checks disnix-backdoor-client.in disnix-nixops-client.in disnixos-geninfra.in disnixos-gentests.in disnixos-instantiate.in disnixos-manifest.in disnixos-env.in disnixos-vm-env.in disnixos-deploy-network.in disnixos-collect-garbage.in disnixos-clean-snapshots.in disnixos-query \
+  disnix-backdoor-client.1 disnix-nixops-client.1 disnixos-geninfra.1 disnixos-gentests.1 disnixos-instantiate.1 disnixos-manifest.1 disnixos-env.1 disnixos-deploy-network.1 disnixos-collect-garbage.1 disnixos-clean-snapshots.1 disnixos-query.1 disnixos-vm-env.1 \
+  disnix-backdoor-client.1.xml disnix-nixops-client.1.xml disnixos-geninfra.1.xml disnixos-gentests.1.xml disnixos-instantiate.1.xml disnixos-manifest.1.xml disnixos-env.1.xml disnixos-deploy-network.1.xml disnixos-collect-garbage.1.xml disnixos-clean-snapshots.1.xml disnixos-query.1.xml disnixos-vm-env.1.xml

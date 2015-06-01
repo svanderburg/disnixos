@@ -20,14 +20,38 @@
 
 showUsage()
 {
-    echo "Usage: $0 -n network_expr [ -n network_expr2 ... ] [options] manifest"
-    echo "Options:"
-    echo
-    echo "-n,--network   Network Nix expression which declares a NixOS configuration for each machine in the network"
-    echo "--no-out-link  Do not create a 'result' symlink"
-    echo "--show-trace   Shows a trace of the output"
-    echo "--use-nixops   Use NixOps instead of Disnix's deployment facilities"
-    echo "-h,--help      Shows the usage of this command"
+    cat <<EOF
+Usage: $0 [OPTION] -n network_expr [ -n network_expr2 ... ] MANIFEST
+
+The command \`disnixos-gentests' generates a part of the testsuite that starts
+the backdoors on the machines in the network and deploys the services in the
+network of machines, by invoking \`disnix-activate'.
+
+Options:
+  -n, --network=network_nix  Network Nix expression which declares a NixOS configuration for each machine in the network
+      --no-out-link          Do not create a 'result' symlink
+      --show-trace           Shows a trace of the output
+      --use-nixops           Use NixOps instead of Disnix's deployment facilities
+  -h, --help                 Shows the usage of this command
+
+Environment:
+  DISNIXOS_USE_NIXOPS        When set to 1, it specifies that NixOps is used to
+                             take care of the infrastructure deployment, so that
+                             it properly interprets NixOps configurations and
+                             uses NixOps tooling instead of Disnix's deployment
+                             facilities.
+EOF
+}
+
+# Shows the version of this command to the user
+
+showVersion()
+{
+    cat <<EOF
+$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+
+Copyright (C) 2008-2015 Sander van der Burg
+EOF
 }
 
 # Autoconf settings
@@ -41,7 +65,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o n:h -l network:,no-out-link,show-trace,use-nixops,help -- "$@"`
+PARAMS=`@getopt@ -n $0 -o n:hv -l network:,no-out-link,show-trace,use-nixops,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -56,22 +80,26 @@ eval set -- "$PARAMS"
 while [ "$1" != "--" ]
 do
     case "$1" in
-	-n|--network)
-	    networkFiles="$networkFiles `readlink -f $2`"
-	    ;;
-	--no-out-link)
-	    noOutLink=1
-	    ;;
-	--show-trace)
-	    showTrace=1
-	    ;;
-	--use-nixops)
-	    useNixOps=1
-	    ;;
-	-h|--help)
-	    showUsage
-	    exit 0
-	    ;;
+        -n|--network)
+            networkFiles="$networkFiles `readlink -f $2`"
+            ;;
+        --no-out-link)
+            noOutLink=1
+            ;;
+        --show-trace)
+            showTrace=1
+            ;;
+        --use-nixops)
+            useNixOps=1
+            ;;
+        -h|--help)
+            showUsage
+            exit 0
+            ;;
+        -v|--version)
+            showVersion
+            exit 0
+            ;;
     esac
     
     shift
