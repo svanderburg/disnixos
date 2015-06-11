@@ -1,4 +1,7 @@
-#!/bin/bash -e
+#!/bin/bash
+set -e
+set -o pipefail
+
 # DisnixOS - Infrastructure deployment extension for Disnix
 # Copyright (C) 2008-2015  Sander van der Burg
 #
@@ -86,15 +89,6 @@ Copyright (C) 2008-2015 Sander van der Burg
 EOF
 }
 
-# Autoconf settings
-export prefix=@prefix@
-
-# Import checks
-source @datadir@/@PACKAGE@/checks
-
-# Import Disnix checks
-source @DISNIX_PREFIX@/share/disnix/checks
-
 # Parse valid argument options
 
 PARAMS=`@getopt@ -n $0 -o s:n:d:hv -l services:,network:,distribution:,target-property:,interface:,no-out-link,show-trace,vm,use-nixops,disable-disnix,help,version -- "$@"`
@@ -105,9 +99,9 @@ then
     exit 1
 fi
 
-eval set -- "$PARAMS"
-
 # Evaluate valid options
+
+eval set -- "$PARAMS"
 
 while [ "$1" != "--" ]
 do
@@ -154,6 +148,15 @@ do
     
     shift
 done
+
+# Autoconf settings
+export prefix=@prefix@
+
+# Import checks
+source @datadir@/@PACKAGE@/checks
+
+# Import Disnix checks
+source @DISNIX_PREFIX@/share/disnix/checks
 
 # Validate the given options
 

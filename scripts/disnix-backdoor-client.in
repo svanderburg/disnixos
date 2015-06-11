@@ -1,4 +1,7 @@
-#!/bin/bash -e
+#!/bin/bash
+set -e
+set -o pipefail
+
 # DisnixOS - Infrastructure deployment extension for Disnix
 # Copyright (C) 2008-2015  Sander van der Burg
 #

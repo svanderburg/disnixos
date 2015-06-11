@@ -1,4 +1,7 @@
-#!/bin/bash -e
+#!/bin/bash
+set -e
+set -o pipefail
+
 # DisnixOS - Infrastructure deployment extension for Disnix
 # Copyright (C) 2008-2015  Sander van der Burg
 #
@@ -22,8 +25,8 @@ checkNetworkFiles()
 {
     if [ "$networkFiles" = "" ]
     then
-	echo "ERROR: At least one network expression must be specified!" >&2
-	exit 1
+        echo "ERROR: At least one network expression must be specified!" >&2
+        exit 1
     fi
 }
 
