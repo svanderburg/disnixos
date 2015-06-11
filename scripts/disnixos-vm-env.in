@@ -106,6 +106,7 @@ do
         -v|--version)
             showVersion
             exit 0
+            ;;
     esac
     
     shift
