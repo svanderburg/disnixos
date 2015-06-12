@@ -142,7 +142,7 @@ EOF
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o rqp:dhv -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o rqp:dC:c:hv -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,snapshot,restore,delete-state,query-all-snapshots,query-latest-snapshot,print-missing-snapshots,import-snapshots,export-snapshots,resolve-snapshots,clean-snapshots,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,container:,component:,keep:,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -150,9 +150,9 @@ then
     exit 1
 fi
 
-eval set -- "$PARAMS"
-
 # Evaluate valid options
+
+eval set -- "$PARAMS"
 
 while [ "$1" != "--" ]
 do
@@ -197,6 +197,38 @@ do
             operation="unlock"
             path=$2
             ;;
+        --snapshot)
+            operation="snapshot"
+            path=$2
+            ;;
+        --restore)
+            operation="restore"
+            path=$2
+            ;;
+        --delete-state)
+            operation="delete-state"
+            ;;
+        --query-all-snapshots)
+            operation="query-all-snapshots"
+            ;;
+        --query-latest-snapshot)
+            operation="query-latest-snapshot"
+            ;;
+        --print-missing-snapshots)
+            operation="print-missing-snapshots"
+            ;;
+        --import-snapshots)
+            operation="import-snapshots"
+            ;;
+        --export-snapshots)
+            operation="export-snapshots"
+            ;;
+        --resolve-snapshots)
+            operation="resolve-snapshots"
+            ;;
+        --clean-snapshots)
+            operation="clean-snapshots"
+            ;;
         --target)
             target=$2
             ;;
@@ -217,6 +249,15 @@ do
             ;;
         --arguments)
             argsArg="$argsArg --arguments \"$2\""
+            ;;
+        -C|--container)
+            container=$2
+            ;;
+        -c|--component)
+            component=$2
+            ;;
+        --keep)
+            keep=$2
             ;;
         -h|--help)
             showUsage
@@ -269,12 +310,12 @@ case "$operation" in
         exit $exitStatus
         ;;
     set)
-        #outputFile=$(mktemp -p $TMPDIR)
-        #echo "disnix-client $profileArg --set $@; echo \$?" | socat stdio $target > $outputFile
-        #exitStatus=$(tail -1 $outputFile)
-        #head -n -1 $outputFile
-        #rm -f $outputFile
-        #exit $exitStatus
+        outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client $profileArg --set $@; echo \$?" | socat stdio $target > $outputFile
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
         ;;
     query-installed)
         outputFile=$(mktemp -p $TMPDIR)
@@ -339,6 +380,94 @@ case "$operation" in
     unlock)
         outputFile=$(mktemp -p $TMPDIR)
         echo "disnix-client --unlock $profileArg; echo \$?" | socat stdio $target > $outputFile
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
+        ;;
+    snapshot)
+        if [ "$type" = "" ]
+        then
+            echo "ERROR: A type must be specified!" >&2
+            exit 1
+        fi
+        
+        outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client --type $type $argsArg --snapshot $@; echo \$?" | socat stdio $target > $outputFile
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
+        ;;
+    restore)
+        if [ "$type" = "" ]
+        then
+            echo "ERROR: A type must be specified!" >&2
+            exit 1
+        fi
+        
+        outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client --type $type $argsArg --restore $@; echo \$?" | socat stdio $target > $outputFile
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
+        ;;
+    delete-state)
+        if [ "$type" = "" ]
+        then
+            echo "ERROR: A type must be specified!" >&2
+            exit 1
+        fi
+        
+        outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client --type $type $argsArg --delete-state $@; echo \$?" | socat stdio $target > $outputFile
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
+        ;;
+    query-all-snapshots)
+        outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client --query-all-snapshots --container $container --component $component; echo \$?" | socat stdio $target > $outputFile
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
+        ;;
+    query-latest-snapshot)
+        outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client --query-latest-snapshot --container $container --component $component; echo \$?" | socat stdio $target > $outputFile
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
+        ;;
+    print-missing-snapshots)
+        outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client --print-missing-snapshots $@; echo \$?" | socat stdio $target > $outputFile
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
+        ;;
+    import-snapshots)
+        # Returns always true since host Dysnomia snapshot store == guest Dysnomia snapshot store
+        ;;
+    export-snapshots)
+        # Returns always true since host Dysnomia snapshot store == guest Dysnomia snapshot store
+        ;;
+    resolve-snapshots)
+        outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client --resolve-snapshots $@; echo \$?" | socat stdio $target > $outputFile
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
+        ;;
+    clean-snapshots)
+        outputFile=$(mktemp -p $TMPDIR)
+        echo "disnix-client --clean-snapshots --keep $keep $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile

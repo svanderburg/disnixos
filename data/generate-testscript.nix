@@ -14,6 +14,7 @@
     '') (builtins.attrNames network)}
     
     ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --no-upgrade ${manifestFile}");
+    ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("DYSNOMIA_STATEDIR=/tmp/shared/dysnomia ${disnix}/bin/disnix-restore --no-upgrade ${manifestFile}");
     
     ${testScript}
 ''
