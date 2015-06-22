@@ -416,11 +416,14 @@ case "$operation" in
         # A localfile must first be transferred
         if [ "$localfile" = "1" ]
         then
-            remotefile=`nixops ssh $NIXOPS_OPTS $target "mktemp -d -p $TMPDIR"`
-            nixops scp $NIXOPS_OPTS --to $target $@ $remotefile
+            tempdir=`nixops ssh $NIXOPS_OPTS $target "mktemp -d -p $TMPDIR"`
+            scp -r -P $targetPort $SSH_OPTS $@ $targetHostname:$tempdir > /dev/null
+            remotefile=`nixops ssh $NIXOPS_OPTS $target echo $tempdir/*`
+        else
+            remotefile=$@
         fi
         
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --container $container --component $component --import-snapshots "$remotefile/*
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --container $container --component $component --import-snapshots $remotefile"
         ;;
     export-snapshots)
         tmpdir=`mktemp -d -p $TMPDIR`
