@@ -417,7 +417,7 @@ case "$operation" in
         if [ "$localfile" = "1" ]
         then
             tempdir=`nixops ssh $NIXOPS_OPTS $target "mktemp -d -p $TMPDIR"`
-            scp -r -P $targetPort $SSH_OPTS $@ $targetHostname:$tempdir > /dev/null
+            nixops scp $NIXOPS_OPTS --to $target $@ $tempdir > /dev/null
             remotefile=`nixops ssh $NIXOPS_OPTS $target echo $tempdir/*`
         else
             remotefile=$@
