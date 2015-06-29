@@ -141,6 +141,24 @@ Copyright (C) 2008-2015 Sander van der Burg
 EOF
 }
 
+checkLocalOrRemoteFile()
+{
+    if [ "$localfile" != "1" ] && [ "$remotefile" != "1" ]
+    then
+        echo "ERROR: Either a remote or a localfile must be specified!" >&2
+        exit 1
+    fi
+}
+
+checkType()
+{
+    if [ "$type" = "" ]
+    then
+        echo "ERROR: A type must be specified!" >&2
+        exit 1
+    fi
+}
+
 # Autoconf settings
 export prefix=@prefix@
 
@@ -295,28 +313,22 @@ fi
 
 case "$operation" in
     import)
-        if [ "$localfile" != "1" ] && [ "$remotefile" != "1" ]
-        then
-            echo "ERROR: Either a remote or a localfile must be specified!" >&2
-            exit 1
-        fi
+        checkLocalOrRemoteFile
         
         # A localfile must first be transferred
         if [ "$localfile" != "" ]
         then
-            remotefile=`nixops ssh $target "mktemp -p $TMPDIR"`
-            nixops scp $NIXOPS_OPTS --to $target "$@" $remotefile
+            remoteClosure=`nixops ssh $target "mktemp -p $TMPDIR"`
+            nixops scp $NIXOPS_OPTS --to $target "$@" $remoteClosure
+        else
+            remoteClosure="$@"
         fi
         
         # Import the closure into the Nix store
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --import $remotefile"
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --import $remoteClosure"
         ;;
     export)
-        if [ "$localfile" != "1" ] && [ "$remotefile" != "1" ]
-        then
-            echo "ERROR: Either a remote or a localfile must be specified!" >&2
-            exit 1
-        fi
+        checkLocalOrRemoteFile
 
         closure=`nixops ssh $NIXOPS_OPTS $target "disnix-client --export $@"`
         
@@ -347,21 +359,11 @@ case "$operation" in
         nixops ssh $NIXOPS_OPTS $target "disnix-client --collect-garbage $deleteOldArg $@"
         ;;
     activate)
-        if [ "$type" = "" ]
-        then
-            echo "ERROR: A type must be specified!" >&2
-            exit 1
-        fi
-        
+        checkType
         nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type $argsArg --activate $@"
         ;;
     deactivate)
-        if [ "$type" = "" ]
-        then
-            echo "ERROR: A type must be specified!" >&2
-            exit 1
-        fi
-        
+        checkType
         nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type $argsArg --deactivate $@"
         ;;
     lock)
@@ -371,30 +373,15 @@ case "$operation" in
         nixops ssh $NIXOPS_OPTS $target "disnix-client --unlock $profileArg"
         ;;
     snapshot)
-        if [ "$type" = "" ]
-        then
-            echo "ERROR: A type must be specified!" >&2
-            exit 1
-        fi
-        
+        checkType
         nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type $argsArg --snapshot $@"
         ;;
     restore)
-        if [ "$type" = "" ]
-        then
-            echo "ERROR: A type must be specified!" >&2
-            exit 1
-        fi
-        
+        checkType
         nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type $argsArg --restore $@"
         ;;
     delete-state)
-        if [ "$type" = "" ]
-        then
-            echo "ERROR: A type must be specified!" >&2
-            exit 1
-        fi
-        
+        checkType
         nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type $argsArg --delete-state $@"
         ;;
     query-all-snapshots)
@@ -407,32 +394,27 @@ case "$operation" in
         nixops ssh $NIXOPS_OPTS $target "disnix-client --print-missing-snapshots $@"
         ;;
     import-snapshots)
-        if [ "$localfile" != "1" ] && [ "$remotefile" != "1" ]
-        then
-            echo "ERROR: Either a remote or a localfile must be specified!" >&2
-            exit 1
-        fi
+        checkLocalOrRemoteFile
         
         # A localfile must first be transferred
         if [ "$localfile" = "1" ]
         then
             tempdir=`nixops ssh $NIXOPS_OPTS $target "mktemp -d -p $TMPDIR"`
             nixops scp $NIXOPS_OPTS --to $target $@ $tempdir > /dev/null
-            remotefile=`nixops ssh $NIXOPS_OPTS $target echo $tempdir/*`
+            remoteSnapshots=`nixops ssh $NIXOPS_OPTS $target echo $tempdir/*`
         else
-            remotefile=$@
+            remoteSnapshots="$@"
         fi
         
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --container $container --component $component --import-snapshots $remotefile"
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --container $container --component $component --import-snapshots $remoteSnapshots"
         ;;
     export-snapshots)
-        tmpdir=`mktemp -d -p $TMPDIR`
         for i in $@
         do
+            tmpdir=`mktemp -d -p $TMPDIR`
             nixops scp $NIXOPS_OPTS --from $target $i $tmpdir
+            echo $tmpdir
         done
-        
-        echo $tmpdir
         ;;
     resolve-snapshots)
         nixops ssh $NIXOPS_OPTS $target "disnix-client --resolve-snapshots $@"

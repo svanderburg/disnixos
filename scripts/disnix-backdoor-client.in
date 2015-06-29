@@ -140,6 +140,15 @@ Copyright (C) 2008-2015 Sander van der Burg
 EOF
 }
 
+checkType()
+{
+    if [ "$type" = "" ]
+    then
+        echo "ERROR: A type must be specified!" >&2
+        exit 1
+    fi
+}
+
 # Parse valid argument options
 
 PARAMS=`@getopt@ -n $0 -o rqp:dC:c:hv -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,snapshot,restore,delete-state,query-all-snapshots,query-latest-snapshot,print-missing-snapshots,import-snapshots,export-snapshots,resolve-snapshots,clean-snapshots,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,container:,component:,keep:,help,version -- "$@"`
@@ -342,11 +351,7 @@ case "$operation" in
         exit $exitStatus
         ;;
     activate)
-        if [ "$type" = "" ]
-        then
-            echo "ERROR: A type must be specified!" >&2
-            exit 1
-        fi
+        checkType
         
         outputFile=$(mktemp -p $TMPDIR)
         echo "disnix-client --type $type $argsArg --activate $@; echo \$?" | socat stdio $target > $outputFile
@@ -356,11 +361,7 @@ case "$operation" in
         exit $exitStatus
         ;;
     deactivate)
-        if [ "$type" = "" ]
-        then
-            echo "ERROR: A type must be specified!" >&2
-            exit 1
-        fi
+        checkType
         
         outputFile=$(mktemp -p $TMPDIR)
         echo "disnix-client --type $type $argsArg --deactivate $@; echo \$?" | socat stdio $target > $outputFile
@@ -386,11 +387,7 @@ case "$operation" in
         exit $exitStatus
         ;;
     snapshot)
-        if [ "$type" = "" ]
-        then
-            echo "ERROR: A type must be specified!" >&2
-            exit 1
-        fi
+        checkType
         
         outputFile=$(mktemp -p $TMPDIR)
         echo "disnix-client --type $type $argsArg --snapshot $@; echo \$?" | socat stdio $target > $outputFile
@@ -400,11 +397,7 @@ case "$operation" in
         exit $exitStatus
         ;;
     restore)
-        if [ "$type" = "" ]
-        then
-            echo "ERROR: A type must be specified!" >&2
-            exit 1
-        fi
+        checkType
         
         outputFile=$(mktemp -p $TMPDIR)
         echo "disnix-client --type $type $argsArg --restore $@; echo \$?" | socat stdio $target > $outputFile
@@ -414,11 +407,7 @@ case "$operation" in
         exit $exitStatus
         ;;
     delete-state)
-        if [ "$type" = "" ]
-        then
-            echo "ERROR: A type must be specified!" >&2
-            exit 1
-        fi
+        checkType
         
         outputFile=$(mktemp -p $TMPDIR)
         echo "disnix-client --type $type $argsArg --delete-state $@; echo \$?" | socat stdio $target > $outputFile
