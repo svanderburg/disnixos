@@ -162,4 +162,4 @@ manifest=`disnixos-manifest $networkFileArgs --target-property $targetProperty -
 disnix-distribute $maxConcurrentTransfersArg $manifest
 
 # Activate system derivations
-disnix-activate $profileArg --no-coordinator-profile --no-target-profiles --no-upgrade $manifest
+disnix-activate $profileArg --no-upgrade $manifest
