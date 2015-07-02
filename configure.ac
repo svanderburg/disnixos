@@ -52,6 +52,7 @@ data/generate-tests.nix
 data/testing.nix
 data/instantiate.nix
 data/manifest.nix
+maintenance/Makefile
 scripts/disnix-backdoor-client
 scripts/disnix-nixops-client
 scripts/disnixos-instantiate
