@@ -11,7 +11,7 @@
 	<section>
 		<title>Deploying the infrastructure</title>
 		<para>
-			To deploy the NixOS configurations of machines in the network, the following instruction can be used:
+			To deploy a network of NixOS configurations of machines, the following instruction can be used:
 		</para>
 		
 <screen>

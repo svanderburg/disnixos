@@ -102,7 +102,7 @@ $ nix-env -i disnix
 			it is installed, so that Disnix is able to find it. In NixOS, a copy is 
 			already present and this environment variable has already been configured.
 			On other systems this variable can be configured by adding the following lines to your
-			<filename>~/.bash_profile</filename> configuration (or another configuration
+			<filename>~/.bash_profile</filename> configuration (or similar configuration
 			file, if you use a different shell):
 		</para>
 		

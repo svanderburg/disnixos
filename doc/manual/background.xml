@@ -72,7 +72,7 @@
 		
 		<callout arearefs='co-2-boot'>
 			<para>
-				This section of the NixOS specifcation describes the settings
+				This section of the NixOS specification describes the settings
 				of the GRUB bootloader, such as that the partition containing
 				the MBR is <filename>/dev/sda</filename>.
 			</para>
@@ -80,7 +80,7 @@
 		
 		<callout arearefs='co-3-filesystems'>
 			<para>
-				This section of the NixOS specifcation describes the settings
+				This section of the NixOS specification describes the settings
 				of hard drive partitions, such as the root partition and the
 				swap partition.
 			</para>
@@ -88,7 +88,7 @@
 		
 		<callout arearefs='co-4-services'>
 			<para>
-				This section of the NixOS specifcation describes the services
+				This section of the NixOS specification describes the services
 				running on the system, such as the OpenSSH server providing
 				remote SSH access.
 			</para>
@@ -96,7 +96,7 @@
 		
 		<callout arearefs='co-5-environment'>
 			<para>
-				This section of the NixOS specifcation describes the system packages,
+				This section of the NixOS specification describes the system packages,
 				which can be used by all users on the machines, such as the
 				Lynx web browser and Midnight Commander.
 			</para>
@@ -106,7 +106,7 @@
 	<para>
 		The specification in <xref linkend="ex-1-nixos-configuration" /> should be stored in the
 		following location: <filename>/etc/nixos/configuration.nix</filename>. 
-		The complete configuration can be built from source code and activated by running:
+		The complete configuration can be deployed by running:
 	</para>
 	
 <screen>

@@ -52,7 +52,7 @@
 			<para>
 				DisnixOS allows you to write a network of NixOS configurations in a model and
 				to automatically deploy the system configurations in a network of machines through
-				the Disnix interface.
+				their Disnix interfaces.
 			</para>
 		</simplesect>
 		
@@ -61,7 +61,7 @@
 			<para>
 				DisnixOS uses the NixOS test driver to build a network of virtual machines
 				closely matching the actual network and automatically deploys the service-oriented system
-				in the virtual network,	so that it can be easily tested by developers.
+				in the virtual network, so that it can be easily tested by developers.
 			</para>
 		</simplesect>
 		
