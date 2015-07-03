@@ -277,6 +277,7 @@ rec {
       name = "test-project-tests";
       inherit tarball manifest;
       networkFile = "deployment/DistributedDeployment/network.nix";
+      dysnomiaStateDir = /var/state/dysnomia;
       testScript =
         ''
           # Wait until the front-end application is deployed
@@ -318,6 +319,10 @@ rec {
 					Basically this function abstraction does mostly what the command <command>disnixos-vm-env</command> does, but in an non-interactive
 					manner. Moreover, it also takes a test script as a parameter that is written in Perl. Test scripts use the facilities
 					of the NixOS test driver for execution. Consult the NixOS manual for more details on how to write test scripts.
+				</para>
+				<para>
+					Optionally, it can also refer to a Dysnomia snapshot folder. If a snapshot folder has been provided, they are restored in the VMs after the
+					system has been successfully deployed.
 				</para>
 			</callout>
 	      </calloutlist>
