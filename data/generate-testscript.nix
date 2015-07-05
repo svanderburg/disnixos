@@ -11,10 +11,12 @@
       ${"\$"}${targetName}->mustSucceed("iptables -I INPUT -p tcp --dport 512 -j ACCEPT || true");
       $pid = ${"\$"}${targetName}->mustSucceed("${socat}/bin/socat tcp-listen:512,fork exec:/bin/sh & echo -n \$!");
       ${"\$"}${targetName}->mustSucceed("while [ \"\$(ps -p $pid | grep socat)\" = \"\" ]; do sleep 0.5; done");
+      ${"\$"}${targetName}->mustSucceed("mkdir -p /var/state");
+      ${"\$"}${targetName}->mustSucceed("ln -s ${dysnomiaStateDir} /var/state/dysnomia");
     '') (builtins.attrNames network)}
     
     ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-activate --no-upgrade ${manifestFile}");
-    ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("DYSNOMIA_STATEDIR=${dysnomiaStateDir} ${disnix}/bin/disnix-restore --no-upgrade ${manifestFile}");
+    ${"\$"}${builtins.head (builtins.attrNames network)}->mustSucceed("${disnix}/bin/disnix-restore --no-upgrade ${manifestFile}");
     
     ${testScript}
 ''
