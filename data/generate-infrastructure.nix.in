@@ -13,15 +13,13 @@ in
 pkgs.stdenv.mkDerivation {
   name = "infrastructure.nix";
   buildCommand = ''
-    export datadir=@prefix@/share;
-
     sed -e "s|@networkFiles@|${toString networkFiles}|" \
         -e "s|@nixpkgs@|${nixpkgs}|" \
         -e "s|@useBackdoor@|${if useBackdoor then "true" else "false"}|" \
         -e "s|@useVMTesting@|${if useVMTesting then "true" else "false"}|" \
         -e "s|@enableDisnix@|${if enableDisnix then "true" else "false"}|" \
         -e "s|@nixOpsModel@|${if nixOpsModel then "true" else "false"}|" \
-        -e "s|@disnixos@|@prefix@|" \
+        -e "s|@disnixos@|${builtins.storePath @prefix@}|" \
         -e "s|@PACKAGE"@"|@PACKAGE@|" \
         ${infrastructureNix} > $out
   '';
