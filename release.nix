@@ -23,7 +23,7 @@ let
         inherit officialRelease;
         dontBuild = false;
 
-        buildInputs = [ socat getopt pkgconfig libxml2 libxslt disnix dblatex tetex help2man doclifter nukeReferences ];
+        buildInputs = [ socat getopt pkgconfig libxml2 libxslt disnix dblatex (dblatex.tex or tetex) help2man doclifter nukeReferences ];
         
         # Add documentation in the tarball
         configureFlags = ''
