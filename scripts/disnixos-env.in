@@ -25,13 +25,15 @@ showUsage()
 {
     cat <<EOF
 Usage: $0 -s services_nix -n network.nix [ -n network2.nix ... ] -d distribution_nix [OPTION]
+  or: $0 --rollback [OPTION]
+  or: $0 --switch-generation NUM [OPTION]
 
-The command \`disnixos-env' is used to install or upgrade the services and
-infrastructure of distributed system in a given environment. This command
-requires three Nix expressions as input parameters; A services model capturing
-the components of a distributed system and its inter-dependencies; A network
-model capturing the NixOS configurations of machines in the network and its
-properties and a distribution model which maps services to machines.
+The command \`disnixos-env' is used to install, upgrade or roll back the
+services and infrastructure of distributed system in a given environment. This
+command requires three Nix expressions as input parameters; A services model
+capturing the components of a distributed system and its inter-dependencies; A
+network model capturing the NixOS configurations of machines in the network and
+its properties and a distribution model which maps services to machines.
 
 By invoking this command it will first build, distribute and activate all the
 NixOS configurations of the machines in the network. Then it will build all the
@@ -64,6 +66,9 @@ Options:
   -d, --distribution=distribution_nix
                                   Distribution Nix expression which maps
                                   services to machines in the network
+      --switch-to-generation=NUM  Switches to a specific profile generation
+      --rollback                  Switches back to the previously deployed
+                                  configuration
       --target-property=PROP      The target property of an infrastructure
                                   model, that specifies how to
       --deploy-state              Indicates whether to globally deploy state
@@ -136,7 +141,7 @@ EOF
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:p:m:hv -l services:,network:,distribution:,profile:,max-concurrent-transfers:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,deploy-state,no-upgrade,no-lock,no-coordinator-profile,no-target-profiles,no-delete-state,show-trace,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:p:m:hv -l services:,network:,distribution:,rollback,switch-to-generation:,profile:,max-concurrent-transfers:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,deploy-state,no-upgrade,no-lock,no-coordinator-profile,no-target-profiles,no-delete-state,show-trace,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -159,6 +164,14 @@ do
             ;;
         -d|--distribution)
             distributionFile=`readlink -f $2`
+            ;;
+        --rollback)
+            switchGeneration=1
+            switchGenerationArg="--rollback"
+            ;;
+        --switch-to-generation)
+            switchGeneration=1
+            switchGenerationArg="--switch-to-generation $2"
             ;;
         -p|--profile)
             profileArg="--profile $2"
@@ -229,9 +242,13 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Validate the given options
 
-checkServicesFile
-checkNetworkFiles
-checkDistributionFile
+if [ "$switchGeneration" != "1" ]
+then
+    checkServicesFile
+    checkNetworkFiles
+    checkDistributionFile
+fi
+
 checkUseNixOps
 
 # If no client interface is given and NixOps is used, then use the disnix-nixops-client by default
@@ -245,14 +262,19 @@ checkClientInterface
 checkTargetProperty
 checkShowTrace
 
-# Generate infrastructure model from network model
-infrastructureFile=`disnixos-geninfra --no-out-link $useNixOpsArg $networkFiles`
-
-if [ "$useNixOps" != "1" ] && [ "$noInfraDeployment" != "1" ]
+if [ "$switchGeneration" = "1" ]
 then
-    # Upgrade the NixOS configurations through Disnix if NixOps is not used
-    disnixos-deploy-network --target-property $targetProperty --interface $interface $disableDisnixArg $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $showTraceArg $networkFiles
-fi
+    disnix-env $switchGenerationArg --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $deployStateArg $noUpgradeArg $noLockArg $noCoordinatorProfileArg $noTargetProfilesArg $noDeleteStateArg $switchToGenerationArg $showTraceArg
+else
+    # Generate infrastructure model from network model
+    infrastructureFile=`disnixos-geninfra --no-out-link $useNixOpsArg $networkFiles`
 
-# Upgrade the services
-disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $deployStateArg $noUpgradeArg $noLockArg $noCoordinatorProfileArg $noTargetProfilesArg $noDeleteStateArg $showTraceArg
+    if [ "$useNixOps" != "1" ] && [ "$noInfraDeployment" != "1" ]
+    then
+        # Upgrade the NixOS configurations through Disnix if NixOps is not used
+        disnixos-deploy-network --target-property $targetProperty --interface $interface $disableDisnixArg $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $showTraceArg $networkFiles
+    fi
+
+    # Upgrade the services
+    disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $deployStateArg $noUpgradeArg $noLockArg $noCoordinatorProfileArg $noTargetProfilesArg $noDeleteStateArg $switchToGenerationArg $showTraceArg
+fi
