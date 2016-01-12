@@ -18,7 +18,7 @@ writeTextFile {
         services.openssh.enable = true;
         
         # Create dummy Disnix job that does nothing. This prevents it from stopping.
-        jobs.disnix =
+        systemd.services.disnix =
           { description = "Disnix dummy server";
 
             wantedBy = [ "multi-user.target" ];

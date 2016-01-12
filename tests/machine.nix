@@ -3,7 +3,7 @@
 
 {
   virtualisation.writableStore = true;
-  virtualisation.memorySize = 1024;
+  virtualisation.memorySize = 2048;
   virtualisation.diskSize = 10240;
   virtualisation.pathsInNixDB = [ pkgs.stdenv pkgs.perlPackages.ArchiveCpio pkgs.busybox ];
   
@@ -14,9 +14,9 @@
   services.dbus.packages = [ disnix ];
   services.openssh.enable = true;
   
-  jobs.ssh.restartIfChanged = false;
+  systemd.services.ssh.restartIfChanged = false;
   
-  jobs.disnix =
+  systemd.services.disnix =
     { description = "Disnix server";
 
       wantedBy = [ "multi-user.target" ];
@@ -27,7 +27,7 @@
         HOME = "/root";
       };
 
-      exec = "disnix-service";
+      serviceConfig.ExecStart = "${disnix}/bin/disnix-service";
     };
     
     environment.systemPackages = [ pkgs.nix dysnomia disnix disnixos pkgs.hello pkgs.zip ];
