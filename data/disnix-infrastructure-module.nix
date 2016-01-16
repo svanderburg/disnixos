@@ -33,6 +33,7 @@ in
       // lib.optionalAttrs (config.services.mysql.enable) { mysqlPort = config.services.mysql.port; }
       // lib.optionalAttrs (config.services.tomcat.enable) { tomcatPort = 8080; }
       // lib.optionalAttrs (config.services.svnserve.enable) { svnBaseDir = config.services.svnserve.svnBaseDir; }
+      // lib.optionalAttrs (config.services.ejabberd.enable) { ejabberdUser = config.services.ejabberd.user; }
       // lib.optionalAttrs (cfg.enableAuthentication) (
           lib.optionalAttrs (config.services.mysql.enable) { mysqlUsername = "root"; mysqlPassword = builtins.readFile config.services.mysql.rootPassword; }
         )
