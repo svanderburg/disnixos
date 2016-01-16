@@ -94,27 +94,5 @@ $ nix-env -i disnixos
 <screen>
 $ nix-env -i disnix
 </screen>
-
-		<para>
-			A copy of
-			<link xlink:href="http://nixos.org/nixpkgs">Nixpkgs</link> is required
-			and an environment variable <envar>NIX_PATH</envar> must point to the path where
-			it is installed, so that Disnix is able to find it. In NixOS, a copy is 
-			already present and this environment variable has already been configured.
-			On other systems this variable can be configured by adding the following lines to your
-			<filename>~/.bash_profile</filename> configuration (or similar configuration
-			file, if you use a different shell):
-		</para>
-		
-<screen>
-$ cat &gt;&gt; ~/.bash_profile &lt;&lt;EOF
-# Begin Nixpkgs addition
-
-NIX_PATH="nixpkgs=/path/to/nixpkgs"
-export NIX_PATH
-
-# End Nixpkgs addition
-EOF
-</screen>
 	</section>
 </chapter>

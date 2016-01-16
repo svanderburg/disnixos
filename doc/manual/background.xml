@@ -13,13 +13,13 @@
 		system packages.
 	</para>
 	
-	<example xml:id="ex-1-nixos-configuration">
+	<example xml:id="ex-nixos-configuration">
 		<title>A NixOS configuration running a OpenSSH server</title>
 <programlisting>
-{pkgs, ...}: <co xml:id='co-1-functionHeader' />
+{pkgs, ...}: <co xml:id='co-functionHeader' />
 
 {
-  boot = { <co xml:id='co-2-boot' />
+  boot = { <co xml:id='co-boot' />
     loader = {
       grub = {
         device = "/dev/sda";
@@ -27,7 +27,7 @@
     };
   };
 
-  fileSystems = [ <co xml:id='co-3-filesystems' />
+  fileSystems = [ <co xml:id='co-filesystems' />
     { mountPoint = "/";
       device = "/dev/sda2";
     }
@@ -37,13 +37,13 @@
     { device = "/dev/sda1"; }
   ];
   
-  services = { <co xml:id='co-4-services' />
+  services = { <co xml:id='co-services' />
     openssh = {
       enable = true;
     };
   };
 
-  environment = { <co xml:id='co-5-environment' />
+  environment = { <co xml:id='co-environment' />
     systemPackages = [
       pkgs.mc
       pkgs.subversion
@@ -55,22 +55,22 @@
 	</example>
 	
 	<para>
-		<xref linkend="ex-1-nixos-configuration" /> shows a Nix expression describing the configuration
+		<xref linkend="ex-nixos-configuration" /> shows a Nix expression describing the configuration
 		of a machine.
 	</para>
 	
 	<calloutlist>
-		<callout arearefs='co-1-functionHeader'>
+		<callout arearefs='co-functionHeader'>
 			<para>
 				This line states that the expression is a function, having
 				an argument called <varname>pkgs</varname>, which refers to
 				<link xlink:href="http://nixos.org/nixpkgs">Nixpkgs</link>, 
-				a collection of 2500 packages which can be deployed
+				a collection of 2500 packages that can be deployed
 				by the Nix package manager.
 			</para>
 		</callout>
 		
-		<callout arearefs='co-2-boot'>
+		<callout arearefs='co-boot'>
 			<para>
 				This section of the NixOS specification describes the settings
 				of the GRUB bootloader, such as that the partition containing
@@ -78,7 +78,7 @@
 			</para>
 		</callout>
 		
-		<callout arearefs='co-3-filesystems'>
+		<callout arearefs='co-filesystems'>
 			<para>
 				This section of the NixOS specification describes the settings
 				of hard drive partitions, such as the root partition and the
@@ -86,7 +86,7 @@
 			</para>
 		</callout>
 		
-		<callout arearefs='co-4-services'>
+		<callout arearefs='co-services'>
 			<para>
 				This section of the NixOS specification describes the services
 				running on the system, such as the OpenSSH server providing
@@ -94,7 +94,7 @@
 			</para>
 		</callout>
 		
-		<callout arearefs='co-5-environment'>
+		<callout arearefs='co-environment'>
 			<para>
 				This section of the NixOS specification describes the system packages,
 				which can be used by all users on the machines, such as the
@@ -104,7 +104,7 @@
 	</calloutlist>
 	
 	<para>
-		The specification in <xref linkend="ex-1-nixos-configuration" /> should be stored in the
+		The specification in <xref linkend="ex-nixos-configuration" /> should be stored in the
 		following location: <filename>/etc/nixos/configuration.nix</filename>. 
 		The complete configuration can be deployed by running:
 	</para>
@@ -118,31 +118,31 @@ $ nixos-rebuild switch
 		 of machines:
 	</para>
 
-	<example xml:id="ex-2-network">
+	<example xml:id="ex-network">
 		<title>A network of NixOS configurations</title>
 <programlisting>
 {
-  test1 = import ../configurations/openssh.nix; <co xml:id='co-1-openssh' />
-  test2 = import ../configurations/tomcat.nix; <co xml:id='co-2-tomcat' />
+  test1 = import ../configurations/openssh.nix; <co xml:id='co-openssh' />
+  test2 = import ../configurations/tomcat.nix; <co xml:id='co-tomcat' />
   test3 = import ../configurations/httpd.nix;
 }
 </programlisting>
 	</example>
 	
 	<para>
-		<xref linkend="ex-2-network" /> shows a network of NixOS configurations. Basically, this
+		<xref linkend="ex-network" /> shows a network of NixOS configurations. Basically, this
 		expression is an attribute set in which each attribute refers to a NixOS configuration: 
 	</para>
 	
 	<calloutlist>
-		<callout arearefs='co-1-openssh'>
+		<callout arearefs='co-openssh'>
 			<para>
 				This attribute declares that we have a machine with identifier
 				<varname>test1</varname>, having a configuration running a OpenSSH server,
-				described earlier in <xref linkend="ex-1-nixos-configuration" />.
+				described earlier in <xref linkend="ex-nixos-configuration" />.
 			</para>
 		</callout>
-		<callout arearefs='co-2-tomcat'>
+		<callout arearefs='co-tomcat'>
 			<para>
 				This attribute declares that we have a machine with identifier
 				<varname>test2</varname>, having a configuration running an Apache Tomcat server.
@@ -173,7 +173,7 @@ $ disnixos-deploy-network network.nix
 		in a network. Furthermore, the system configurations have references to each other:
 	</para>
 	
-	<example xml:id="ex-3-network-logical">
+	<example xml:id="ex-network-logical">
 		<title>A logical NixOS network model</title>
 <programlisting>
 {
@@ -186,7 +186,7 @@ $ disnixos-deploy-network network.nix
         };
 
         tomcat = {
-          enable = true; <co xml:id='co-1-tomcat' />
+          enable = true; <co xml:id='co-tomcatService' />
         };
       };
     };
@@ -206,7 +206,7 @@ $ disnixos-deploy-network network.nix
 	  extraConfig = ''
 	    &lt;Proxy balancer://cluster&gt;
               Allow from all
-              BalancerMember http://${nodes.tomcat.config.networking.hostName}:8080 retry=0 <co xml:id='co-2-reverseproxy' />
+              BalancerMember http://${nodes.tomcat.config.networking.hostName}:8080 retry=0 <co xml:id='co-reverseproxy' />
             &lt;/Proxy&gt;
 
             ProxyStatus       full
@@ -223,18 +223,18 @@ $ disnixos-deploy-network network.nix
 	</example>
 	
 	<para>
-		The model in <xref linkend="ex-3-network-logical" /> is an attribute set in which each value refers to a
+		The model in <xref linkend="ex-network-logical" /> is an attribute set in which each value refers to a
 		NixOS configuration:
 	</para>
 	
 	<calloutlist>
-		<callout arearefs='co-1-tomcat'>
+		<callout arearefs='co-tomcatService'>
 			<para>
 				The <varname>tomcat</varname> machine is a simple configuration hosting Apache Tomcat serving
-				an arbitrary number of web applications and an OpenSSH server.
+				an arbitrary number of web applications, and an OpenSSH server.
 			</para>
 		</callout>
-		<callout arearefs='co-2-reverseproxy'>
+		<callout arearefs='co-reverseproxy'>
 			<para>
 				The <varname>httpd</varname> machine runs a reverse proxy that forwards all incoming requests to the Apache Tomcat server.
 				It fetches the hostname of the <varname>tomcat</varname> machine's configuration through the <varname>nodes</varname>
@@ -248,7 +248,7 @@ $ disnixos-deploy-network network.nix
 		machine specific properties, such as the partitions and bootloader settings:
 	</para>
 
-	<example xml:id="ex-4-network-physical">
+	<example xml:id="ex-network-physical">
 		<title>A physical NixOS network model</title>
 <programlisting>
 {
@@ -300,7 +300,7 @@ $ disnixos-deploy-network network.nix
 	</example>
 
 	<para>
-		The network in model shown in <xref linkend="ex-4-network-physical" /> captures machine-specific properties, such as partition and bootloader
+		The network in model shown in <xref linkend="ex-network-physical" /> captures machine-specific properties, such as partition and bootloader
 		settings. With the following command the network can be deployed taking both the given logical and physical
 		properties into account:
 	</para>

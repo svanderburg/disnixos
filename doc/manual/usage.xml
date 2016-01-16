@@ -65,7 +65,7 @@ $ disnixos-env -s services.nix -n network-logical.nix -n network-physical.nix -d
 </screen>
 		<para>
 			The <command>disnixos-env</command> supports most of the options that <command>disnix-env</command>
-			supports. For example, adding the <command>--build-on-targets</command> parameter builds all
+			supports. For example, adding the <option>--build-on-targets</option> parameter builds all
 			system configurations on the target machines, instead of the coordinator machine.
 		</para>
 	</section>
@@ -237,7 +237,7 @@ $ disnix-collect-garbage $(disnixos-geninfra network.nix)
 			automated tests non-interactively from Nix expressions.
 		</para>
 		<para>
-			<example xml:id="ex-5-disnixosjobset">
+			<example xml:id="ex-disnixosjobset">
 				<title>A Nix expression jobset for testing Disnix projects</title>
 				<programlisting>
 			
@@ -248,14 +248,14 @@ $ disnix-collect-garbage $(disnixos-geninfra network.nix)
 let
   pkgs = import nixpkgs { inherit system; };
   
-  disnixos = import "${pkgs.disnixos}/share/disnixos/testing.nix" { <co xml:id='co-1-importDisnixos' />
+  disnixos = import "${pkgs.disnixos}/share/disnixos/testing.nix" { <co xml:id='co-importDisnixos' />
     inherit nixpkgs system;
   };
   
   version = "1.0";
 in
 rec {
-  tarball = disnixos.sourceTarball { <co xml:id='co-2-sourceTarball' />
+  tarball = disnixos.sourceTarball { <co xml:id='co-sourceTarball' />
     name = "testproject-zip";
     inherit version;
     src = ./.;
@@ -263,7 +263,7 @@ rec {
   };
   
   manifest = 
-    disnixos.buildManifest { <co xml:id='co-3-buildManifest' />
+    disnixos.buildManifest { <co xml:id='co-buildManifest' />
     name = "test-project-manifest";
     version = builtins.readFile ./version;
     inherit tarball;
@@ -273,7 +273,7 @@ rec {
   };
 
   tests =
-    disnixos.disnixTest { <co xml:id='co-4-disnixTest' />
+    disnixos.disnixTest { <co xml:id='co-disnixTest' />
       name = "test-project-tests";
       inherit tarball manifest;
       networkFile = "deployment/DistributedDeployment/network.nix";
@@ -293,27 +293,27 @@ rec {
 		</para>
 		
 		<para>
-			<xref linkend="ex-5-disnixosjobset" /> shows a Nix expression defining three jobs:
+			<xref linkend="ex-disnixosjobset" /> shows a Nix expression defining three jobs:
 		</para>
 		<calloutlist>
-			<callout arearefs='co-1-importDisnixos'>
+			<callout arearefs='co-importDisnixos'>
 				<para>
 					This line imports the testing function abstractions provided by DisnixOS.
 				</para>
 			</callout>
-			<callout arearefs='co-2-sourceTarball'>
+			<callout arearefs='co-sourceTarball'>
 				<para>
 				      This function invocation constructs a bzip2 compressed tarball containing all files belonging to a Disnix project.
 				</para>
 			</callout>
-			<callout arearefs='co-3-buildManifest'>
+			<callout arearefs='co-buildManifest'>
 				<para>
 					Here, the three DisnixOS models provided by a source distribution are built from source code and a
 					<filename>manifest.xml</filename> is produced. Basically this function abstraction does the same thing
 					as the <command>disnixos-manifest</command> command.
 				</para>
 			</callout>
-			<callout arearefs='co-4-disnixTest'>
+			<callout arearefs='co-disnixTest'>
 				<para>
 					This job spawns a network of QEMU machines inside a Nix build, consults DisnixOS to deploy the system and performs some testcases.
 					Basically this function abstraction does mostly what the command <command>disnixos-vm-env</command> does, but in an non-interactive
@@ -321,7 +321,8 @@ rec {
 					of the NixOS test driver for execution. Consult the NixOS manual for more details on how to write test scripts.
 				</para>
 				<para>
-					Optionally, it can also refer to a Dysnomia snapshot folder. If a snapshot folder has been provided, they are restored in the VMs after the
+					Optionally, it can also refer to a Dysnomia snapshot folder. If a snapshot folder has been provided, then
+					the latest snapshots inside are restored in the VMs after the
 					system has been successfully deployed.
 				</para>
 			</callout>
