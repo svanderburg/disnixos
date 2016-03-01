@@ -193,10 +193,7 @@ then
               $showTraceArg \
               "$(readlink -f @datadir@/@PACKAGE@/instantiate.nix)"
 else
-    if [ "$useNixOps" = "1" ]
-    then
-        nixOpsArg="--use-nixops"
-    fi
+    setNixOpsParams
 
     # Generate infrastructure model from network model
     infrastructureFile=`disnixos-geninfra --no-out-link $genInfraArgs $nixOpsArg $networkFiles`

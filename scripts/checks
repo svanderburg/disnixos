@@ -30,6 +30,8 @@ checkNetworkFiles()
     fi
 }
 
+# Checks whether NixOps integration should be enabled
+
 checkUseNixOps()
 {
     if [ "$DISNIXOS_USE_NIXOPS" = "1" ]
@@ -38,7 +40,23 @@ checkUseNixOps()
     fi
 }
 
+# Locates the location of NixOps and adjusts NIX_PATH to refer to the NixOS
+# module configuring NixOps specific properties
+
 locateNixOps()
 {
     export NIX_PATH=$NIX_PATH:nixops=$(dirname $(readlink -f $(type -p nixops)))/../share/nix/nixops
+}
+
+# Sets all relevant parameter such as interface and nixOpsArgs to allow the
+# NixOps integration to work
+
+setNixOpsParams()
+{
+    if [ "$useNixOps" = "1" ]
+    then
+        locateNixOps
+        interface=disnix-nixops-client
+        nixOpsArg="--use-nixops"
+    fi
 }

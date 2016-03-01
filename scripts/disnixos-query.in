@@ -122,12 +122,7 @@ source @datadir@/@PACKAGE@/checks
 # Validate the given options
 checkClientInterface
 checkUseNixOps
-
-if [ "$useNixOps" = "1" ]
-then
-    nixOpsArg="--use-nixops"
-    locateNixOps
-fi
+setNixOpsParams
 
 if [ -z "$1" ]
 then
