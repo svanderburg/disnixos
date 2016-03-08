@@ -2,12 +2,25 @@
 , systems ? [ "i686-linux" "x86_64-linux" ]
 , disnixos ? { outPath = ./.; rev = 1234; }
 , officialRelease ? false
-, disnixJobset ? import ../disnix/release.nix { inherit nixpkgs systems officialRelease; }
-, dysnomiaJobset ? import ../dysnomia/release.nix { inherit nixpkgs systems officialRelease; }
+, fetchDependenciesFromNixpkgs ? false
 }:
 
 let
   pkgs = import nixpkgs {};
+  
+  # Refer either to dysnomia in the parent folder, or to the one in Nixpkgs
+  dysnomiaJobset = if fetchDependenciesFromNixpkgs then {
+    build = pkgs.lib.genAttrs systems (system:
+      (import nixpkgs { inherit system; }).dysnomia
+    );
+  } else import ../dysnomia/release.nix { inherit nixpkgs systems officialRelease; };
+  
+  # Refer either to disnix in the parent folder, or to the one in Nixpkgs
+  disnixJobset = if fetchDependenciesFromNixpkgs then {
+    build = pkgs.lib.genAttrs systems (system:
+      (import nixpkgs { inherit system; }).disnix
+    );
+  } else import ../disnix/release.nix { inherit nixpkgs systems officialRelease; };
   
   jobs = rec {
     tarball =
