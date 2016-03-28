@@ -21,6 +21,8 @@ simpleTest {
       $coordinator->waitForJob("network-interfaces.target");
       $testtarget1->waitForJob("disnix");
       $testtarget2->waitForJob("disnix");
+      $testtarget1->waitForJob("sshd");
+      $testtarget2->waitForJob("sshd");
       
       # Initialise ssh stuff by creating a key pair for communication
       my $key=`${openssh}/bin/ssh-keygen -t dsa -f key -N ""`;

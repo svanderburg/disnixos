@@ -5,16 +5,17 @@
   virtualisation.writableStore = true;
   virtualisation.memorySize = 2048;
   virtualisation.diskSize = 10240;
-  virtualisation.pathsInNixDB = [ pkgs.stdenv ];
+  virtualisation.pathsInNixDB = [ pkgs.stdenv pkgs.perlPackages.ArchiveCpio pkgs.busybox ];
   
   ids.gids = { disnix = 200; };
   users.extraGroups = [ { gid = 200; name = "disnix"; } ];
+  networking.firewall.enable = false;
   
   services.dbus.enable = true;
   services.dbus.packages = [ disnix ];
   services.openssh.enable = true;
   
-  systemd.services.ssh.restartIfChanged = false;
+  #systemd.services.ssh.restartIfChanged = false;
   
   systemd.services.disnix =
     { description = "Disnix server";

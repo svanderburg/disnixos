@@ -181,6 +181,7 @@ then
 fi
 
 checkUseNixOps
+setNixOpsParams
 
 # Build the manifest file
 
@@ -206,8 +207,6 @@ then
               $showTraceArg \
               "$(readlink -f @datadir@/@PACKAGE@/manifest.nix)"
 else
-    setNixOpsParams
-
     # Generate infrastructure model from network model
     infrastructureFile=`disnixos-geninfra --no-out-link $genInfraArgs $nixOpsArg $networkFiles`
     
