@@ -17,6 +17,8 @@ let
   
   # Refer either to disnix in the parent folder, or to the one in Nixpkgs
   disnixJobset = if fetchDependenciesFromNixpkgs then {
+    tarball = pkgs.dysnomia.src;
+    
     build = pkgs.lib.genAttrs systems (system:
       (import nixpkgs { inherit system; }).disnix
     );
@@ -97,7 +99,8 @@ let
         
         deploymentInfraWithData = import ./tests/deployment-infra-with-data.nix {
           inherit nixpkgs dysnomia disnix disnixos;
-          inherit (pkgs) writeTextFile openssh;
+          inherit (pkgs) writeTextFile runCommand openssh;
+          dysnomiaTarball = dysnomiaJobset.tarball;
         };
         
         distbuildInfra = import ./tests/distbuild-infra.nix {
