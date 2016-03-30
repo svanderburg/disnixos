@@ -95,6 +95,11 @@ let
           inherit (pkgs) writeTextFile openssh;
         };
         
+        deploymentInfraWithData = import ./tests/deployment-infra-with-data.nix {
+          inherit nixpkgs dysnomia disnix disnixos;
+          inherit (pkgs) writeTextFile openssh;
+        };
+        
         distbuildInfra = import ./tests/distbuild-infra.nix {
           inherit nixpkgs dysnomia disnix disnixos;
           inherit (pkgs) writeTextFile openssh;

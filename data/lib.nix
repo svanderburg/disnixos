@@ -146,6 +146,32 @@ rec {
   ;
   
   /*
+   * Generates a list of snapshot items specifying on which machines to snapshot the state of a NixOS configuration.
+   *
+   * Parameters:
+   * configurations: An attribute set with evaluated configurations
+   * targetProperty: Attribute from the infrastructure model that is used to connect to the Disnix interface
+   *
+   * Returns:
+   * A list of attribute sets representing snapshot items
+   */
+  generateSnapshotMappings = configurations: targetProperty:
+    map (targetName:
+      let
+        machine = getAttr targetName configurations;
+        infrastructure = machine.config.disnixInfrastructure.infrastructure;
+        service = machine.config.system.build.toplevel.outPath;
+        target = getTargetProperty targetProperty infrastructure;
+      in
+      {
+        component = builtins.substring 33 (builtins.stringLength service) (builtins.baseNameOf service);
+        container = "nixos-configuration";
+        inherit service target;
+      }
+    ) (attrNames configurations)
+  ;
+  
+  /*
    * Generates a list of machines that are involved in the deployment process.
    *
    * Parameters:
@@ -192,6 +218,7 @@ rec {
     in
     { profiles = generateProfiles configurations targetProperty;
       activation = generateActivationMappings configurations targetProperty;
+      snapshots = generateSnapshotMappings configurations targetProperty;
       targets = generateTargetPropertyList configurations targetProperty clientInterface;
     };
   

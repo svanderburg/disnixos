@@ -1,0 +1,160 @@
+#!/bin/bash
+set -e
+set -o pipefail
+
+# DisnixOS - Infrastructure deployment extension for Disnix
+# Copyright (C) 2008-2016  Sander van der Burg
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+# Shows the usage of this command to the user
+
+showUsage()
+{
+    cat <<EOF
+Usage: $0 [OPTION] network_expr ...
+
+The command \`disnixos-restore-network' is used to restore the state of all
+mutable components that have been deployed as part of machine's configuration.
+
+Options:
+      --target-property=PROP          The target property of an infrastructure
+                                      model, that specifies how to
+                                      connect to the remote Disnix interface.
+                                      (Defaults to hostname)
+      --interface=INTERFACE           Process that communicates with the remote
+                                      disnix service. Defaults to:
+                                      disnix-ssh-client
+      --transfer-only                 Transfers the snapshot from the target
+                                      machines, but does not actually restore
+                                      them
+      --all                           Transfers all snapshot generations of the
+                                      target machines, not the latest
+  -p, --profile=PROFILE               Name of the profile that is used for this
+                                      system. Defaults to: default
+  -m, --max-concurrent-transfers=NUM  Maximum amount of concurrent closure
+                                      transfers. Defauls to: 2
+      --disable-disnix                Do not enable the Disnix service on the
+                                      target machines by default
+      --show-trace                    Shows a trace of the output
+  -h, --help                          Shows the usage of this command
+  -v, --version                       Shows the version of this command
+
+Environment:
+  DISNIX_CLIENT_INTERFACE    Sets the client interface (which defaults to
+                             \`disnix-ssh-client')
+  DISNIX_TARGET_PROPERTY     Specifies which property in the infrastructure Nix
+                             expression specifies how to connect to the remote
+                             interface (defaults to: hostname)
+  DISNIX_PROFILE             Sets the name of the profile that stores the
+                             manifest on the coordinator machine and the
+                             deployed services per machine on each target
+                             (Defaults to: default).
+EOF
+}
+
+# Shows the version of this command to the user
+
+showVersion()
+{
+    cat <<EOF
+$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+
+Copyright (C) 2008-2016 Sander van der Burg
+EOF
+}
+
+# Parse valid argument options
+
+PARAMS=`@getopt@ -n $0 -o p:m:hv -l all,transfer-only,profile:,max-concurrent-transfers:,target-property:,interface:,show-trace,disable-disnix,help,version -- "$@"`
+
+if [ $? != 0 ]
+then
+    showUsage
+    exit 1
+fi
+
+# Evaluate valid options
+
+eval set -- "$PARAMS"
+
+while [ "$1" != "--" ]
+do
+    case "$1" in
+        --all)
+            allArg="--all"
+            ;;
+        --transfer-only)
+            transferOnlyArg="--transfer-only"
+            ;;
+        -p|--profile)
+            profileArg="--profile $2"
+            ;;
+        -m|--max-concurrent-transfers)
+            maxConcurrentTransfersArg="-m $2"
+            ;;
+        --target-property)
+            targetProperty=$2
+            ;;
+        --interface)
+            interface=$2
+            ;;
+        --show-trace)
+            showTrace=1
+            ;;
+        --disable-disnix)
+            disableDisnixArg="--disable-disnix"
+            ;;
+        -h|--help)
+            showUsage
+            exit 0
+            ;;
+        -v|--version)
+            showVersion
+            exit 0
+            ;;
+    esac
+    
+    shift
+done
+
+shift
+
+# Import checks
+source @DISNIX_PREFIX@/share/disnix/checks
+
+# Validate the given options
+
+checkTargetProperty
+checkClientInterface
+checkShowTrace
+
+if [ "$1" = "" ]
+then
+    echo "ERROR: At least one network expression must be specified!" >&2
+    exit 1
+else
+    while [ "$1" != "" ]
+    do
+        networkFileArgs="$networkFileArgs -n $(readlink -f $1)"
+        shift
+    done
+fi
+
+# Create a manifest file
+manifest=`disnixos-manifest $networkFileArgs --target-property $targetProperty --interface $interface --no-out-link $maxConcurrentTransfersArg $disableDisnixArg $showTraceArg`
+
+# Snapshot the state of the system derivations
+disnix-restore --no-upgrade $allArg $transferOnlyArg $profileArg $manifest

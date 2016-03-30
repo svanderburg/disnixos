@@ -65,5 +65,8 @@ scripts/disnixos-vm-env
 scripts/disnixos-collect-garbage
 scripts/disnixos-clean-snapshots
 scripts/disnixos-query
+scripts/disnixos-snapshot-network
+scripts/disnixos-restore-network
+scripts/disnixos-delete-network-state
 ])
 AC_OUTPUT
