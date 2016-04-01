@@ -230,6 +230,43 @@ $ disnix-collect-garbage $(disnixos-geninfra network.nix)
 	</section>
 	
 	<section>
+		<title>Snapshotting the state of the infrastructure</title>
+		
+		<para>
+			It is also possible to manage the state of mutable components deployed as part of a NixOS
+			configuration for systems that have the Dysnomia NixOS module enabled. To snapshot their
+			state and transfer the composite snapshot to the coordinator run:
+		</para>
+		
+<screen>
+$ disnixos-snapshot-network network.nix
+</screen>
+	</section>
+	
+	<section>
+		<title>Restoring the state of the infrastructure</title>
+		
+		<para>
+			Besides snapshotting the state of the infrastructure, it is also possible to restore it:
+		</para>
+<screen>
+$ disnixos-restore-network network.nix
+</screen>
+	</section>
+	
+	<section>
+		<title>Deleting obsolete infrastructure state</title>
+		
+		<para>
+			The obsolete state of the mutable components that have been deployed as part of the infrastructure
+			can be removed as follows:
+		</para>
+<screen>
+$ disnixos-delete-network-state network.nix
+</screen>
+	</section>
+	
+	<section>
 		<title>Automated testing of Disnix deployments</title>
 		
 		<para>
