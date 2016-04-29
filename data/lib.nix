@@ -140,6 +140,7 @@ rec {
         name = targetName;
         service = machine.config.system.build.toplevel.outPath;
         target = getTargetProperty targetProperty infrastructure;
+        container = "nixos-configuration";
         dependsOn = [];
         type = "nixos-configuration";
       }
@@ -167,6 +168,7 @@ rec {
       {
         component = builtins.substring 33 (builtins.stringLength service) (builtins.baseNameOf service);
         container = "nixos-configuration";
+        type = "nixos-configuration";
         inherit service target;
       }
     ) (attrNames configurations)
