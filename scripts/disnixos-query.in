@@ -123,6 +123,7 @@ source @datadir@/@PACKAGE@/checks
 checkClientInterface
 checkUseNixOps
 setNixOpsParams
+locateDysnomia
 
 if [ -z "$1" ]
 then

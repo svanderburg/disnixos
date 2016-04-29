@@ -107,9 +107,11 @@ Collect garbage options:
 Activation/Deactivation/Snapshot/Restore/Delete state options:
   --type=TYPE                Specifies the activation module that should be
                              used, such as echo or process.
-
   --arguments=ARGUMENTS      Specifies the arguments passed to the Dysnomia
                              module, which is a string with key=value pairs
+  --container=CONTAINER      Name of the container in which the component is
+                             managed. If omitted it will default to the same
+                             value as the type.
 
 Query all snapshots/Query latest snapshot options:
   -C, --container=CONTAINER  Name of the container in which the component is managed
@@ -147,6 +149,14 @@ checkType()
     then
         echo "ERROR: A type must be specified!" >&2
         exit 1
+    fi
+}
+
+checkContainer()
+{
+    if [ "$container" = "" ]
+    then
+        container=type
     fi
 }
 
@@ -353,9 +363,10 @@ case "$operation" in
         ;;
     activate)
         checkType
+        checkContainer
         
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --type $type $argsArg --activate $@; echo \$?" | socat stdio $target > $outputFile
+        echo "disnix-client --type $type --container $container $argsArg --activate $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -363,9 +374,10 @@ case "$operation" in
         ;;
     deactivate)
         checkType
+        checkContainer
         
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --type $type $argsArg --deactivate $@; echo \$?" | socat stdio $target > $outputFile
+        echo "disnix-client --type $type --container $container $argsArg --deactivate $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -389,9 +401,10 @@ case "$operation" in
         ;;
     snapshot)
         checkType
+        checkContainer
         
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --type $type $argsArg --snapshot $@; echo \$?" | socat stdio $target > $outputFile
+        echo "disnix-client --type $type --container $container $argsArg --snapshot $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -399,9 +412,10 @@ case "$operation" in
         ;;
     restore)
         checkType
+        checkContainer
         
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --type $type $argsArg --restore $@; echo \$?" | socat stdio $target > $outputFile
+        echo "disnix-client --type $type --container $container $argsArg --restore $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -409,9 +423,10 @@ case "$operation" in
         ;;
     delete-state)
         checkType
+        checkContainer
         
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --type $type $argsArg --delete-state $@; echo \$?" | socat stdio $target > $outputFile
+        echo "disnix-client --type $type --container $container $argsArg --delete-state $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile

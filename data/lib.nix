@@ -65,6 +65,7 @@ rec {
             networking.hostName = pkgs.lib.mkOverride 900 targetName;
             disnixInfrastructure.enable = true;
             disnixInfrastructure.enableAuthentication = true;
+            disnixInfrastructure.generateContainersExpr = <dysnomia/generate-containers.nix>;
           }
         ]
         ++ pkgs.lib.optional enableDisnix {

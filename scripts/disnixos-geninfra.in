@@ -141,6 +141,8 @@ then
     locateNixOps
 fi
 
+locateDysnomia
+
 if [ -z "$1" ]
 then
     echo "ERROR: A network expression must be specified!" >&2

@@ -106,9 +106,11 @@ Collect garbage options:
 Activation/Deactivation/Snapshot/Restore/Delete state options:
   --type=TYPE                Specifies the activation module that should be
                              used, such as echo or process.
-
   --arguments=ARGUMENTS      Specifies the arguments passed to the Dysnomia
                              module, which is a string with key=value pairs
+  --container=CONTAINER      Name of the container in which the component is
+                             managed. If omitted it will default to the same
+                             value as the type.
 
 Query all snapshots/Query latest snapshot options:
   -C, --container=CONTAINER  Name of the container in which the component is managed
@@ -157,6 +159,14 @@ checkType()
     then
         echo "ERROR: A type must be specified!" >&2
         exit 1
+    fi
+}
+
+checkContainer()
+{
+    if [ "$container" = "" ]
+    then
+        container=type
     fi
 }
 
@@ -361,11 +371,13 @@ case "$operation" in
         ;;
     activate)
         checkType
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type $argsArg --activate $@"
+        checkContainer
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type --container $container $argsArg --activate $@"
         ;;
     deactivate)
         checkType
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type $argsArg --deactivate $@"
+        checkContainer
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type --container $container $argsArg --deactivate $@"
         ;;
     lock)
         nixops ssh $NIXOPS_OPTS $target "disnix-client --lock $profileArg"
@@ -375,15 +387,18 @@ case "$operation" in
         ;;
     snapshot)
         checkType
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type $argsArg --snapshot $@"
+        checkContainer
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type --container $container $argsArg --snapshot $@"
         ;;
     restore)
         checkType
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type $argsArg --restore $@"
+        checkContainer
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type --container $container $argsArg --restore $@"
         ;;
     delete-state)
         checkType
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type $argsArg --delete-state $@"
+        checkContainer
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type --container $container $argsArg --delete-state $@"
         ;;
     query-all-snapshots)
         nixops ssh $NIXOPS_OPTS $target "disnix-client --query-all-snapshots --container $container --component $component"

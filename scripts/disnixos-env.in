@@ -267,6 +267,7 @@ fi
 checkClientInterface
 checkTargetProperty
 checkShowTrace
+locateDysnomia
 
 if [ "$switchGeneration" = "1" ]
 then

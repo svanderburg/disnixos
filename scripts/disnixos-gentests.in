@@ -123,6 +123,8 @@ then
     nixOpsArg="--arg nixOpsModel true"
 fi
 
+locateDysnomia
+
 if [ "$@" = "" ]
 then
     echo "ERROR: A manifest file must be specified!" >&2

@@ -20,24 +20,24 @@ in
         default = {};
         description = "An attribute set containing infrastructure model properties";
       };
+      
+      generateContainersExpr = lib.mkOption {
+        description = "The path to the expression generating the container properties";
+        type = lib.types.path;
+      };
     };
   };
   
   config = lib.mkIf cfg.enable {
-    disnixInfrastructure.infrastructure =
-      { hostname = config.networking.hostName;
-        system = if config.nixpkgs.system == "" then builtins.currentSystem else config.nixpkgs.system;
-      }
-      // lib.optionalAttrs (config.services.disnix.useWebServiceInterface) { targetEPR = "http://${config.networking.hostName}:8080/DisnixWebService/services/DisnixWebService"; }
-      // lib.optionalAttrs (config.services.httpd.enable) { documentRoot = config.services.httpd.documentRoot; }
-      // lib.optionalAttrs (config.services.mysql.enable) { mysqlPort = config.services.mysql.port; }
-      // lib.optionalAttrs (config.services.tomcat.enable) { tomcatPort = 8080; }
-      // lib.optionalAttrs (config.services.svnserve.enable) { svnBaseDir = config.services.svnserve.svnBaseDir; }
-      // lib.optionalAttrs (config.services.ejabberd.enable) { ejabberdUser = config.services.ejabberd.user; }
-      // lib.optionalAttrs (cfg.enableAuthentication) (
-          lib.optionalAttrs (config.services.mysql.enable) { mysqlUsername = "root"; mysqlPassword = builtins.readFile config.services.mysql.rootPassword; }
-        )
-      // config.services.disnix.infrastructure;
-
+    disnixInfrastructure.infrastructure = {
+      properties.hostname = config.networking.hostName;
+      
+      system = if config.nixpkgs.system == "" then builtins.currentSystem else config.nixpkgs.system;
+      
+      containers = import cfg.generateContainersExpr {
+        inherit (cfg) enableAuthentication;
+        inherit config lib;
+      };
+    };
   };
 }
