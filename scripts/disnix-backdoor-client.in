@@ -81,6 +81,8 @@ Operations:
   --resolve-snapshots        Converts the relative paths to the snapshots to
                              absolute paths
   --clean-snapshots          Removes older snapshots from the snapshot store
+  --capture-config           Captures the configuration of the machine from the
+                             Dysnomia container properties in a Nix expression
   --help                     Shows the usage of this command to the user
   --version                  Shows the version of this command to the user
 
@@ -162,7 +164,7 @@ checkContainer()
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o rqp:dC:c:hv -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,snapshot,restore,delete-state,query-all-snapshots,query-latest-snapshot,print-missing-snapshots,import-snapshots,export-snapshots,resolve-snapshots,clean-snapshots,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,container:,component:,keep:,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o rqp:dC:c:hv -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,snapshot,restore,delete-state,query-all-snapshots,query-latest-snapshot,print-missing-snapshots,import-snapshots,export-snapshots,resolve-snapshots,clean-snapshots,capture-config,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,container:,component:,keep:,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -248,6 +250,9 @@ do
             ;;
         --clean-snapshots)
             operation="clean-snapshots"
+            ;;
+        --capture-config)
+            operation="capture-config"
             ;;
         --target)
             target=$2
@@ -473,6 +478,14 @@ case "$operation" in
     clean-snapshots)
         outputFile=$(mktemp -p $TMPDIR)
         echo "disnix-client --clean-snapshots --keep $keep $@; echo \$?" | socat stdio $target > $outputFile
+        exitStatus=$(tail -1 $outputFile)
+        head -n -1 $outputFile
+        rm -f $outputFile
+        exit $exitStatus
+        ;;
+    capture-config)
+        outputFile=$(mktemp -p $TMPDIR)
+        echo "tempfile=\$(disnix-client --capture-config); cat \$tempfile; rm -f \$tempfile; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile

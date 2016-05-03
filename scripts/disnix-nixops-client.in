@@ -80,6 +80,8 @@ Operations:
   --resolve-snapshots        Converts the relative paths to the snapshots to
                              absolute paths
   --clean-snapshots          Removes older snapshots from the snapshot store
+  --capture-config           Captures the configuration of the machine from the
+                             Dysnomia container properties in a Nix expression
   --help                     Shows the usage of this command to the user
   --version                  Shows the version of this command to the user
 
@@ -178,7 +180,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o rqp:dC:c:hv -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,snapshot,restore,delete-state,query-all-snapshots,query-latest-snapshot,print-missing-snapshots,import-snapshots,export-snapshots,resolve-snapshots,clean-snapshots,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,container:,component:,keep:,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o rqp:dC:c:hv -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,snapshot,restore,delete-state,query-all-snapshots,query-latest-snapshot,print-missing-snapshots,import-snapshots,export-snapshots,resolve-snapshots,clean-snapshots,capture-config,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,container:,component:,keep:,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -264,6 +266,9 @@ do
             ;;
         --clean-snapshots)
             operation="clean-snapshots"
+            ;;
+        --capture-config)
+            operation="capture-config"
             ;;
         --target)
             target=$2
@@ -437,5 +442,9 @@ case "$operation" in
         ;;
     clean-snapshots)
         nixops ssh $NIXOPS_OPTS $target "disnix-client --clean-snapshots --keep $keep $@"
+        ;;
+    capture-config)
+        tempfile=`nixops ssh $NIXOPS_OPTS $target "disnix-client --capture-config"`
+        nixops ssh $NIXOPS_OPTS $target "cat $tempfile; rm -f $tempfile"
         ;;
 esac
