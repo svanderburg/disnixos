@@ -21,6 +21,11 @@ in
         description = "An attribute set containing infrastructure model properties";
       };
       
+      properties = lib.mkOption {
+        default = {};
+        description = "An attribute set container arbitary machine properties";
+      };
+      
       generateContainersExpr = lib.mkOption {
         description = "The path to the expression generating the container properties";
         type = lib.types.path;
@@ -30,7 +35,9 @@ in
   
   config = lib.mkIf cfg.enable {
     disnixInfrastructure.infrastructure = {
-      properties.hostname = config.networking.hostName;
+      properties = {
+        hostname = config.networking.hostName;
+      } // cfg.properties;
       
       system = if config.nixpkgs.system == "" then builtins.currentSystem else config.nixpkgs.system;
       

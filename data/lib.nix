@@ -78,7 +78,7 @@ rec {
         ]
         ++ pkgs.lib.optional useBackdoor {
           key = "backdoor";
-          disnixInfrastructure.infrastructure.backdoor = "TCP:${targetName}:512";
+          disnixInfrastructure.properties.backdoor = "TCP:${targetName}:512";
         }
         ++ pkgs.lib.optional nixOpsModel {
           key = "nixops-stuff";
