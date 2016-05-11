@@ -4,6 +4,8 @@
 , enableDisnix ? true
 , nixOpsModel ? false
 , nixpkgs ? <nixpkgs>
+, dysnomia
+, nixops ? null
 }:
 
 let
@@ -20,6 +22,8 @@ pkgs.stdenv.mkDerivation {
         -e "s|@enableDisnix@|${if enableDisnix then "true" else "false"}|" \
         -e "s|@nixOpsModel@|${if nixOpsModel then "true" else "false"}|" \
         -e "s|@disnixos@|${builtins.storePath @prefix@}|" \
+        -e "s|@dysnomia"@"|${builtins.storePath dysnomia}|" \
+        -e "s|@nixops@|${if nixops == null then "null" else "builtins.storePath ${builtins.storePath nixops}"}|" \
         -e "s|@PACKAGE"@"|@PACKAGE@|" \
         ${infrastructureNix} > $out
   '';

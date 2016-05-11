@@ -119,11 +119,8 @@ checkUseNixOps
 
 if [ "$useNixOps" = "1" ]
 then
-    locateNixOps
     nixOpsArg="--arg nixOpsModel true"
 fi
-
-locateDysnomia
 
 if [ "$@" = "" ]
 then

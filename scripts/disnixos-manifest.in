@@ -182,7 +182,6 @@ fi
 
 checkUseNixOps
 setNixOpsParams
-locateDysnomia
 
 # Build the manifest file
 

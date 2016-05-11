@@ -7,6 +7,8 @@
 , nixOpsModel ? false
 , useVMTesting ? false
 , useBackdoor ? false
+, dysnomia ? builtins.storePath @dysnomia@/../..
+, nixops ? null
 }:
 
 let
@@ -15,7 +17,7 @@ let
   lib = import ./lib.nix { inherit nixpkgs pkgs; };
   
   mergedNetwork = lib.generateMergedNetwork networkFiles nixOpsModel;
-  manifest = lib.generateManifest mergedNetwork targetProperty clientInterface enableDisnix nixOpsModel useVMTesting useBackdoor;
+  manifest = lib.generateManifest mergedNetwork targetProperty clientInterface enableDisnix nixOpsModel useVMTesting useBackdoor dysnomia nixops;
   
   generateManifestXSL = "${disnix}/share/disnix/generatemanifest.xsl";
 in

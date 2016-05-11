@@ -137,11 +137,10 @@ checkUseNixOps
 
 if [ "$useNixOps" = "1" ]
 then
-    nixOpsArg="--arg nixOpsModel true"
-    locateNixOps
+    nixOpsArg="--arg nixOpsModel true --arg nixops $(dirname $(readlink -f $(type -p nixops)))/.."
 fi
 
-locateDysnomia
+dysnomiaArg="--arg dysnomia $(dirname $(readlink -f $(type -p dysnomia)))/.."
 
 if [ -z "$1" ]
 then
@@ -156,4 +155,4 @@ else
 fi
 
 # Execute operation
-nix-build @datadir@/@PACKAGE@/generate-infrastructure.nix --arg networkFiles "[ $networkFiles ]" $useBackdoorArg $useVMTesting $nixOpsArg $showTraceArg $noOutLinkArg
+nix-build @datadir@/@PACKAGE@/generate-infrastructure.nix --arg networkFiles "[ $networkFiles ]" $useBackdoorArg $useVMTesting $dysnomiaArg $nixOpsArg $showTraceArg $noOutLinkArg

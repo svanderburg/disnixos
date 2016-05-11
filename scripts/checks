@@ -40,22 +40,6 @@ checkUseNixOps()
     fi
 }
 
-# Locates the location of NixOps and adjusts NIX_PATH to refer to the NixOS
-# module configuring NixOps specific properties
-
-locateNixOps()
-{
-    export NIX_PATH=$NIX_PATH:nixops=$(dirname $(readlink -f $(type -p nixops)))/../share/nix/nixops
-}
-
-# Locates the location of Dysnomia and adjusts NIX_PATH to refer to the NixOS
-# module configuring NixOps specific properties
-
-locateDysnomia()
-{
-    export NIX_PATH=$NIX_PATH:dysnomia=$(dirname $(readlink -f $(type -p dysnomia)))/../share/dysnomia
-}
-
 # Sets all relevant parameter such as interface and nixOpsArgs to allow the
 # NixOps integration to work
 
@@ -63,7 +47,6 @@ setNixOpsParams()
 {
     if [ "$useNixOps" = "1" ]
     then
-        locateNixOps
         interface=disnix-nixops-client
         nixOpsArg="--use-nixops"
     fi

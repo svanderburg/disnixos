@@ -174,7 +174,6 @@ fi
 
 checkUseNixOps
 
-
 # Build the manifest file
 
 if [ "$servicesFile" = "" ] || [ "$distributionFile" = "" ]
@@ -194,7 +193,6 @@ then
               "$(readlink -f @datadir@/@PACKAGE@/instantiate.nix)"
 else
     setNixOpsParams
-    locateDysnomia
 
     # Generate infrastructure model from network model
     infrastructureFile=`disnixos-geninfra --no-out-link $genInfraArgs $nixOpsArg $networkFiles`

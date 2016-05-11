@@ -1,5 +1,6 @@
 { nixpkgs ? <nixpkgs>
 , system ? builtins.currentSystem
+, dysnomia ? builtins.storePath "${dirOf @dysnomia@}/.."
 , disnix ? builtins.storePath @DISNIX_PREFIX@
 , disnixos ? builtins.storePath @prefix@
 }:
@@ -41,6 +42,14 @@ in
   buildManifest = 
     {name, version, tarball, servicesFile, networkFile, externalNetworkFile ? false, distributionFile, externalDistributionFile ? false}:
     
+    let
+      infrastructure = import ./generate-infrastructure.nix {
+        networkFiles = [ (if externalNetworkFile then networkFile else "${manifestSrc}/${networkFile}") ];
+        useVMTesting = true;
+        useBackdoor = true;
+        inherit nixpkgs dysnomia;
+      };
+    in
     pkgs.releaseTools.nixBuild rec {
       inherit name version;
       src = tarball;
@@ -49,20 +58,13 @@ in
         inherit name tarball;
       };
       
-      infrastructure = import ./generate-infrastructure.nix {
-        networkFiles = [ (if externalNetworkFile then networkFile else "${manifestSrc}/${networkFile}") ];
-        useVMTesting = true;
-        useBackdoor = true;
-        inherit nixpkgs;
-      };
-      
       manifest = import "${disnix}/share/disnix/manifest.nix" {
         servicesFile = "${manifestSrc}/${servicesFile}";
         infrastructureFile = "${infrastructure}";
         distributionFile = if externalDistributionFile then distributionFile else "${manifestSrc}/${distributionFile}";
         targetProperty = "backdoor";
         clientInterface = "${disnixos}/bin/disnix-backdoor-client";
-        inherit nixpkgs;
+        inherit nixpkgs dysnomia;
       };
       
       installPhase =
@@ -71,7 +73,7 @@ in
           ln -s $manifest $out/manifest.xml
         '';
 
-      checkPhase = "echo hello";
+      checkPhase = "true";
     };
 
   disnixTest =

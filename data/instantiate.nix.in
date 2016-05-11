@@ -5,6 +5,8 @@
 , enableDisnix ? true
 , nixOpsModel ? false
 , disnix ? builtins.storePath @DISNIX_PREFIX@
+, dysnomia ? builtins.storePath "${dirOf @dysnomia@}/.."
+, nixops ? null
 }:
 
 let
@@ -13,7 +15,7 @@ let
   lib = import ./lib.nix { inherit nixpkgs pkgs; };
   
   mergedNetwork = lib.generateMergedNetwork networkFiles nixOpsModel;
-  distributedDerivation = lib.generateDistributedDerivation mergedNetwork targetProperty clientInterface enableDisnix nixOpsModel false false;
+  distributedDerivation = lib.generateDistributedDerivation mergedNetwork targetProperty clientInterface enableDisnix nixOpsModel false false dysnomia nixops;
   
   generateDistributedDerivationXSL = "${disnix}/share/disnix/generatedistributedderivation.xsl";
 in

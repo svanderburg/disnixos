@@ -26,24 +26,23 @@ let
   
   jobs = rec {
     tarball =
-      with pkgs;
-
       let
+        dysnomia = builtins.getAttr (builtins.currentSystem) (dysnomiaJobset.build);
         disnix = builtins.getAttr (builtins.currentSystem) (disnixJobset.build);
       in
-      releaseTools.sourceTarball {
+      pkgs.releaseTools.sourceTarball {
         name = "disnixos-tarball";
         version = builtins.readFile ./version;
         src = disnixos;
         inherit officialRelease;
         dontBuild = false;
 
-        buildInputs = [ socat getopt pkgconfig libxml2 libxslt disnix dblatex (dblatex.tex or tetex) help2man doclifter nukeReferences ];
+        buildInputs = [ pkgs.socat pkgs.getopt pkgs.pkgconfig pkgs.libxml2 pkgs.libxslt dysnomia disnix pkgs.dblatex (pkgs.dblatex.tex or pkgs.tetex) pkgs.help2man pkgs.doclifter pkgs.nukeReferences ];
         
         # Add documentation in the tarball
         configureFlags = ''
-          --with-docbook-rng=${docbook5}/xml/rng/docbook
-          --with-docbook-xsl=${docbook5_xsl}/xml/xsl/docbook
+          --with-docbook-rng=${pkgs.docbook5}/xml/rng/docbook
+          --with-docbook-xsl=${pkgs.docbook5_xsl}/xml/xsl/docbook
         '';
         
         preConfigure = ''
@@ -72,16 +71,15 @@ let
 
     build =
       pkgs.lib.genAttrs systems (system:
-        
-        with import nixpkgs { inherit system; };
-        
         let
+          pkgs = import nixpkgs { inherit system; };
+          dysnomia = builtins.getAttr system (dysnomiaJobset.build);
           disnix = builtins.getAttr system (disnixJobset.build);
         in
-        releaseTools.nixBuild {
+        pkgs.releaseTools.nixBuild {
           name = "disnixos";
           src = tarball;
-          buildInputs = [ socat pkgconfig disnix getopt ];
+          buildInputs = [ pkgs.socat pkgs.pkgconfig dysnomia disnix pkgs.getopt ];
         }
       );
 

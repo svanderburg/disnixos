@@ -50,11 +50,13 @@ rec {
    * nixOpsModel: Indicates whether we should use NixOps specific settings
    * useVMTesting: Indicates whether we should enable NixOS test instrumentation and VM settings
    * useBackdoor: Indicates whether we should enable the backdoor
+   * dysnomia: Path to Dysnomia
+   * nixops: Path to NixOps
    *
    * Returns:
-   * An attribute set with evaluated machine configurationb properties
+   * An attribute set with evaluated machine configuration properties
    */
-  generateConfigurations = network: enableDisnix: nixOpsModel: useVMTesting: useBackdoor:
+  generateConfigurations = network: enableDisnix: nixOpsModel: useVMTesting: useBackdoor: dysnomia: nixops:
     pkgs.lib.mapAttrs (targetName: configuration:
       evalConfig {
         modules = configuration ++ [
@@ -65,7 +67,7 @@ rec {
             networking.hostName = pkgs.lib.mkOverride 900 targetName;
             disnixInfrastructure.enable = true;
             disnixInfrastructure.enableAuthentication = true;
-            disnixInfrastructure.generateContainersExpr = <dysnomia/generate-containers.nix>;
+            disnixInfrastructure.generateContainersExpr = "${dysnomia}/share/dysnomia/generate-containers.nix";
           }
         ]
         ++ pkgs.lib.optional enableDisnix {
@@ -83,13 +85,13 @@ rec {
         ++ pkgs.lib.optional nixOpsModel {
           key = "nixops-stuff";
           # Make NixOps's deployment.* options available.
-          require = [ <nixops/options.nix> ];
+          require = [ "${nixops}/share/nix/nixops/options.nix" ];
           # Provide a default hostname and deployment target equal
           # to the attribute name of the machine in the model.
           deployment.targetHost = pkgs.lib.mkOverride 900 targetName;
           environment.checkConfigurationOptions = false; # We assume that NixOps has already checked it
         };
-        extraArgs = { nodes = generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor; };
+        extraArgs = { nodes = generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor dysnomia nixops; };
       }) network;
 
   /*
@@ -211,13 +213,15 @@ rec {
    * nixOpsModel: Indicates whether we should use NixOps specific settings
    * useVMTesting: Indicates whether we should enable NixOS test instrumentation and VM settings
    * useBackdoor: Indicates whether we should enable the backdoor
+   * dysnomia: Path to Dysnomia
+   * nixops: Path to NixOps
    *
    * Returns:
    * An attributeset which should be exported to XML representing the manifest
    */
-  generateManifest = network: targetProperty: clientInterface: enableDisnix: nixOpsModel: useVMTesting: useBackdoor:
+  generateManifest = network: targetProperty: clientInterface: enableDisnix: nixOpsModel: useVMTesting: useBackdoor: dysnomia: nixops:
     let
-      configurations = generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor;
+      configurations = generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor dysnomia nixops;
     in
     { profiles = generateProfiles configurations targetProperty;
       activation = generateActivationMappings configurations targetProperty;
@@ -237,13 +241,15 @@ rec {
    * nixOpsModel: Indicates whether we should use NixOps specific settings
    * useVMTesting: Indicates whether we should enable NixOS test instrumentation and VM settings
    * useBackdoor: Indicates whether we should enable the backdoor
+   * dysnomia: Path to Dysnomia
+   * nixops: Path to NixOps
    *
    * Returns: 
    * An attributeset which should be exported to XML representing the distributed derivation
    */
-  generateDistributedDerivation = network: targetProperty: clientInterface: enableDisnix: nixOpsModel: useVMTesting: useBackdoor:
+  generateDistributedDerivation = network: targetProperty: clientInterface: enableDisnix: nixOpsModel: useVMTesting: useBackdoor: dysnomia: nixops:
     let
-      configurations = generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor;
+      configurations = generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor dysnomia nixops;
     in
     {
       build = map (targetName:
