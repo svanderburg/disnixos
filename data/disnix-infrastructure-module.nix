@@ -41,10 +41,10 @@ in
       
       system = if config.nixpkgs.system == "" then builtins.currentSystem else config.nixpkgs.system;
       
-      containers = import cfg.generateContainersExpr {
+      containers = lib.recursiveUpdate (import cfg.generateContainersExpr {
         inherit (cfg) enableAuthentication;
         inherit config lib;
-      };
+      }) (config.dysnomia.extraContainerProperties or {});
     };
   };
 }
