@@ -1,6 +1,6 @@
 { nixpkgs ? <nixpkgs>
 , system ? builtins.currentSystem
-, dysnomia ? builtins.storePath "${dirOf @dysnomia@}/.."
+, dysnomia ? builtins.storePath "@dysnomia@/../.."
 , disnix ? builtins.storePath @DISNIX_PREFIX@
 , disnixos ? builtins.storePath @prefix@
 }:
@@ -49,14 +49,14 @@ in
         useBackdoor = true;
         inherit nixpkgs dysnomia;
       };
-    in
-    pkgs.releaseTools.nixBuild rec {
-      inherit name version;
-      src = tarball;
       
       manifestSrc = generateManifestSrc {
         inherit name tarball;
       };
+    in
+    pkgs.releaseTools.nixBuild {
+      inherit name version;
+      src = tarball;
       
       manifest = import "${disnix}/share/disnix/manifest.nix" {
         servicesFile = "${manifestSrc}/${servicesFile}";
@@ -64,7 +64,7 @@ in
         distributionFile = if externalDistributionFile then distributionFile else "${manifestSrc}/${distributionFile}";
         targetProperty = "backdoor";
         clientInterface = "${disnixos}/bin/disnix-backdoor-client";
-        inherit nixpkgs dysnomia;
+        inherit nixpkgs;
       };
       
       installPhase =
