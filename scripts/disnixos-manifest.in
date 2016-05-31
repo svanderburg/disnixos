@@ -181,7 +181,11 @@ then
 fi
 
 checkUseNixOps
-setNixOpsParams
+
+if [ "$useNixOps" = "1" ]
+then
+    setNixOpsParams
+fi
 
 # Build the manifest file
 

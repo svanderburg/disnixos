@@ -150,6 +150,9 @@ then
     DYSNOMIA_STATEDIR=/var/state/dysnomia
 fi
 
+# Unset the DISNIXOS_USE_NIXOPS variable that causes conflicts when generating the manifest
+unset DISNIXOS_USE_NIXOPS
+
 # Generate virtual machines matching the configuration in the network Nix expression
 vmsPath=`nixos-build-vms --no-out-link $showTraceArg $networkFiles`
 
