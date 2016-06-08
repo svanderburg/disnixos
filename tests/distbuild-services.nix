@@ -7,6 +7,8 @@ let
   manifestTests = ./manifest;
   
   physicalNetworkNix = import ./generate-physical-network.nix { inherit writeTextFile nixpkgs; };
+
+  env = "NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
 in
 simpleTest {
   nodes = {
@@ -35,11 +37,11 @@ simpleTest {
       $coordinator->mustSucceed("chmod 600 /root/.ssh/id_dsa");
       
       # Deploy a NixOS network and services in a network specified by a NixOS network expression simultaneously
-      $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-env -s ${manifestTests}/services.nix -n ${physicalNetworkNix} -d ${manifestTests}/distribution.nix --disable-disnix --no-infra-deployment --build-on-targets");
+      $coordinator->mustSucceed("${env} disnixos-env -s ${manifestTests}/services.nix -n ${physicalNetworkNix} -d ${manifestTests}/distribution.nix --disable-disnix --no-infra-deployment --build-on-targets");
       
       # Use disnixos-query to see if the right services are installed on
       # the right target platforms. This test should succeed.
-      my @lines = split('\n', $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-query ${physicalNetworkNix}"));
+      my @lines = split('\n', $coordinator->mustSucceed("${env} disnixos-query ${physicalNetworkNix}"));
       
       if($lines[3] =~ /\-testService1/) {
           print "Found testService1 on disnix-query output line 3\n";

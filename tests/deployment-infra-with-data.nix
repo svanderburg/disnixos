@@ -61,8 +61,6 @@ let
 
   manifestTests = ./manifest;
   
-  # TODO: properly refer to the Dysnomia module
-  
   logicalNetworkNix = writeTextFile {
     name = "network-logical-dysnomia.nix";
   
@@ -196,6 +194,8 @@ let
   };
 
   physicalNetworkNix = import ./generate-physical-network.nix { inherit writeTextFile nixpkgs; };
+  
+  env = "NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
 in
 simpleTest {
   nodes = {
@@ -224,10 +224,10 @@ simpleTest {
       $coordinator->mustSucceed("chmod 600 /root/.ssh/id_dsa");
         
       # Deploy the test NixOS network expression. This test should succeed.
-      $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-deploy-network ${logicalNetworkNix} ${physicalNetworkNix} --disable-disnix");
+      $coordinator->mustSucceed("${env} disnixos-deploy-network ${logicalNetworkNix} ${physicalNetworkNix} --disable-disnix");
     
       # Capture the state of the NixOS configurations
-      $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-snapshot-network ${logicalNetworkNix} ${physicalNetworkNix} --disable-disnix");
+      $coordinator->mustSucceed("${env} disnixos-snapshot-network ${logicalNetworkNix} ${physicalNetworkNix} --disable-disnix");
       
       # Check if two nixos-configuration snapshots exist
       my $result = $coordinator->mustSucceed("dysnomia-snapshots --query-latest --container nixos-configuration");
@@ -246,7 +246,7 @@ simpleTest {
       
       # Remove all the remote snapshots and check if both the Disnix and NixOS
       # state dir have no snapshots
-      $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-clean-snapshots --keep 0 ${logicalNetworkNix}");
+      $coordinator->mustSucceed("${env} disnixos-clean-snapshots --keep 0 ${logicalNetworkNix}");
       
       $result = $testtarget1->mustSucceed("DYSNOMIA_STATEDIR=/var/state/dysnomia dysnomia-snapshots --query-all");
       @snapshots = split('\n', $result);
@@ -270,7 +270,7 @@ simpleTest {
       # Restore the state of the databases and check whether the modifications
       # are gone.
       
-      $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-restore-network ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix");
+      $coordinator->mustSucceed("${env} disnixos-restore-network ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix");
       
       $result = $testtarget1->mustSucceed("echo 'select * from test' | mysql --user=root --password=verysecret -N testdb");
       
@@ -289,7 +289,7 @@ simpleTest {
       }
       
       # Delete the state. Because no databases have been undeployed, they should be kept.
-      $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-delete-network-state ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix");
+      $coordinator->mustSucceed("${env} disnixos-delete-network-state ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix");
       
       $result = $testtarget1->mustSucceed("echo 'select * from test' | mysql --user=root --password=verysecret -N testdb");
       
@@ -308,11 +308,11 @@ simpleTest {
       }
       
       # Upgrade the test NixOS configuration with the databases undeployed.
-      $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-deploy-network ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix");
+      $coordinator->mustSucceed("${env} disnixos-deploy-network ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix");
       
       # Delete the state. Because the databases were undeployed, they should have been removed.
       
-      $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' disnixos-delete-network-state ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix");
+      $coordinator->mustSucceed("${env} disnixos-delete-network-state ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix");
       
       $testtarget1->mustFail("echo 'select * from test' | mysql --user=root --password=verysecret -N testdb");
       $testtarget1->mustFail("echo 'select * from test' | psql --file - testdb");

@@ -8,6 +8,8 @@ let
 
   logicalNetworkNix = import ./generate-logical-network.nix { inherit writeTextFile; };
   physicalNetworkNix = import ./generate-physical-network-for-nixops.nix { inherit writeTextFile nixpkgs disnix; };
+
+  env = "NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixpkgs}/nixos ";
 in
 simpleTest {
   nodes = {
@@ -43,14 +45,14 @@ simpleTest {
       
       # Deploy infrastructure with NixOps
       $coordinator->mustSucceed("nixops create ${logicalNetworkNix} ${physicalNetworkNix}");
-      $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixpkgs}/nixos nixops deploy");
+      $coordinator->mustSucceed("${env} nixops deploy");
       
       # Deploy services with disnixos-env
-      $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} disnixos-env -s ${manifestTests}/services.nix -n ${logicalNetworkNix} -n ${physicalNetworkNix} -d ${manifestTests}/distribution.nix --use-nixops");
+      $coordinator->mustSucceed("${env} disnixos-env -s ${manifestTests}/services.nix -n ${logicalNetworkNix} -n ${physicalNetworkNix} -d ${manifestTests}/distribution.nix --use-nixops");
       
       # Use disnixos-query to see if the right services are installed on
       # the right target platforms. This test should succeed.
-      my @lines = split('\n', $coordinator->mustSucceed("NIX_PATH=nixpkgs=${nixpkgs} disnixos-query ${physicalNetworkNix} --use-nixops"));
+      my @lines = split('\n', $coordinator->mustSucceed("${env} disnixos-query ${physicalNetworkNix} --use-nixops"));
       
       if($lines[3] =~ /\-testService1/) {
           print "Found testService1 on disnix-query output line 3\n";

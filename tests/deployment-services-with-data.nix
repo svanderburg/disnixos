@@ -7,6 +7,8 @@ let
   snapshotsTests = ./snapshots;
   
   physicalNetworkNix = import ./generate-physical-network.nix { inherit writeTextFile nixpkgs; };
+  
+  env = "DYSNOMIA_STATEDIR=/root/dysnomia NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
 in
 simpleTest {
   nodes = {
@@ -34,7 +36,7 @@ simpleTest {
       $coordinator->mustSucceed("chmod 600 /root/.ssh/id_dsa");
       
       # Deploy a NixOS network and services including state
-      $coordinator->mustSucceed("DYSNOMIA_STATEDIR=/root/dysnomia NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' dysnomia=\"\$(dirname \$(readlink -f \$(type -p dysnomia)))/..\" disnixos-env -s ${snapshotsTests}/services-state.nix -n ${physicalNetworkNix} -d ${snapshotsTests}/distribution-simple.nix --disable-disnix --no-infra-deployment");
+      $coordinator->mustSucceed("${env} dysnomia=\"\$(dirname \$(readlink -f \$(type -p dysnomia)))/..\" disnixos-env -s ${snapshotsTests}/services-state.nix -n ${physicalNetworkNix} -d ${snapshotsTests}/distribution-simple.nix --disable-disnix --no-infra-deployment");
       
       # Check if the state is actually deployed
       my $result = $testtarget1->mustSucceed("cat /var/db/testService1/state");
@@ -59,7 +61,7 @@ simpleTest {
       $testtarget2->mustSucceed("echo 2 > /var/db/testService2/state");
       
       # Redeploy the services by reversing their distribution
-      $coordinator->mustSucceed("DYSNOMIA_STATEDIR=/root/dysnomia NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' dysnomia=\"\$(dirname \$(readlink -f \$(type -p dysnomia)))/..\" disnixos-env -s ${snapshotsTests}/services-state.nix -n ${physicalNetworkNix} -d ${snapshotsTests}/distribution-reverse.nix --disable-disnix --no-infra-deployment");
+      $coordinator->mustSucceed("${env} dysnomia=\"\$(dirname \$(readlink -f \$(type -p dysnomia)))/..\" disnixos-env -s ${snapshotsTests}/services-state.nix -n ${physicalNetworkNix} -d ${snapshotsTests}/distribution-reverse.nix --disable-disnix --no-infra-deployment");
       
       # Check if the state has been migrated correctly
       $result = $testtarget1->mustSucceed("cat /var/db/testService2/state");
@@ -81,7 +83,7 @@ simpleTest {
       # Run the clean snapshots operation to wipe out all snapshots on the target
       # machines and check if they are really removed.
       
-      $coordinator->mustSucceed("SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' NIX_PATH=nixpkgs=${nixpkgs} disnixos-clean-snapshots --keep 0 ${physicalNetworkNix}");
+      $coordinator->mustSucceed("${env} disnixos-clean-snapshots --keep 0 ${physicalNetworkNix}");
       
       $result = $testtarget1->mustSucceed("dysnomia-snapshots --query-all --container wrapper --component testService1 | wc -l");
       
