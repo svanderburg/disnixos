@@ -21,8 +21,9 @@ let
       ids.gids = { disnix = 200; };
       users.extraGroups = [ { gid = 200; name = "disnix"; } ];
       
-      dysnomia = {
+      dysnomiaTest = {
         enable = true;
+        enableAuthentication = true;
       };
       
       services.dbus.enable = true;
@@ -48,7 +49,7 @@ let
           wantedBy = [ "multi-user.target" ];
           after = [ "dbus.service" ];
       
-          path = [ pkgs.nix pkgs.getopt disnix config.dysnomia.package "/run/current-system/sw" ];
+          path = [ pkgs.nix pkgs.getopt disnix config.dysnomiaTest.package "/run/current-system/sw" ];
           environment = {
             HOME = "/root";
           };
@@ -56,7 +57,7 @@ let
           serviceConfig.ExecStart = "${disnix}/bin/disnix-service";
         };
     
-        environment.systemPackages = [ config.dysnomia.package disnix disnixos ];
+      environment.systemPackages = [ config.dysnomiaTest.package disnix disnixos ];
     };
 
   manifestTests = ./manifest;
@@ -71,8 +72,9 @@ let
         {
           imports = [ ${dysnomiaSrc}/dysnomia-module.nix ];
           
-          dysnomia = {
+          dysnomiaTest = {
             enable = true;
+            enableAuthentication = true;
             
             components = {
               mysql-database = {
@@ -151,9 +153,9 @@ let
         {
           imports = [ ${dysnomiaSrc}/dysnomia-module.nix ];
           
-          dysnomia = {
+          dysnomiaTest = {
             enable = true;
-            
+            enableAuthentication = true;
             # We have undeployed the databases
           };
           

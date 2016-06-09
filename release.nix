@@ -98,7 +98,7 @@ let
         deploymentInfraWithData = import ./tests/deployment-infra-with-data.nix {
           inherit nixpkgs dysnomia disnix disnixos;
           inherit (pkgs) writeTextFile runCommand openssh;
-          dysnomiaTarball = dysnomiaJobset.tarball;
+          dysnomiaTarball = if fetchDependenciesFromNixpkgs then pkgs.dysnomia.src else dysnomiaJobset.tarball;
         };
         
         distbuildInfra = import ./tests/distbuild-infra.nix {

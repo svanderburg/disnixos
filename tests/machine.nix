@@ -29,6 +29,6 @@
 
       serviceConfig.ExecStart = "${disnix}/bin/disnix-service";
     };
-    
-    environment.systemPackages = [ pkgs.nix dysnomia disnix disnixos pkgs.hello pkgs.zip ];
+  
+  environment.systemPackages = [ pkgs.nix dysnomia disnix disnixos pkgs.hello pkgs.zip ];
 }
