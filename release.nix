@@ -126,5 +126,23 @@ let
           inherit (pkgs) writeTextFile openssh;
         };
       };
+    
+    release = pkgs.releaseTools.aggregate {
+      name = "disnixos-${tarball.version}";
+      constituents = [
+        tarball
+      ]
+      ++ map (system: builtins.getAttr system build) systems
+      ++ [
+        tests.deploymentInfra
+        tests.deploymentInfraWithData
+        tests.distbuildInfra
+        tests.deploymentServices
+        tests.deploymentServicesWithData
+        tests.distbuildServices
+        tests.deploymentNixOps
+      ];
+      meta.description = "Release-critical builds";
+    };
   };
 in jobs
