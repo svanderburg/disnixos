@@ -122,6 +122,8 @@ Query all snapshots/Query latest snapshot options:
 Clean snapshots options:
   --keep=NUM                 Amount of snapshot generations to keep. Defaults
                              to: 1
+  -C, --container=CONTAINER  Name of the container to filter on
+  -c, --component=COMPONENT  Name of the component to filter on
 
 Environment:
   DISNIX_PROFILE             Sets the name of the profile that stores the
@@ -476,8 +478,18 @@ case "$operation" in
         exit $exitStatus
         ;;
     clean-snapshots)
+        if [ "$container" != "" ]
+        then
+            containerArg="--container $container"
+        fi
+        
+        if [ "$component" != "" ]
+        then
+            componentArg="--component $component"
+        fi
+        
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --clean-snapshots --keep $keep $@; echo \$?" | socat stdio $target > $outputFile
+        echo "disnix-client --clean-snapshots --keep $keep $containerArg $componentArg $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile

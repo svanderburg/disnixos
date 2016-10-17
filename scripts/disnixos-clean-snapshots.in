@@ -36,6 +36,8 @@ Options:
                               that specifies how to connect to the remote Disnix
       --keep=NUM              Amount of snapshot generations to keep. Defaults
                               to: 1
+  -C, --container=CONTAINER   Name of the container to filter on
+  -c, --component=COMPONENT   Name of the component to filter on
       --use-nixops            Use NixOps instead of Disnix for infrastructure
                               deployment
   -h, --help                  Shows the usage of this command to the user
@@ -68,7 +70,7 @@ EOF
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o dhv -l keep:,target-property:,interface:,use-nixops,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o c:C:dhv -l keep:,container:,component:,target-property:,interface:,use-nixops,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -85,6 +87,12 @@ do
     case "$1" in
         --keep)
             keepArg="--keep $2"
+            ;;
+        -C|--container)
+            containerArg="--container $2"
+            ;;
+        -c|--component)
+            componentArg="--component $2"
             ;;
         --target-property)
             targetPropertyArg=$2
@@ -145,4 +153,4 @@ fi
 infrastructureFile=`disnixos-geninfra --no-out-link $nixOpsArg $networkFiles`
 
 # Execute operation
-disnix-clean-snapshots $targetPropertyArg --interface $interface $keepArg $infrastructureFile
+disnix-clean-snapshots $targetPropertyArg --interface $interface $keepArg $containerArg $componentArg $infrastructureFile

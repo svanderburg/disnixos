@@ -121,6 +121,8 @@ Query all snapshots/Query latest snapshot options:
 Clean snapshots options:
   --keep=NUM                 Amount of snapshot generations to keep. Defaults
                              to: 1
+  -C, --container=CONTAINER  Name of the container to filter on
+  -c, --component=COMPONENT  Name of the component to filter on
 
 Environment:
   NIXOPS_OPTS                Additional properties which are passed to the
@@ -441,7 +443,17 @@ case "$operation" in
         nixops ssh $NIXOPS_OPTS $target "disnix-client --resolve-snapshots $@"
         ;;
     clean-snapshots)
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --clean-snapshots --keep $keep $@"
+        if [ "$container" != "" ]
+        then
+            containerArg="--container $container"
+        fi
+        
+        if [ "$component" != "" ]
+        then
+            componentArg="--component $component"
+        fi
+        
+        nixops ssh $NIXOPS_OPTS $target "disnix-client --clean-snapshots --keep $keep $containerArg $componentArg $@"
         ;;
     capture-config)
         tempfile=`nixops ssh $NIXOPS_OPTS $target "disnix-client --capture-config"`
