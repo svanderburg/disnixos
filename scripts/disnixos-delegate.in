@@ -1,0 +1,188 @@
+#!/bin/bash
+set -e
+set -o pipefail
+shopt -s nullglob
+
+# Disnix - A Nix-based distributed service deployment tool
+# Copyright (C) 2008-2016  Sander van der Burg
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+# Shows the usage of this command to the user
+
+showUsage()
+{
+    cat <<EOF
+Usage: $0 -s services_nix -n network_nix [ -n network2_nix ... ] -d distribution_nix [OPTION]
+  or: $0 -n network_nix [ -n network2_nix ... ] [OPTION]
+
+The command \`disnixos-delegate' is used to instantiate all derivations of the
+services deployed machines in the network and to delegate their build operations
+to the target machines.
+
+This command requires three Nix expressions as input parameters -- a services
+model capturing the components of a distributed system and its
+inter-dependencies, an infrastructure model capturing the machines in the
+network and its properties and a distribution model which maps services to
+machines.
+
+Most users don't need to use this command directly. The \`disnix-env' command
+will automatically invoke this command to activate the new configuration.
+
+Options:
+  -s, --services=services_nix
+                                  Services Nix expression which describes all
+                                  components of the distributed system
+  -n, --network=network_nix       Network Nix expression which declares a NixOS
+                                  configuration for each machine in the network
+  -d, --distribution=distribution_nix
+                                  Distribution Nix expression which maps
+                                  services to machines in the network
+      --target-property=PROP      The target property of an infrastructure
+                                  model, that specifies how to connect to the
+                                  remote Disnix interface. (Defaults to
+                                  hostname)
+      --interface=INTERFACE       Path to executable that communicates with a
+                                  Disnix interface. Defaults to:
+                                  disnix-ssh-client
+  -m, --max-concurrent-transfers=NUM
+                                  Maximum amount of concurrent closure
+                                  transfers. Defauls to: 2
+      --vm                        Configures a manifest used for the NixOS test
+                                  driver
+      --use-nixops                Use NixOps instead of Disnix's deployment
+                                  facilities
+      --disable-disnix            Do not enable the Disnix service on the target
+                                  machines by default
+      --show-trace                Shows a trace of the output
+  -h, --help                      Shows the usage of this command
+  -v, --version                   Shows the version of this command
+
+Environment:
+  DISNIX_CLIENT_INTERFACE    Sets the client interface (defaults to:
+                             disnix-ssh-client)
+  DISNIX_TARGET_PROPERTY     Sets the target property of an infrastructure
+                             model, that specifies how to connect to the remote
+                             Disnix interface. (Defaults to: hostname)
+EOF
+}
+
+# Shows the version of this command to the user
+
+showVersion()
+{
+    cat <<EOF
+$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+
+Copyright (C) 2008-2016 Sander van der Burg
+EOF
+}
+
+# Parse valid argument options
+
+PARAMS=`@getopt@ -n $0 -o s:n:d:m:hv -l services:,network:,distribution:,interface:,target-property:,max-concurrent-transfers:,show-trace,vm,use-nixops,disable-disnix,help,version -- "$@"`
+
+if [ $? != 0 ]
+then
+    showUsage
+    exit 1
+fi
+
+# Evaluate valid options
+
+eval set -- "$PARAMS"
+
+while [ "$1" != "--" ]
+do
+    case "$1" in
+        -s|--services)
+            servicesFile=`readlink -f $2`
+            ;;
+        -n|--network)
+            networkFiles="$networkFiles `readlink -f $2`"
+            ;;
+        -d|--distribution)
+            distributionFile=`readlink -f $2`
+            ;;
+        -m|--max-concurrent-transfers)
+            maxConcurrentTransfersArg="-m $2"
+            ;;
+        --show-trace)
+            showTraceArg="--show-trace"
+            ;;
+        --interface)
+            interface=$2
+            ;;
+        --target-property)
+            targetProperty=$2
+            ;;
+        --vm)
+            vmArg="--vm"
+            ;;
+        --use-nixops)
+            useNixOpsArg="--use-nixops"
+            ;;
+        --disable-disnix)
+            disableDisnixArg="--disable-disnix"
+            ;;
+        -h|--help)
+            showUsage
+            exit 0
+            ;;
+        -v|--version)
+            showVersion
+            exit 0
+            ;;
+    esac
+    
+    shift
+done
+
+# Autoconf settings
+export prefix=@prefix@
+
+# Import checks
+source @datadir@/@PACKAGE@/checks
+
+# Import Disnix checks
+source @DISNIX_PREFIX@/share/disnix/checks
+
+# Validate the given options
+
+checkNetworkFiles
+checkClientInterface
+checkTargetProperty
+
+# Execute operations
+
+for n in $networkFiles
+do
+    networkArgs="$networkArgs -n $n"
+done
+
+if [ "$servicesFile" != "" ]
+then
+    servicesArg="-s $servicesFile"
+fi
+
+if [ "$distributionFile" != "" ]
+then
+    distributionArg="-d $distributionFile"
+fi
+
+echo "[coordinator]: Instantiating store derivations..."
+distributedDerivation=`disnixos-instantiate $servicesArg $networkArgs $distributionArg --target-property $targetProperty --interface $interface --no-out-link $showTraceArg $vmArg $useNixOpsArg $disableDisnixArg`
+echo "[coordinator]: Building store derivations..."
+disnix-build $maxConcurrentTransfersArg $distributedDerivation

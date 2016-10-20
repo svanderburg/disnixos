@@ -1,3 +1,11 @@
+Version 0.6
+===========
+- Added disnixos-delegate
+
+Version 0.5
+===========
+- Compatibility fixes with current versions of Disnix and NixOps
+
 Version 0.4
 ===========
 - Add disnixos-snapshot-network and disnixos-restore-network to capture and restore state of entire NixOS configurations

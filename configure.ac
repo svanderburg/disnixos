@@ -59,6 +59,7 @@ scripts/disnix-nixops-client
 scripts/disnixos-instantiate
 scripts/disnixos-manifest
 scripts/disnixos-deploy-network
+scripts/disnixos-delegate
 scripts/disnixos-env
 scripts/disnixos-geninfra
 scripts/disnixos-gentests

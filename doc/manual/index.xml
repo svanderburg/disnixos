@@ -48,6 +48,7 @@
       
       <xi:include href="../../scripts/disnix-backdoor-client.1.xml" />
       <xi:include href="../../scripts/disnix-nixops-client.1.xml" />
+      <xi:include href="../../scripts/disnixos-delegate.1.xml" />
       <xi:include href="../../scripts/disnixos-manifest.1.xml" />
       <xi:include href="../../scripts/disnixos-instantiate.1.xml" />
       <xi:include href="../../scripts/disnixos-deploy-network.1.xml" />

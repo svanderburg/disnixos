@@ -34,6 +34,12 @@ disnixos-manifest.1: disnixos-manifest.in
 disnixos-manifest.1.xml: disnixos-manifest.1
 	$(SHELL) ../maintenance/man2docbook.bash $<
 
+disnixos-delegate.1: disnixos-delegate.in
+	$(HELP2MAN) --output=$@ --no-info --name 'Delegates service and infrastructure builds to the target machines' "$(SHELL) disnixos-delegate"
+
+disnixos-delegate.1.xml: disnixos-delegate.1
+	$(SHELL) ../maintenance/man2docbook.bash $<
+
 disnixos-env.1: disnixos-env.in
 	$(HELP2MAN) --output=$@ --no-info --name 'Installs or updates the services and infrastructure of a distributed system' "$(SHELL) disnixos-env"
 
@@ -88,12 +94,12 @@ disnixos-vm-env.1: disnixos-vm-env.in
 disnixos-vm-env.1.xml: disnixos-vm-env.1
 	$(SHELL) ../maintenance/man2docbook.bash $<
 
-bin_SCRIPTS = disnix-backdoor-client disnix-nixops-client disnixos-geninfra disnixos-gentests disnixos-instantiate disnixos-manifest disnixos-env disnixos-vm-env disnixos-deploy-network disnixos-collect-garbage disnixos-clean-snapshots disnixos-query disnixos-snapshot-network disnixos-restore-network disnixos-delete-network-state
+bin_SCRIPTS = disnix-backdoor-client disnix-nixops-client disnixos-geninfra disnixos-gentests disnixos-instantiate disnixos-manifest disnixos-delegate disnixos-env disnixos-vm-env disnixos-deploy-network disnixos-collect-garbage disnixos-clean-snapshots disnixos-query disnixos-snapshot-network disnixos-restore-network disnixos-delete-network-state
 pkgdata_SCRIPTS = checks
-noinst_DATA = disnix-backdoor-client.1.xml disnix-nixops-client.1.xml disnixos-geninfra.1.xml disnixos-gentests.1.xml disnixos-instantiate.1.xml disnixos-manifest.1.xml disnixos-env.1.xml disnixos-deploy-network.1.xml disnixos-collect-garbage.1.xml disnixos-clean-snapshots.1.xml disnixos-query.1.xml disnixos-vm-env.1.xml
-man1_MANS = disnix-backdoor-client.1 disnix-nixops-client.1 disnixos-geninfra.1 disnixos-gentests.1 disnixos-instantiate.1 disnixos-manifest.1 disnixos-env.1 disnixos-deploy-network.1 disnixos-collect-garbage.1 disnixos-clean-snapshots.1 disnixos-query.1 disnixos-vm-env.1 disnixos-snapshot-network.1 disnixos-restore-network.1 disnixos-delete-network-state.1
+noinst_DATA = disnix-backdoor-client.1.xml disnix-nixops-client.1.xml disnixos-geninfra.1.xml disnixos-gentests.1.xml disnixos-instantiate.1.xml disnixos-manifest.1.xml disnixos-delegate.1.xml disnixos-env.1.xml disnixos-deploy-network.1.xml disnixos-collect-garbage.1.xml disnixos-clean-snapshots.1.xml disnixos-query.1.xml disnixos-vm-env.1.xml
+man1_MANS = disnix-backdoor-client.1 disnix-nixops-client.1 disnixos-geninfra.1 disnixos-gentests.1 disnixos-instantiate.1 disnixos-manifest.1 disnixos-delegate.1 disnixos-env.1 disnixos-deploy-network.1 disnixos-collect-garbage.1 disnixos-clean-snapshots.1 disnixos-query.1 disnixos-vm-env.1 disnixos-snapshot-network.1 disnixos-restore-network.1 disnixos-delete-network-state.1
 
-EXTRA_DIST = checks disnix-backdoor-client.in disnix-nixops-client.in disnixos-geninfra.in disnixos-gentests.in disnixos-instantiate.in disnixos-manifest.in disnixos-env.in disnixos-vm-env.in disnixos-deploy-network.in disnixos-collect-garbage.in disnixos-clean-snapshots.in disnixos-query \
-  disnix-backdoor-client.1 disnix-nixops-client.1 disnixos-geninfra.1 disnixos-gentests.1 disnixos-instantiate.1 disnixos-manifest.1 disnixos-env.1 disnixos-deploy-network.1 disnixos-collect-garbage.1 disnixos-clean-snapshots.1 disnixos-query.1 disnixos-vm-env.1 \
-  disnix-backdoor-client.1.xml disnix-nixops-client.1.xml disnixos-geninfra.1.xml disnixos-gentests.1.xml disnixos-instantiate.1.xml disnixos-manifest.1.xml disnixos-env.1.xml disnixos-deploy-network.1.xml disnixos-collect-garbage.1.xml disnixos-clean-snapshots.1.xml disnixos-query.1.xml disnixos-vm-env.1.xml \
+EXTRA_DIST = checks disnix-backdoor-client.in disnix-nixops-client.in disnixos-geninfra.in disnixos-gentests.in disnixos-instantiate.in disnixos-manifest.in disnixos-delegate.in disnixos-env.in disnixos-vm-env.in disnixos-deploy-network.in disnixos-collect-garbage.in disnixos-clean-snapshots.in disnixos-query \
+  disnix-backdoor-client.1 disnix-nixops-client.1 disnixos-geninfra.1 disnixos-gentests.1 disnixos-instantiate.1 disnixos-manifest.1 disnixos-delegate.1 disnixos-env.1 disnixos-deploy-network.1 disnixos-collect-garbage.1 disnixos-clean-snapshots.1 disnixos-query.1 disnixos-vm-env.1 \
+  disnix-backdoor-client.1.xml disnix-nixops-client.1.xml disnixos-geninfra.1.xml disnixos-gentests.1.xml disnixos-instantiate.1.xml disnixos-manifest.1.xml disnixos-delegate.1.xml disnixos-env.1.xml disnixos-deploy-network.1.xml disnixos-collect-garbage.1.xml disnixos-clean-snapshots.1.xml disnixos-query.1.xml disnixos-vm-env.1.xml \
   disnixos-snapshot-network.1 disnixos-snapshot-network.1.xml disnixos-restore-network.1 disnixos-restore-network.1.xml disnixos-delete-network-state.1 disnixos-delete-network-state.1.xml
