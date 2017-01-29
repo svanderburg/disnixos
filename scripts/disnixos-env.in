@@ -103,6 +103,11 @@ Options:
                                   machines by default
       --no-infra-deployment       Only deploy the services, not the
                                   infrastructure
+      --depth-first               Snapshots components depth-first as opposed to
+                                  breadth-first. This approach is more space
+                                  efficient, but slower.
+      --keep=NUM                  Amount of snapshot generations to keep.
+                                  Defaults to: 1
   -h, --help                      Shows the usage of this command
   -v, --version                   Shows the version of this command
 
@@ -144,7 +149,7 @@ EOF
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:p:m:hv -l services:,network:,distribution:,rollback,switch-to-generation:,profile:,max-concurrent-transfers:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,deploy-state,no-upgrade,no-lock,no-coordinator-profile,no-target-profiles,no-migration,no-delete-state,show-trace,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:p:m:hv -l services:,network:,distribution:,rollback,switch-to-generation:,profile:,max-concurrent-transfers:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,deploy-state,no-upgrade,no-lock,no-coordinator-profile,no-target-profiles,no-migration,no-delete-state,depth-first,keep:,show-trace,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -222,6 +227,12 @@ do
         --no-delete-state)
             noDeleteStateArg="--no-delete-state"
             ;;
+        --depth-first)
+            depthFirstArg="--depth-first"
+            ;;
+        --keep)
+            keepArg="--keep $2"
+            ;;
         --show-trace)
             showTrace=1
             ;;
@@ -269,7 +280,7 @@ checkShowTrace
 
 if [ "$switchGeneration" = "1" ]
 then
-    disnix-env $switchGenerationArg --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $deployStateArg $noUpgradeArg $noLockArg $noCoordinatorProfileArg $noTargetProfilesArg $noMigrationArg $noDeleteStateArg $switchToGenerationArg $showTraceArg
+    disnix-env $switchGenerationArg --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $deployStateArg $noUpgradeArg $noLockArg $noCoordinatorProfileArg $noTargetProfilesArg $noMigrationArg $noDeleteStateArg $switchToGenerationArg $depthFirstArg $keepArg $showTraceArg
 else
     # Generate infrastructure model from network model
     infrastructureFile=`disnixos-geninfra --no-out-link $useNixOpsArg $networkFiles`
@@ -281,5 +292,5 @@ else
     fi
 
     # Upgrade the services
-    disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $deployStateArg $noUpgradeArg $noLockArg $noCoordinatorProfileArg $noTargetProfilesArg $noMigrationArg $noDeleteStateArg $switchToGenerationArg $showTraceArg
+    disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $deployStateArg $noUpgradeArg $noLockArg $noCoordinatorProfileArg $noTargetProfilesArg $noMigrationArg $noDeleteStateArg $switchToGenerationArg $depthFirstArg $keepArg $showTraceArg
 fi
