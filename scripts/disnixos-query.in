@@ -37,6 +37,8 @@ Options:
       --target-property=PROP  The target property of an infrastructure model,
                               that specifies how to connect to the remote Disnix
                               interface. (Defaults to hostname)
+  -f, --format=FORMAT         Output format. Options are: services (default),
+                              containers and nix
       --use-nixops            Use NixOps instead of Disnix for infrastructure
                               deployment
   -h, --help                  Shows the usage of this command to the user
@@ -68,7 +70,7 @@ EOF
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o p:hv -l profile:,target-property:,interface:,use-nixops,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o f:p:hv -l format:,profile:,target-property:,interface:,use-nixops,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -83,6 +85,9 @@ eval set -- "$PARAMS"
 while [ "$1" != "--" ]
 do
     case "$1" in
+        -f|--format)
+            formatArg="--format $2"
+            ;;
         -p|--profile)
             profileArg="--profile $2"
             ;;
@@ -140,4 +145,4 @@ fi
 infrastructureFile=`disnixos-geninfra --no-out-link $nixOpsArg $networkFiles`
 
 # Execute operation
-disnix-query $profileArg $targetPropertyArg --interface $interface $infrastructureFile
+disnix-query $profileArg $targetPropertyArg $formatArg --interface $interface $infrastructureFile
