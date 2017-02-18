@@ -57,6 +57,11 @@
       <xi:include href="../../scripts/disnixos-query.1.xml" />
       <xi:include href="../../scripts/disnixos-geninfra.1.xml" />
       <xi:include href="../../scripts/disnixos-gentests.1.xml" />
+      <xi:include href="../../scripts/disnixos-capture-manifest.1.xml" />
+      <xi:include href="../../scripts/disnixos-reconstruct.1.xml" />
+      <xi:include href="../../scripts/disnixos-snapshot-network.1.xml" />
+      <xi:include href="../../scripts/disnixos-restore-network.1.xml" />
+      <xi:include href="../../scripts/disnixos-delete-network-state.1.xml" />
     </section>
   </appendix>
 </book>

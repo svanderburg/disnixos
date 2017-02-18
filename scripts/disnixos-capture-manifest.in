@@ -1,0 +1,151 @@
+#!/bin/bash
+set -e
+set -o pipefail
+
+# DisnixOS - Infrastructure deployment extension for Disnix
+# Copyright (C) 2008-2016  Sander van der Burg
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+# Shows the usage of this command to the user
+
+showUsage()
+{
+    cat <<EOF
+Usage: $0 [OPTION] network_nix [ network2_nix ... ]
+
+The command \`disnixos-capture-manifests' consults the manifests of the target
+Disnix profiles, retrieves their intra-dependency closures and composes a Nix
+expression that can be used to reconstruct the deployment manifest on the
+coordinator machine.
+
+Options:
+  -p, --profile=PROFILE       Name of the profile in which the services are
+                              registered. Defaults to: default
+      --interface=INTERFACE   Path to executable that communicates with a Disnix
+                              interface. Defaults to \`disnix-ssh-client'
+      --target-property=PROP  The target property of an infrastructure model,
+                              that specifies how to connect to the remote Disnix
+                              interface. (Defaults to hostname)
+  -m, --max-concurrent-transfers=NUM
+                              Maximum amount of concurrent closure transfers.
+                              Defauls to: 2
+      --use-nixops            Use NixOps instead of Disnix for infrastructure
+                              deployment
+  -h, --help                  Shows the usage of this command to the user
+  -v, --version               Shows the version of this command to the user
+
+Environment:
+  DISNIX_CLIENT_INTERFACE    Sets the client interface (which defaults to
+                             \`disnix-ssh-client'
+  DISNIX_TARGET_PROPERTY     Specifies which property in the infrastructure Nix
+                             expression specifies how to connect to the remote
+                             interface (defaults to: hostname)
+  DISNIX_PROFILE             Sets the name of the profile that stores the
+                             manifest on the coordinator machine and the
+                             deployed services per machine on each target
+                             (Defaults to: default)
+EOF
+}
+
+# Shows the version of this command to the user
+
+showVersion()
+{
+    cat <<EOF
+$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+
+Copyright (C) 2008-2016 Sander van der Burg
+EOF
+}
+
+# Parse valid argument options
+
+PARAMS=`@getopt@ -n $0 -o p:m:hv -l profile:,max-concurrent-transfers:,target-property:,interface:,use-nixops,help,version -- "$@"`
+
+if [ $? != 0 ]
+then
+    showUsage
+    exit 1
+fi
+
+# Evaluate valid options
+
+eval set -- "$PARAMS"
+
+while [ "$1" != "--" ]
+do
+    case "$1" in
+        -p|--profile)
+            profileArg="--profile $2"
+            ;;
+        --target-property)
+            targetPropertyArg=$2
+            ;;
+        -m|--max-concurrent-transfers)
+            maxConcurrentTransfersArg="-m $2"
+            ;;
+        --interface)
+            interface=$2
+            ;;
+        --use-nixops)
+            useNixOps=1
+            ;;
+        -h|--help)
+            showUsage
+            exit 0
+            ;;
+        -v|--version)
+            showVersion
+            exit 0
+            ;;
+    esac
+    
+    shift
+done
+
+shift
+
+# Autoconf settings
+export prefix=@prefix@
+
+# Import Disnix checks
+source @DISNIX_PREFIX@/share/disnix/checks
+
+# Import checks
+source @datadir@/@PACKAGE@/checks
+
+# Validate the given options
+checkClientInterface
+checkUseNixOps
+setNixOpsParams
+
+if [ -z "$1" ]
+then
+    echo "ERROR: At least one network expression must be specified!" >&2
+    exit 1
+else
+    while [ "$1" != "" ]
+    do
+        networkFiles="$networkFiles $(readlink -f $1)"
+        shift
+    done
+fi
+
+# Generate infrastructure model from network model
+infrastructureFile=`disnixos-geninfra --no-out-link $nixOpsArg $networkFiles`
+
+# Execute operation
+disnix-capture-manifest $profileArg $targetPropertyArg $maxConcurrentTransfersArg --interface $interface $infrastructureFile
