@@ -20,6 +20,11 @@ In order to build Disnix from source code, the following packages are required:
 * [Disnix](http://github.com/svanderburg/disnix)
 * [NixOps](http://github.com/nixos/nixops), if it is desired to use NixOps' infrastructure deployment facilities
 
+When building directly from a Git clone, you also need:
+
+* [help2man](https://www.gnu.org/software/help2man)
+* [doclifter](http://www.catb.org/esr/doclifter)
+
 These dependencies can be acquired with the Nix package manager, your host
 system's package manager or be compiled from sources. Consult the documentation
 of your distribution or the corresponding packages for more information.
