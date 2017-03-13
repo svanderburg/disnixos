@@ -101,7 +101,7 @@ disnixos-capture-manifest.1.xml: disnixos-capture-manifest.1
 	$(SHELL) ../maintenance/man2docbook.bash $<
 
 disnixos-reconstruct.1: disnixos-reconstruct.in
-	$(HELP2MAN) --output=$@ --no-info --name 'Reconstructs the deployment manifest on the coordinator machine from the manifests on the target machines' --libtool "$(SHELL) disnixos-capture-manifest"
+	$(HELP2MAN) --output=$@ --no-info --name 'Reconstructs the deployment manifest on the coordinator machine from the manifests on the target machines' --libtool "$(SHELL) disnixos-reconstruct"
 
 disnixos-reconstruct.1.xml: disnixos-reconstruct.1
 	$(SHELL) ../maintenance/man2docbook.bash $<
