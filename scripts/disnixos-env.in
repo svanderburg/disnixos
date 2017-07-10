@@ -95,7 +95,8 @@ Options:
       --no-migration              Do not migrate the state of services from one
                                   machine to another, even if they have been
                                   annotated as such
-      --no-delete-state           Do not remove the state of deactivated services
+      --delete-state              Remove the obsolete state of deactivated
+                                  services
       --show-trace                Shows a trace of the output
       --use-nixops                Use NixOps instead of Disnix's deployment
                                   facilities
@@ -123,8 +124,8 @@ Environment:
                              (Defaults to: default).
   DISNIX_DEPLOY_STATE        If set to 1 it also deploys the state of all
                              components. (defaults to: 0)
-  DISNIX_NO_DELETE_STATE     If set to 1 it does not delete the obsolete state
-                             after upgrading. (defaults to: 0)
+  DISNIX_DELETE_STATE        If set to 1 it automatically deletes the obsolete
+                             state after upgrading. (defaults to: 0)
   DYSNOMIA_STATEDIR          Specifies where the snapshots must be stored on the
                              coordinator machine (defaults to:
                              /var/state/dysnomia)
@@ -149,7 +150,7 @@ EOF
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:p:m:hv -l services:,network:,distribution:,rollback,switch-to-generation:,profile:,max-concurrent-transfers:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,deploy-state,no-upgrade,no-lock,no-coordinator-profile,no-target-profiles,no-migration,no-delete-state,depth-first,keep:,show-trace,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:p:m:hv -l services:,network:,distribution:,rollback,switch-to-generation:,profile:,max-concurrent-transfers:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,deploy-state,no-upgrade,no-lock,no-coordinator-profile,no-target-profiles,no-migration,delete-state,depth-first,keep:,show-trace,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -224,8 +225,8 @@ do
         --no-target-profiles)
             noTargetProfilesArg="--no-target-profiles"
             ;;
-        --no-delete-state)
-            noDeleteStateArg="--no-delete-state"
+        --delete-state)
+            deleteStateArg="--delete-state"
             ;;
         --depth-first)
             depthFirstArg="--depth-first"
@@ -280,7 +281,7 @@ checkShowTrace
 
 if [ "$switchGeneration" = "1" ]
 then
-    disnix-env $switchGenerationArg --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $deployStateArg $noUpgradeArg $noLockArg $noCoordinatorProfileArg $noTargetProfilesArg $noMigrationArg $noDeleteStateArg $switchToGenerationArg $depthFirstArg $keepArg $showTraceArg
+    disnix-env $switchGenerationArg --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $deployStateArg $noUpgradeArg $noLockArg $noCoordinatorProfileArg $noTargetProfilesArg $noMigrationArg $deleteStateArg $switchToGenerationArg $depthFirstArg $keepArg $showTraceArg
 else
     # Generate infrastructure model from network model
     infrastructureFile=`disnixos-geninfra --no-out-link $useNixOpsArg $networkFiles`
@@ -292,5 +293,5 @@ else
     fi
 
     # Upgrade the services
-    disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $deployStateArg $noUpgradeArg $noLockArg $noCoordinatorProfileArg $noTargetProfilesArg $noMigrationArg $noDeleteStateArg $switchToGenerationArg $depthFirstArg $keepArg $showTraceArg
+    disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $deployStateArg $noUpgradeArg $noLockArg $noCoordinatorProfileArg $noTargetProfilesArg $noMigrationArg $deleteStateArg $switchToGenerationArg $depthFirstArg $keepArg $showTraceArg
 fi
