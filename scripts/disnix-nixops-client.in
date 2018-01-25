@@ -182,7 +182,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o rqp:dC:c:hv -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,snapshot,restore,delete-state,query-all-snapshots,query-latest-snapshot,print-missing-snapshots,import-snapshots,export-snapshots,resolve-snapshots,clean-snapshots,capture-config,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,container:,component:,keep:,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o rqp:dC:c:hv -l import,export,print-invalid,realise,set,query-installed,query-requisites,collect-garbage,activate,deactivate,lock,unlock,snapshot,restore,delete-state,query-all-snapshots,query-latest-snapshot,print-missing-snapshots,import-snapshots,export-snapshots,resolve-snapshots,clean-snapshots,capture-config,shell,target:,localfile,remotefile,profile:,delete-old,type:,arguments:,container:,component:,keep:,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -247,6 +247,9 @@ do
             ;;
         --delete-state)
             operation="delete-state"
+            ;;
+        --shell)
+            operation="shell"
             ;;
         --query-all-snapshots)
             operation="query-all-snapshots"
@@ -406,6 +409,11 @@ case "$operation" in
         checkType
         checkContainer
         nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type --container $container $argsArg --delete-state $@"
+        ;;
+    shell)
+        checkType
+        checkContainer
+        nixops ssh $NIXOPS_OPTS $target -- -t "bash -i -c 'disnix-run-activity --type $type --container $container $argsArg --shell $@'"
         ;;
     query-all-snapshots)
         nixops ssh $NIXOPS_OPTS $target "disnix-client --query-all-snapshots --container $container --component $component"
