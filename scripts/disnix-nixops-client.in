@@ -424,9 +424,9 @@ case "$operation" in
 
         if [ "$command" = "" ]
         then
-            nixops ssh $NIXOPS_OPTS $target -- -tt "bash -i -c 'disnix-run-activity --type $type --container $container $argsArg --shell $@'"
+            nixops ssh $NIXOPS_OPTS $target -- -tt "disnix-run-activity --type $type --container $container $argsArg --shell $@"
         else
-            nixops ssh $NIXOPS_OPTS $target -- -tt "bash -i -c 'disnix-run-activity --type $type --container $container $argsArg --command \"$command\" --shell $@'"
+            nixops ssh $NIXOPS_OPTS $target -- -tt "disnix-run-activity --type $type --container $container $argsArg --command '$command' --shell $@"
         fi
         ;;
     query-all-snapshots)
