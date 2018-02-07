@@ -121,6 +121,18 @@ let
           inherit (pkgs) writeTextFile openssh;
         };
         
+        nixopsClientToDBus = import ./tests/nixops-client.nix {
+          inherit nixpkgs dysnomia disnix disnixos;
+          inherit (pkgs) writeTextFile openssh;
+          disnixRemoteClient = "disnix-client";
+        };
+        
+        nixopsClientToRunActivity = import ./tests/nixops-client.nix {
+          inherit nixpkgs dysnomia disnix disnixos;
+          inherit (pkgs) writeTextFile openssh;
+          disnixRemoteClient = "disnix-run-activity";
+        };
+        
         deploymentNixOps = import ./tests/deployment-nixops.nix {
           inherit nixpkgs dysnomia disnix disnixos;
           inherit (pkgs) writeTextFile openssh;
@@ -140,6 +152,8 @@ let
         tests.deploymentServices
         tests.deploymentServicesWithData
         tests.distbuildServices
+        tests.nixopsClientToDBus
+        tests.nixopsClientToRunActivity
         tests.deploymentNixOps
       ];
       meta.description = "Release-critical builds";

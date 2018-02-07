@@ -132,6 +132,8 @@ Clean snapshots options:
 Environment:
   NIXOPS_OPTS                Additional properties which are passed to the
                              \`nixops' command
+  DISNIX_REMOTE_CLIENT       Name of the remote executable to run to execute a
+                             deployment activity (defaults to: disnix-client)
   DISNIX_PROFILE             Sets the name of the profile that stores the
                              manifest on the coordinator machine and the
                              deployed services per machine on each target
@@ -338,6 +340,11 @@ then
     keep=1
 fi
 
+if [ "$DISNIX_REMOTE_CLIENT" = "" ]
+then
+    DISNIX_REMOTE_CLIENT="disnix-client"
+fi
+
 # Execute selected operation
 
 case "$operation" in
@@ -354,12 +361,12 @@ case "$operation" in
         fi
         
         # Import the closure into the Nix store
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --import $remoteClosure"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --import $remoteClosure"
         ;;
     export)
         checkLocalOrRemoteFile
 
-        closure=`nixops ssh $NIXOPS_OPTS $target "disnix-client --export $@"`
+        closure=`nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --export $@"`
         
         # A remote file must be downloaded afterwards
         if [ "$remotefile" = "1" ]
@@ -370,53 +377,53 @@ case "$operation" in
         fi
         ;;
     print-invalid)
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --print-invalid $@"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --print-invalid $@"
         ;;
     realise)
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --realise $@"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --realise $@"
         ;;
     set)
-        nixops ssh $NIXOPS_OPTS $target "disnix-client $profileArg --set $@"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT $profileArg --set $@"
         ;;
     query-installed)
-        nixops ssh $NIXOPS_OPTS $target "disnix-client $profileArg --query-installed $@"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT $profileArg --query-installed $@"
         ;;
     query-requisites)
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --query-requisites $@"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --query-requisites $@"
         ;;
     collect-garbage)
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --collect-garbage $deleteOldArg $@"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --collect-garbage $deleteOldArg $@"
         ;;
     activate)
         checkType
         checkContainer
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type --container $container $argsArg --activate $@"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --type $type --container $container $argsArg --activate $@"
         ;;
     deactivate)
         checkType
         checkContainer
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type --container $container $argsArg --deactivate $@"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --type $type --container $container $argsArg --deactivate $@"
         ;;
     lock)
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --lock $profileArg"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --lock $profileArg"
         ;;
     unlock)
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --unlock $profileArg"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --unlock $profileArg"
         ;;
     snapshot)
         checkType
         checkContainer
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type --container $container $argsArg --snapshot $@"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --type $type --container $container $argsArg --snapshot $@"
         ;;
     restore)
         checkType
         checkContainer
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type --container $container $argsArg --restore $@"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --type $type --container $container $argsArg --restore $@"
         ;;
     delete-state)
         checkType
         checkContainer
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --type $type --container $container $argsArg --delete-state $@"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --type $type --container $container $argsArg --delete-state $@"
         ;;
     shell)
         checkType
@@ -430,13 +437,13 @@ case "$operation" in
         fi
         ;;
     query-all-snapshots)
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --query-all-snapshots --container $container --component $component"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --query-all-snapshots --container $container --component $component"
         ;;
     query-latest-snapshot)
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --query-latest-snapshot --container $container --component $component"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --query-latest-snapshot --container $container --component $component"
         ;;
     print-missing-snapshots)
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --print-missing-snapshots $@"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --print-missing-snapshots $@"
         ;;
     import-snapshots)
         checkLocalOrRemoteFile
@@ -451,7 +458,7 @@ case "$operation" in
             remoteSnapshots="$@"
         fi
         
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --container $container --component $component --import-snapshots $remoteSnapshots"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --container $container --component $component --import-snapshots $remoteSnapshots"
         ;;
     export-snapshots)
         for i in $@
@@ -462,7 +469,7 @@ case "$operation" in
         done
         ;;
     resolve-snapshots)
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --resolve-snapshots $@"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --resolve-snapshots $@"
         ;;
     clean-snapshots)
         if [ "$container" != "" ]
@@ -475,10 +482,10 @@ case "$operation" in
             componentArg="--component $component"
         fi
         
-        nixops ssh $NIXOPS_OPTS $target "disnix-client --clean-snapshots --keep $keep $containerArg $componentArg $@"
+        nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --clean-snapshots --keep $keep $containerArg $componentArg $@"
         ;;
     capture-config)
-        tempfile=`nixops ssh $NIXOPS_OPTS $target "disnix-client --capture-config"`
+        tempfile=`nixops ssh $NIXOPS_OPTS $target "$DISNIX_REMOTE_CLIENT --capture-config"`
         nixops ssh $NIXOPS_OPTS $target "cat $tempfile; rm -f $tempfile"
         ;;
 esac

@@ -1,3 +1,9 @@
+Version 0.7
+===========
+- Add --shell support to the NixOps client
+
+- Added testsuite for the disnix-nixops-client tool
+
 Version 0.6
 ===========
 - Added disnixos-delegate, disnixos-capture-manifest, disnixos-reconstruct
