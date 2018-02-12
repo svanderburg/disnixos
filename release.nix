@@ -133,6 +133,18 @@ let
           disnixRemoteClient = "disnix-run-activity";
         };
         
+        snapshotsViaDBus = import ./tests/snapshots.nix {
+          inherit nixpkgs dysnomia disnix disnixos;
+          inherit (pkgs) stdenv writeTextFile openssh;
+          disnixRemoteClient = "disnix-client";
+        };
+        
+        snapshotsViaRunActivity = import ./tests/snapshots.nix {
+          inherit nixpkgs dysnomia disnix disnixos;
+          inherit (pkgs) stdenv writeTextFile openssh;
+          disnixRemoteClient = "disnix-run-activity";
+        };
+        
         deploymentNixOps = import ./tests/deployment-nixops.nix {
           inherit nixpkgs dysnomia disnix disnixos;
           inherit (pkgs) writeTextFile openssh;
@@ -154,6 +166,8 @@ let
         tests.distbuildServices
         tests.nixopsClientToDBus
         tests.nixopsClientToRunActivity
+        tests.snapshotsViaDBus
+        tests.snapshotsViaRunActivity
         tests.deploymentNixOps
       ];
       meta.description = "Release-critical builds";

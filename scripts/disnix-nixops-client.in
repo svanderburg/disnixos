@@ -464,7 +464,7 @@ case "$operation" in
         for i in $@
         do
             tmpdir=`mktemp -d -p $TMPDIR`
-            nixops scp $NIXOPS_OPTS --from $target $i $tmpdir
+            nixops scp $NIXOPS_OPTS --from $target $i $tmpdir > /dev/null
             echo $tmpdir
         done
         ;;
