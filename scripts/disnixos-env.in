@@ -27,6 +27,9 @@ showUsage()
 Usage: $0 -s services_nix -n network.nix [ -n network2.nix ... ] -d distribution_nix [OPTION]
   or: $0 --rollback [OPTION]
   or: $0 --switch-generation NUM [OPTION]
+  or: $0 --list-generations [OPTION]
+  or: $0 --delete-generations NUM [OPTION]
+  or: $0 --delete-all-generations NUM [OPTION]
 
 The command \`disnixos-env' is used to install, upgrade or roll back the
 services and infrastructure of distributed system in a given environment. This
@@ -69,6 +72,13 @@ Options:
       --switch-to-generation=NUM  Switches to a specific profile generation
       --rollback                  Switches back to the previously deployed
                                   configuration
+      --list-generations          Lists all profile generations of the current
+                                  deployment
+      --delete-generations=NUM    Deletes the specified generations. The number
+                                  can correspond to generation numbers, days
+                                  (d postfix) or 'old'.
+      --delete-all-generations    Deletes all profile generations. This is
+                                  useful when a deployment has been discarded
       --target-property=PROP      The target property of an infrastructure
                                   model, that specifies how to
       --deploy-state              Indicates whether to globally deploy state
@@ -150,7 +160,7 @@ EOF
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:p:m:hv -l services:,network:,distribution:,rollback,switch-to-generation:,profile:,max-concurrent-transfers:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,deploy-state,no-upgrade,no-lock,no-coordinator-profile,no-target-profiles,no-migration,delete-state,depth-first,keep:,show-trace,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:p:m:hv -l services:,network:,distribution:,rollback,switch-to-generation:,list-generations,delete-generations:,delete-all-generations,profile:,max-concurrent-transfers:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,deploy-state,no-upgrade,no-lock,no-coordinator-profile,no-target-profiles,no-migration,delete-state,depth-first,keep:,show-trace,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -181,6 +191,18 @@ do
         --switch-to-generation)
             switchGeneration=1
             switchGenerationArg="--switch-to-generation $2"
+            ;;
+        --list-generations)
+            switchGeneration=1
+            switchGenerationArg="--list-generations"
+            ;;
+        --delete-generations)
+            switchGeneration=1
+            switchGenerationArg="--delete-generations $2"
+            ;;
+        --delete-all-generations)
+            switchGeneration=1
+            switchGenerationArg="--delete-all-generations"
             ;;
         -p|--profile)
             profileArg="--profile $2"
