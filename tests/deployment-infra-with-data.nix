@@ -14,7 +14,7 @@ let
       imports = [ "${dysnomiaSrc}/dysnomia-module.nix" ];
       
       virtualisation.writableStore = true;
-      virtualisation.memorySize = 2048;
+      virtualisation.memorySize = 4096;
       virtualisation.diskSize = 10240;
       virtualisation.pathsInNixDB = [ pkgs.stdenv pkgs.perlPackages.ArchiveCpio pkgs.busybox ] ++ pkgs.libxml2.all ++ pkgs.libxslt.all;
       
@@ -118,7 +118,7 @@ let
             package = pkgs.postgresql;
           };
           
-          environment.systemPackages = [ ${disnix} ];
+          environment.systemPackages = [ (builtins.storePath ${disnix}) ];
         };
       
         testtarget2 = {pkgs, ...}:
@@ -137,7 +137,7 @@ let
             package = pkgs.postgresql;
           };
           
-          environment.systemPackages = [ ${disnix} ];
+          environment.systemPackages = [ (builtins.storePath ${disnix}) ];
         };
       }
     '';
@@ -170,7 +170,7 @@ let
             package = pkgs.postgresql;
           };
           
-          environment.systemPackages = [ ${disnix} ];
+          environment.systemPackages = [ (builtins.storePath ${disnix}) ];
         };
       
         testtarget2 = {pkgs, ...}:
@@ -189,7 +189,7 @@ let
             package = pkgs.postgresql;
           };
           
-          environment.systemPackages = [ ${disnix} ];
+          environment.systemPackages = [ (builtins.storePath ${disnix}) ];
         };
       }
     '';
@@ -244,7 +244,7 @@ simpleTest {
       # Modify the state of the databases
       
       $testtarget1->mustSucceed("echo \"insert into test values ('Bye world');\" | mysql --user=root --password=verysecret -N testdb");
-      $testtarget1->mustSucceed("echo \"insert into test values ('Bye world');\" | psql --file - testdb");
+      $testtarget1->mustSucceed("echo \"insert into test values ('Bye world');\" | su postgres -s /bin/sh -c 'psql --file - testdb'");
       
       # Remove all the remote snapshots and check if both the Disnix and NixOS
       # state dir have no snapshots
@@ -282,7 +282,7 @@ simpleTest {
           print "MySQL does not contain: Bye world!\n";
       }
       
-      $result = $testtarget1->mustSucceed("echo 'select * from test' | psql --file - testdb");
+      $result = $testtarget1->mustSucceed("echo 'select * from test' | su postgres -s /bin/sh -c 'psql --file - testdb'");
       
       if($result =~ /Bye world/) {
           die "PostgreSQL table should not contain: Bye world!\n";
@@ -301,7 +301,7 @@ simpleTest {
           print "MySQL does not contain: Bye world!\n";
       }
       
-      $result = $testtarget1->mustSucceed("echo 'select * from test' | psql --file - testdb");
+      $result = $testtarget1->mustSucceed("echo 'select * from test' | su postgres -s /bin/sh -c 'psql --file - testdb'");
       
       if($result =~ /Bye world/) {
           die "PostgreSQL table should not contain: Bye world!\n";
@@ -317,6 +317,6 @@ simpleTest {
       $coordinator->mustSucceed("${env} disnixos-delete-network-state ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix");
       
       $testtarget1->mustFail("echo 'select * from test' | mysql --user=root --password=verysecret -N testdb");
-      $testtarget1->mustFail("echo 'select * from test' | psql --file - testdb");
+      $testtarget1->mustFail("echo 'select * from test' | su postgres -s /bin/sh -c 'psql --file - testdb'");
     '';
 }
