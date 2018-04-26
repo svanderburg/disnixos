@@ -27,7 +27,7 @@ simpleTest {
       $testtarget2->waitForJob("sshd");
       
       # Initialise ssh stuff by creating a key pair for communication
-      my $key=`${openssh}/bin/ssh-keygen -t dsa -f key -N ""`;
+      my $key=`${openssh}/bin/ssh-keygen -t ecdsa -f key -N ""`;
     
       $testtarget1->mustSucceed("mkdir -m 700 /root/.ssh");
       $testtarget1->copyFileFromHost("key.pub", "/root/.ssh/authorized_keys");

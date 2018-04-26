@@ -57,6 +57,13 @@ let
           serviceConfig.ExecStart = "${disnix}/bin/disnix-service";
         };
     
+      # We can't download any substitutes in a test environment. To make tests
+      # faster, we disable substitutes so that Nix does not waste any time by
+      # attempting to download them.
+      nix.extraOptions = ''
+        substitute = false
+      '';
+
       environment.systemPackages = [ config.dysnomiaTest.package disnix disnixos ];
     };
 
@@ -213,7 +220,7 @@ simpleTest {
       $testtarget2->waitForJob("disnix");
         
       # Initialise ssh stuff by creating a key pair for communication
-      my $key=`${openssh}/bin/ssh-keygen -t dsa -f key -N ""`;
+      my $key=`${openssh}/bin/ssh-keygen -t ecdsa -f key -N ""`;
         
       $testtarget1->mustSucceed("mkdir -m 700 /root/.ssh");
       $testtarget1->copyFileFromHost("key.pub", "/root/.ssh/authorized_keys");

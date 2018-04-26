@@ -19,7 +19,7 @@ writeTextFile {
         networking.firewall.enable = false;
 
         # Ugly: Replicates assignIPAddresses from build-vms.nix.
-        networking.interfaces.eth1.ip4 = [ {
+        networking.interfaces.eth1.ipv4.addresses = [ {
           address = "192.168.1.2";
           prefixLength = 24;
         } ];

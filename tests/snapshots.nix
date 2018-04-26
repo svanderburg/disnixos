@@ -29,7 +29,7 @@ with import "${nixpkgs}/nixos/lib/testing.nix" { system = builtins.currentSystem
         my @closure = split('\n', $client->mustSucceed("nix-store -qR $manifest"));
 
         # Initialise ssh stuff by creating a key pair for communication
-        my $key=`${openssh}/bin/ssh-keygen -t dsa -f key -N ""`;
+        my $key=`${openssh}/bin/ssh-keygen -t ecdsa -f key -N ""`;
 
         $server->mustSucceed("mkdir -m 700 /root/.ssh");
         $server->copyFileFromHost("key.pub", "/root/.ssh/authorized_keys");

@@ -21,7 +21,7 @@ writeTextFile {
         networking.firewall.enable = false;
         
         # Ugly: Replicates assignIPAddresses from build-vms.nix.
-        networking.interfaces.eth1.ip4 = [ {
+        networking.interfaces.eth1.ipv4.addresses = [ {
           address = if hostname == "testtarget1" then "192.168.1.2"
             else if hostname == "testtarget2" then "192.168.1.3"
             else throw "Unknown hostname: "+hostname;
