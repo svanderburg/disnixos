@@ -39,12 +39,12 @@ in
         hostname = config.networking.hostName;
       } // cfg.properties;
       
-      system = if config.nixpkgs.system == "" then builtins.currentSystem else config.nixpkgs.system;
+      system = if config.nixpkgs.localSystem.system == "" then builtins.currentSystem else config.nixpkgs.localSystem.system;
       
       containers = lib.recursiveUpdate (import cfg.generateContainersExpr {
         inherit (cfg) enableAuthentication;
         inherit config lib;
-      }) (config.dysnomia.extraContainerProperties or {});
+      }) (config.services.dysnomia.extraContainerProperties or {});
     };
   };
 }
