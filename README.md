@@ -79,7 +79,7 @@ paricularly useful to quickly test a deployment.
 
 Deploying infrastructure through NixOps and services through Disnix
 ------------------------------------------------------------------
-We can also use NixOps to deploy instantiate and deploy infrastructure, and use
+We can also use NixOps to instantiate and deploy infrastructure, and use
 Disnix to deploy the services to the corresponding VM instances.
 
 The following command instantiates and deploys a network of VirtualBox machines:
