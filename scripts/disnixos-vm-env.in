@@ -25,6 +25,7 @@ showUsage()
 {
     cat <<EOF
 Usage: $0 -s services_nix -n network_nix [ -n network_nix ... ] -d distribution_nix [OPTION]
+  or: $0 -P packages_nix -n network_nix [ -n network2_nix ... ] [OPTION]
 
 The command \`disnixos-vm-env' is used to generate and launch a network of
 virtual machines, closely matching the machine configurations defined in the
@@ -50,6 +51,11 @@ Options:
                                        the network
   -d, --distribution=distribution_nix  Distribution Nix expression which maps
                                        services to machines in the network
+  -P, --packages=packages_nix
+                                       Packages Nix expression specifying the
+                                       packages that should be deployed in a Nix
+                                       profile mapped to each machine in the
+                                       network
       --deploy-state                   Indicates whether to globally deploy
                                        state (disabled by default)
       --show-trace                     Shows a trace of the output
@@ -78,7 +84,7 @@ EOF
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:hv -l services:,network:,distribution:,deploy-state,show-trace,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:P:hv -l services:,network:,distribution:,packages:,deploy-state,show-trace,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -102,6 +108,9 @@ do
         -d|--distribution)
             distributionFile=`readlink -f $2`
             ;;
+        -P|--packages)
+            packagesFile=`readlink -f $2`
+            ;;
         --no-out-link)
             noOutLink=1
             ;;
@@ -120,7 +129,7 @@ do
             exit 0
             ;;
     esac
-    
+
     shift
 done
 
@@ -135,9 +144,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 # Validate the given options
 
-checkServicesFile
-checkNetworkFiles
-checkDistributionFile
+generateDisnixOSModelArgs
 checkShowTrace
 
 if [ "$DISNIX_DEPLOY_STATE" = "1" ]
@@ -163,7 +170,7 @@ do
     networkArgs="$networkArgs -n $n"
 done
 
-manifest=`disnixos-manifest -s $servicesFile $networkArgs -d $distributionFile --vm --no-out-link $deployStateArg $showTraceArg`
+manifest=`disnixos-manifest $modelArgs --vm --no-out-link $deployStateArg $showTraceArg`
 
 # Copy the Dysnomia state data to the shared exchange folder so that all machines can access it
 export TMPDIR=`mktemp -d`

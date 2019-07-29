@@ -1,5 +1,7 @@
 Version 0.8
 ===========
+- disnixos-manifest, disnixos-instantiate, disnixos-delegate, disnixos-env, disnixos-vm-env can also work with packages models
+
 - New tools: disnixos-convert-manifest, disnixos-convert
 
 Version 0.7
@@ -32,7 +34,6 @@ Version 0.3
 
 Version 0.2
 ===========
-
 - Machines in the network model can refer to each other through the 'node' parameter
 
 - Multiple network models are also supported, allowing someone to capture concerns separately

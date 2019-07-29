@@ -51,3 +51,34 @@ setNixOpsParams()
         nixOpsArg="--use-nixops"
     fi
 }
+
+# Check all the possible input model combinations. Exists with status 1 if an
+# invalid combination is given or when a mandatory model is not specified.
+# When the right combination of input models is provided, it sets the modelArgs
+# environment variable with parameters that can be propagated to disnix-env or
+# disnix-manifest
+
+generateDisnixOSModelArgs()
+{
+    if [ "$servicesFile" != "" ] || [ "$distributionFile" != "" ]
+    then
+        checkServicesFile
+        checkDistributionFile
+
+        modelArgs="-s $servicesFile -d $distributionFile"
+    fi
+
+    if [ "$packagesFile" != "" ]
+    then
+        checkPackagesFile
+        modelArgs="$modelArgs -P $packagesFile"
+    fi
+
+    if [ "$modelArgs" = "" ]
+    then
+        echo "An unknown combination of inputs models were provided!" >&2
+        exit 1
+    fi
+
+    checkNetworkFiles
+}

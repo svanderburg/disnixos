@@ -24,7 +24,8 @@ set -o pipefail
 showUsage()
 {
     cat <<EOF
-Usage: $0 -s services_nix -n network.nix [ -n network2.nix ... ] -d distribution_nix [OPTION]
+Usage: $0 -s services_nix -n network_nix [ -n network2_nix ... ] -d distribution_nix [OPTION]
+  or: $0 -P packages_nix -n network_nix [ -n network2_nix ... ] [OPTION]
   or: $0 --rollback [OPTION]
   or: $0 --switch-generation NUM [OPTION]
   or: $0 --list-generations [OPTION]
@@ -69,6 +70,10 @@ Options:
   -d, --distribution=distribution_nix
                                   Distribution Nix expression which maps
                                   services to machines in the network
+  -P, --packages=packages_nix
+                                  Packages Nix expression specifying the packages
+                                  that should be deployed in a Nix profile mapped
+                                  to each machine in the network
       --switch-to-generation=NUM  Switches to a specific profile generation
       --rollback                  Switches back to the previously deployed
                                   configuration
@@ -160,7 +165,7 @@ EOF
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:p:m:hv -l services:,network:,distribution:,rollback,switch-to-generation:,list-generations,delete-generations:,delete-all-generations,profile:,max-concurrent-transfers:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,deploy-state,no-upgrade,no-lock,no-coordinator-profile,no-target-profiles,no-migration,delete-state,depth-first,keep:,show-trace,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:P:p:m:hv -l services:,network:,distribution:,packages:,rollback,switch-to-generation:,list-generations,delete-generations:,delete-all-generations,profile:,max-concurrent-transfers:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,deploy-state,no-upgrade,no-lock,no-coordinator-profile,no-target-profiles,no-migration,delete-state,depth-first,keep:,show-trace,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -183,6 +188,9 @@ do
             ;;
         -d|--distribution)
             distributionFile=`readlink -f $2`
+            ;;
+        -P|--packages)
+            packagesFile=`readlink -f $2`
             ;;
         --rollback)
             switchGeneration=1
@@ -267,7 +275,7 @@ do
             showVersion
             exit 0
     esac
-    
+
     shift
 done
 
@@ -284,9 +292,7 @@ source @DISNIX_PREFIX@/share/disnix/checks
 
 if [ "$switchGeneration" != "1" ]
 then
-    checkServicesFile
-    checkNetworkFiles
-    checkDistributionFile
+    generateDisnixOSModelArgs
 fi
 
 checkUseNixOps
@@ -315,5 +321,5 @@ else
     fi
 
     # Upgrade the services
-    disnix-env -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $deployStateArg $noUpgradeArg $noLockArg $noCoordinatorProfileArg $noTargetProfilesArg $noMigrationArg $deleteStateArg $switchToGenerationArg $depthFirstArg $keepArg $showTraceArg
+    disnix-env $modelArgs -i $infrastructureFile --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $deployStateArg $noUpgradeArg $noLockArg $noCoordinatorProfileArg $noTargetProfilesArg $noMigrationArg $deleteStateArg $switchToGenerationArg $depthFirstArg $keepArg $showTraceArg
 fi

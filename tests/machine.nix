@@ -3,7 +3,7 @@
 
 {
   virtualisation.writableStore = true;
-  virtualisation.memorySize = 4096;
+  virtualisation.memorySize = 8192;
   virtualisation.diskSize = 10240;
   virtualisation.pathsInNixDB = [ pkgs.stdenv pkgs.perlPackages.ArchiveCpio pkgs.busybox ] ++ pkgs.libxml2.all ++ pkgs.libxslt.all;
   

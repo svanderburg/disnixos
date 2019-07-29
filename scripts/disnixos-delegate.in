@@ -26,7 +26,7 @@ showUsage()
 {
     cat <<EOF
 Usage: $0 -s services_nix -n network_nix [ -n network2_nix ... ] -d distribution_nix [OPTION]
-  or: $0 -n network_nix [ -n network2_nix ... ] [OPTION]
+  or: $0 -P packages_nix -n network_nix [ -n network2_nix ... ] [OPTION]
 
 The command \`disnixos-delegate' is used to instantiate all derivations of the
 services deployed machines in the network and to delegate their build operations
@@ -50,6 +50,10 @@ Options:
   -d, --distribution=distribution_nix
                                   Distribution Nix expression which maps
                                   services to machines in the network
+  -P, --packages=packages_nix
+                                  Packages Nix expression specifying the packages
+                                  that should be deployed in a Nix profile mapped
+                                  to each machine in the network
       --target-property=PROP      The target property of an infrastructure
                                   model, that specifies how to connect to the
                                   remote Disnix interface. (Defaults to
@@ -92,7 +96,7 @@ EOF
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:m:hv -l services:,network:,distribution:,interface:,target-property:,max-concurrent-transfers:,show-trace,vm,use-nixops,disable-disnix,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:P:m:hv -l services:,network:,distribution:,packages:,interface:,target-property:,max-concurrent-transfers:,show-trace,vm,use-nixops,disable-disnix,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -115,6 +119,9 @@ do
             ;;
         -d|--distribution)
             distributionFile=`readlink -f $2`
+            ;;
+        -P|--packages)
+            packagesFile=`readlink -f $2`
             ;;
         -m|--max-concurrent-transfers)
             maxConcurrentTransfersArg="-m $2"
@@ -182,7 +189,12 @@ then
     distributionArg="-d $distributionFile"
 fi
 
+if [ "$packagesFile" != "" ]
+then
+    packagesArg="-P $packagesFile"
+fi
+
 echo "[coordinator]: Instantiating store derivations..."
-distributedDerivation=`disnixos-instantiate $servicesArg $networkArgs $distributionArg --target-property $targetProperty --interface $interface --no-out-link $showTraceArg $vmArg $useNixOpsArg $disableDisnixArg`
+distributedDerivation=`disnixos-instantiate $servicesArg $networkArgs $distributionArg $packagesArg --target-property $targetProperty --interface $interface --no-out-link $showTraceArg $vmArg $useNixOpsArg $disableDisnixArg`
 echo "[coordinator]: Building store derivations..."
 disnix-build $maxConcurrentTransfersArg $distributedDerivation

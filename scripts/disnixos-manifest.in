@@ -25,6 +25,8 @@ showUsage()
 {
     cat <<EOF
 Usage: $0 -s services_nix -n network_nix [ -n network2_nix ... ] -d distribution_nix [OPTION]
+  or: $0 -P packages_nix -n network_nix [ -n network2_nix ... ] [OPTION]
+  or: $0 -n network_nix [ -n network2_nix ... ] [OPTION]
 
 The command \`disnixos-manifest' generates a manifest file from a service,
 network and distribution Nix expression, which can be used for the
@@ -49,6 +51,10 @@ Options:
   -d, --distribution=distribution_nix
                               Distribution Nix expression which maps services to
                               machines in the network
+  -P, --packages=packages_nix
+                              Packages Nix expression specifying the packages
+                              that should be deployed in a Nix profile mapped
+                              to each machine in the network
       --target-property=PROP  The target property of an infrastructure model,
                               that specifies how to connect to the remote Disnix
                               interface. (Defaults to hostname)
@@ -96,7 +102,7 @@ EOF
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:hv -l services:,network:,distribution:,target-property:,interface:,deploy-state,no-out-link,show-trace,vm,use-nixops,disable-disnix,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:P:hv -l services:,network:,distribution:,packages:,target-property:,interface:,deploy-state,no-out-link,show-trace,vm,use-nixops,disable-disnix,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -119,6 +125,9 @@ do
             ;;
         -d|--distribution)
             distributionFile=`readlink -f $2`
+            ;;
+        -P|--packages)
+            packagesFile=`readlink -f $2`
             ;;
         --target-property)
             targetProperty=$2
@@ -189,18 +198,18 @@ fi
 
 # Build the manifest file
 
-if [ "$servicesFile" = "" ] || [ "$distributionFile" = "" ]
+if [ "$servicesFile" = "" ] && [ "$distributionFile" = "" ] && [ "$packagesFile" = "" ]
 then
     if [ "$useNixOps" = "1" ]
     then
         nixOpsArg="--arg nixOpsModel true"
     fi
-    
+
     if [ "$useVM" = "1" ]
     then
         vmArgs="--arg useVMTesting true --arg useBackdoor true"
     fi
-    
+
     nix-build --arg networkFiles "[ $networkFiles ]" \
               --argstr targetProperty $targetProperty \
               --argstr clientInterface $interface \
@@ -211,8 +220,10 @@ then
               $showTraceArg \
               "$(readlink -f @datadir@/@PACKAGE@/manifest.nix)"
 else
+    generateDisnixOSModelArgs
+
     # Generate infrastructure model from network model
     infrastructureFile=`disnixos-geninfra --no-out-link $genInfraArgs $nixOpsArg $networkFiles`
-    
-    disnix-manifest -s $servicesFile -i $infrastructureFile -d $distributionFile --target-property $targetProperty --interface $interface $deployStateArg $noOutLinkArg $showTraceArg
+
+    disnix-manifest $modelArgs -i $infrastructureFile --target-property $targetProperty --interface $interface $deployStateArg $noOutLinkArg $showTraceArg
 fi
