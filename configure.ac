@@ -72,5 +72,7 @@ scripts/disnixos-restore-network
 scripts/disnixos-delete-network-state
 scripts/disnixos-capture-manifest
 scripts/disnixos-reconstruct
+scripts/disnixos-convert-manifest
+scripts/disnixos-convert
 ])
 AC_OUTPUT

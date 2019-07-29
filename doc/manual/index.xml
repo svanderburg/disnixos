@@ -34,20 +34,20 @@
   <xi:include href="background.xml" />
   <xi:include href="installation.xml" />
   <xi:include href="usage.xml" />
-  
+
   <appendix>
     <title>Command Reference</title>
-    
+
     <section>
       <title>Main commands</title>
-      
+
       <xi:include href="../../scripts/disnixos-env.1.xml" />
       <xi:include href="../../scripts/disnixos-vm-env.1.xml" />
     </section>
-    
+
     <section>
       <title>Utilities</title>
-      
+
       <xi:include href="../../scripts/disnix-backdoor-client.1.xml" />
       <xi:include href="../../scripts/disnix-nixops-client.1.xml" />
       <xi:include href="../../scripts/disnixos-delegate.1.xml" />
@@ -57,6 +57,7 @@
       <xi:include href="../../scripts/disnixos-collect-garbage.1.xml" />
       <xi:include href="../../scripts/disnixos-clean-snapshots.1.xml" />
       <xi:include href="../../scripts/disnixos-query.1.xml" />
+      <xi:include href="../../scripts/disnixos-convert.1.xml" />
       <xi:include href="../../scripts/disnixos-geninfra.1.xml" />
       <xi:include href="../../scripts/disnixos-gentests.1.xml" />
       <xi:include href="../../scripts/disnixos-capture-manifest.1.xml" />
@@ -64,6 +65,7 @@
       <xi:include href="../../scripts/disnixos-snapshot-network.1.xml" />
       <xi:include href="../../scripts/disnixos-restore-network.1.xml" />
       <xi:include href="../../scripts/disnixos-delete-network-state.1.xml" />
+      <xi:include href="../../scripts/disnixos-convert-manifest.1.xml" />
     </section>
   </appendix>
 </book>
