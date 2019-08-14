@@ -1,1 +1,1 @@
-SUBDIRS = scripts data doc maintenance
+SUBDIRS = scripts nix doc maintenance
