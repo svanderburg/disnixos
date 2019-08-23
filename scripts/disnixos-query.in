@@ -38,7 +38,7 @@ Options:
                               that specifies how to connect to the remote Disnix
                               interface. (Defaults to hostname)
   -f, --format=FORMAT         Output format. Options are: services (default),
-                              containers and nix
+                              containers, nix, and xml
       --use-nixops            Use NixOps instead of Disnix for infrastructure
                               deployment
   -h, --help                  Shows the usage of this command to the user
