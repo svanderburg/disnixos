@@ -7,9 +7,9 @@ stdenv.mkDerivation {
     mkdir -p $out/bin
     cat > $out/bin/wrapper << "EOF"
     #! ${stdenv.shell} -e
-    
+
     source ${dysnomia}/share/dysnomia/util
-    
+
     composeUtilityVariables "wrapper" "${name}" $3
 
     case "$1" in
@@ -27,14 +27,14 @@ stdenv.mkDerivation {
         snapshot)
             tmpdir=$(mktemp -d)
             cd $tmpdir
-            
+
             cp /var/db/${name}/state .
-            
+
             hash=$(cat state | sha256sum)
             hash=''${hash:0:64}
-            
+
             snapshotsPath=$(composeSnapshotsPath)
-            
+
             if [ -d $snapshotsPath/$hash ]
             then
                 rm -Rf $tmpdir
@@ -43,12 +43,12 @@ stdenv.mkDerivation {
                 mv state $snapshotsPath/$hash
                 rmdir $tmpdir
             fi
-            
+
             createGenerationSymlink $hash
             ;;
         restore)
             lastSnapshot=$(determineLastSnapshot)
-        
+
             if [ "$lastSnapshot" != "" ]
             then
                 cp $lastSnapshot/state /var/db/${name}
@@ -64,7 +64,7 @@ stdenv.mkDerivation {
             ;;
     esac
     EOF
-    
+
     chmod +x $out/bin/wrapper
   '';
 }

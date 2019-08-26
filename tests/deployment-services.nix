@@ -45,24 +45,10 @@ simpleTest {
 
       # Use disnixos-query to see if the right services are installed on
       # the right target platforms. This test should succeed.
-      my @lines = split('\n', $coordinator->mustSucceed("${env} disnixos-query ${physicalNetworkNix}"));
+      $coordinator->mustSucceed("${env} disnixos-query -f xml ${physicalNetworkNix} > query.xml");
 
-      if($lines[3] =~ /\-testService1/) {
-          print "Found testService1 on disnix-query output line 3\n";
-      } else {
-          die "disnix-query output line 3 does not contain testService1!\n";
-      }
-
-      if($lines[7] =~ /\-testService2/) {
-          print "Found testService2 on disnix-query output line 7\n";
-      } else {
-          die "disnix-query output line 7 does not contain testService2!\n";
-      }
-
-      if($lines[8] =~ /\-testService3/) {
-          print "Found testService3 on disnix-query output line 8\n";
-      } else {
-          die "disnix-query output line 8 does not contain testService3!\n";
-      }
+      $coordinator->mustSucceed("xmllint --xpath \"/profileManifestTargets/target[\@name='testtarget1']/profileManifest/services/service[name='testService1']/name\" query.xml");
+      $coordinator->mustSucceed("xmllint --xpath \"/profileManifestTargets/target[\@name='testtarget2']/profileManifest/services/service[name='testService2']/name\" query.xml");
+      $coordinator->mustSucceed("xmllint --xpath \"/profileManifestTargets/target[\@name='testtarget2']/profileManifest/services/service[name='testService3']/name\" query.xml");
     '';
 }
