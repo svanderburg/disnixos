@@ -5,7 +5,6 @@
   virtualisation.writableStore = true;
   virtualisation.memorySize = 8192;
   virtualisation.diskSize = 10240;
-  virtualisation.pathsInNixDB = [ pkgs.stdenv pkgs.perlPackages.ArchiveCpio pkgs.busybox ] ++ pkgs.libxml2.all ++ pkgs.libxslt.all;
 
   ids.gids = { disnix = 200; };
   users.extraGroups = [ { gid = 200; name = "disnix"; } ];
@@ -38,4 +37,19 @@
   '';
 
   environment.systemPackages = [ pkgs.nix dysnomia disnix disnixos pkgs.hello pkgs.zip pkgs.libxml2 ];
+
+  system.extraDependencies = [
+    pkgs.stdenv
+    pkgs.busybox
+    pkgs.module_init_tools
+    pkgs.perlPackages.ArchiveCpio
+
+    pkgs.utillinux
+    pkgs.texinfo
+    pkgs.xlibs.lndir
+    pkgs.getconf
+    pkgs.desktop-file-utils
+  ]
+  ++ pkgs.libxml2.all
+  ++ pkgs.libxslt.all;
 }

@@ -15,10 +15,10 @@ let
   pkgs = import nixpkgs {};
 
   lib = import ./lib.nix { inherit nixpkgs pkgs; };
-  
+
   mergedNetwork = lib.generateMergedNetwork networkFiles nixOpsModel;
   manifest = lib.generateManifest mergedNetwork targetProperty clientInterface enableDisnix nixOpsModel useVMTesting useBackdoor dysnomia nixops;
-  
+
   generateManifestXSL = "${disnix}/share/disnix/generatemanifest.xsl";
 in
 pkgs.stdenv.mkDerivation {
@@ -26,7 +26,7 @@ pkgs.stdenv.mkDerivation {
   buildInputs = [ pkgs.libxslt ];
   manifestXML = builtins.toXML manifest;
   passAsFile = [ "manifestXML" ];
-  
+
   buildCommand = ''
     if [ "$manifestXMLPath" != "" ]
     then

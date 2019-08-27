@@ -2,11 +2,11 @@
 
 writeTextFile {
   name = "network-physical.nix";
-    
+
   text = ''
     let
       machine = {hostname}: {pkgs, ...}:
-        
+
       {
         require = [
           "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"
@@ -17,7 +17,7 @@ writeTextFile {
         services.dbus.enable = true;
         services.openssh.enable = true;
         networking.firewall.enable = false;
-        
+
         # Ugly: Replicates assignIPAddresses from build-vms.nix.
         networking.interfaces.eth1.ipv4.addresses = [ {
           address = if hostname == "testtarget1" then "192.168.1.2"
@@ -25,7 +25,7 @@ writeTextFile {
             else throw "Unknown hostname: "+hostname;
           prefixLength = 24;
         } ];
-        
+
         # Create dummy Disnix job that does nothing. This prevents it from stopping.
         systemd.services.disnix =
           { description = "Disnix dummy server";
@@ -34,9 +34,9 @@ writeTextFile {
             restartIfChanged = false;
             script = "true";
           };
-        
+
         environment.systemPackages = [ "${disnix}" ];
-        
+
         deployment.targetEnv = "none";
       };
     in
