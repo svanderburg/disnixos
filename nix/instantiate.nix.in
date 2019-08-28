@@ -13,10 +13,18 @@ let
   pkgs = import nixpkgs {};
 
   lib = import ./lib.nix { inherit nixpkgs pkgs; };
-  
-  mergedNetwork = lib.generateMergedNetwork networkFiles nixOpsModel;
-  distributedDerivation = lib.generateDistributedDerivation mergedNetwork targetProperty clientInterface enableDisnix nixOpsModel false false dysnomia nixops;
-  
+
+  mergedNetwork = lib.generateMergedNetwork {
+    inherit networkFiles nixOpsModel;
+  };
+
+  distributedDerivation = lib.generateDistributedDerivation {
+    network = mergedNetwork;
+    inherit targetProperty clientInterface enableDisnix nixOpsModel dysnomia nixops;
+    useVMTesting = false;
+    useBackdoor = false;
+  };
+
   generateDistributedDerivationXSL = "${disnix}/share/disnix/generatedistributedderivation.xsl";
 in
 pkgs.stdenv.mkDerivation {
@@ -24,7 +32,7 @@ pkgs.stdenv.mkDerivation {
   buildInputs = [ pkgs.libxslt ];
   distributedDerivationXML = builtins.toXML distributedDerivation;
   passAsFile = [ "distributedDerivationXML" ];
-  
+
   buildCommand = ''
     if [ "$distributedDerivationXMLPath" != "" ]
     then

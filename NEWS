@@ -1,5 +1,7 @@
 Version 0.8
 ===========
+- disnixos-manifest generates deployment models for infrastructure deployment
+
 - disnixos-manifest, disnixos-instantiate, disnixos-delegate, disnixos-env, disnixos-vm-env can also work with packages models
 
 - New tools: disnixos-convert-manifest, disnixos-convert

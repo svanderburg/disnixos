@@ -8,15 +8,19 @@ let
   nixOpsModel = @nixOpsModel@;
   dysnomia = builtins.storePath @dysnomia@;
   nixops = @nixops@;
-  
+
   pkgs = import nixpkgs {};
-  
+
   lib = import "${disnixos}/share/@PACKAGE@/lib.nix" {
     inherit nixpkgs pkgs;
   };
-  
-  network = lib.generateMergedNetwork networkFiles nixOpsModel;
 
-  configurations = lib.generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor dysnomia nixops;
+  network = lib.generateMergedNetwork {
+    inherit networkFiles nixOpsModel;
+  };
+
+  configurations = lib.generateConfigurations {
+    inherit network enableDisnix nixOpsModel useVMTesting useBackdoor dysnomia nixops;
+  };
 in
 pkgs.lib.mapAttrs (targetName: machine: machine.config.disnixInfrastructure.infrastructure) configurations

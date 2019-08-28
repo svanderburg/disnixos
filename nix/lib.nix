@@ -2,7 +2,7 @@
 
 let
   evalConfig = import "${nixpkgs}/nixos/lib/eval-config.nix";
-  inherit (builtins) getAttr attrNames removeAttrs unsafeDiscardOutputDependency hashString;
+  inherit (builtins) baseNameOf getAttr attrNames removeAttrs unsafeDiscardOutputDependency unsafeDiscardStringContext hashString toXML listToAttrs stringLength substring;
 in
 rec {
   /**
@@ -34,13 +34,13 @@ rec {
    * Returns:
    * An attribute set in which the names refer to machine names and values to lists of NixOS modules
    */
-  generateMergedNetwork = networkFiles: nixOpsModel:
+  generateMergedNetwork = {networkFiles, nixOpsModel}:
     let
       networks = map (networkFile: import networkFile) networkFiles;
       mergedNetwork = pkgs.lib.zipAttrs networks;
     in
     if nixOpsModel then removeAttrs mergedNetwork [ "network" "resources" ] else mergedNetwork; # A NixOps model has a reserved network attributes that cannot be machines
-  
+
   /*
    * Takes a merged network configuration and evaluates them producing a config
    * attribute for each of them.
@@ -56,7 +56,7 @@ rec {
    * Returns:
    * An attribute set with evaluated machine configuration properties
    */
-  generateConfigurations = network: enableDisnix: nixOpsModel: useVMTesting: useBackdoor: dysnomia: nixops:
+  generateConfigurations = {network, enableDisnix, nixOpsModel, useVMTesting, useBackdoor, dysnomia, nixops}:
     pkgs.lib.mapAttrs (targetName: configuration:
       evalConfig {
         modules = configuration ++ [
@@ -91,115 +91,17 @@ rec {
           deployment.targetHost = pkgs.lib.mkOverride 900 targetName;
           environment.checkConfigurationOptions = false; # We assume that NixOps has already checked it
         };
-        extraArgs = { nodes = generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor dysnomia nixops; };
+        extraArgs = {
+          nodes = generateConfigurations {
+            inherit network enableDisnix nixOpsModel useVMTesting useBackdoor dysnomia nixops;
+          };
+        };
       }) network;
 
-  /*
-   * Generates a list of NixOS system profiles mapped to target machines.
-   *
-   * Parameters:
-   * configurations: An attribute set with evaluated configurations
-   * targetProperty: Attribute from the infrastructure model that is used to connect to the Disnix interface
-   *
-   * Returns:
-   * A list of attribute sets in which NixOS profiles are mapped to target machines
-   */
-  generateProfiles = configurations: targetProperty:
-    map (targetName:
-      let
-        machine = getAttr targetName configurations;
-        infrastructure = machine.config.disnixInfrastructure.infrastructure;
-      in
-      {
-        profile = machine.config.system.build.toplevel.outPath;
-        target = getTargetProperty targetProperty infrastructure;
-      }
-    ) (attrNames configurations)
-  ;
-  
-  /*
-   * Generates a list of activation items specifying on which machine to activate a NixOS configuration.
-   *
-   * Parameters:
-   * configurations: An attribute set with evaluated configurations
-   * targetProperty: Attribute from the infrastructure model that is used to connect to the Disnix interface
-   *
-   * Returns:
-   * A list of attribute sets representing activation items
-   */
-  generateActivationMappings = configurations: targetProperty:
-    map (targetName:
-      let
-        machine = getAttr targetName configurations;
-        infrastructure = machine.config.disnixInfrastructure.infrastructure;
-      in
-      { _key = hashString "sha256" (builtins.toXML {
-          service = machine.config.system.build.toplevel.outPath;
-          name = targetName;
-          type = "nixos-configuration";
-          dependsOn = [];
-        });
-        name = targetName;
-        service = machine.config.system.build.toplevel.outPath;
-        target = getTargetProperty targetProperty infrastructure;
-        container = "nixos-configuration";
-        dependsOn = [];
-        type = "nixos-configuration";
-      }
-    ) (attrNames configurations)
-  ;
-  
-  /*
-   * Generates a list of snapshot items specifying on which machines to snapshot the state of a NixOS configuration.
-   *
-   * Parameters:
-   * configurations: An attribute set with evaluated configurations
-   * targetProperty: Attribute from the infrastructure model that is used to connect to the Disnix interface
-   *
-   * Returns:
-   * A list of attribute sets representing snapshot items
-   */
-  generateSnapshotMappings = configurations: targetProperty:
-    map (targetName:
-      let
-        machine = getAttr targetName configurations;
-        infrastructure = machine.config.disnixInfrastructure.infrastructure;
-        service = machine.config.system.build.toplevel.outPath;
-        target = getTargetProperty targetProperty infrastructure;
-      in
-      {
-        component = builtins.substring 33 (builtins.stringLength service) (builtins.baseNameOf service);
-        container = "nixos-configuration";
-        type = "nixos-configuration";
-        inherit service target;
-      }
-    ) (attrNames configurations)
-  ;
-  
-  /*
-   * Generates a list of machines that are involved in the deployment process.
-   *
-   * Parameters:
-   * configurations: An attribute set with evaluated configurations
-   * targetProperty: Attribute from the infrastructure model that is used to connect to the Disnix interface
-   * clientInterface: Path to the executable used to connect to the Disnix interface
-   *
-   * Returns:
-   * A list of strings with connection attributes of each machine that is used
-   */
-  generateTargetPropertyList = configurations: targetProperty: clientInterface:
-    map (targetName:
-      let
-        machine = getAttr targetName configurations;
-        infrastructure = machine.config.disnixInfrastructure.infrastructure;
-      in
-      infrastructure // {
-        targetProperty = if infrastructure ? targetProperty then infrastructure.targetProperty else targetProperty;
-        clientInterface = if infrastructure ? clientInterface then infrastructure.clientInterface else clientInterface;
-        numOfCores = 1;
-      }
-    ) (attrNames configurations)
-  ;
+  generateHash = {name, type, pkg, dependsOn}:
+    unsafeDiscardStringContext (hashString "sha256" (toXML {
+      inherit name type pkg dependsOn;
+    }));
 
   /*
    * Generates a manifest file consisting of a profile mapping and
@@ -219,16 +121,73 @@ rec {
    * Returns:
    * An attributeset which should be exported to XML representing the manifest
    */
-  generateManifest = network: targetProperty: clientInterface: enableDisnix: nixOpsModel: useVMTesting: useBackdoor: dysnomia: nixops:
+  generateManifest = {network, targetProperty, clientInterface, enableDisnix, nixOpsModel, useVMTesting, useBackdoor, dysnomia, nixops}:
     let
-      configurations = generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor dysnomia nixops;
+      configurations = generateConfigurations {
+        inherit network enableDisnix nixOpsModel useVMTesting useBackdoor dysnomia nixops;
+      };
     in
-    { profiles = generateProfiles configurations targetProperty;
-      activation = generateActivationMappings configurations targetProperty;
-      snapshots = generateSnapshotMappings configurations targetProperty;
-      targets = generateTargetPropertyList configurations targetProperty clientInterface;
+    {
+      profiles = pkgs.lib.mapAttrs (targetName: machine: machine.config.system.build.toplevel.outPath) configurations;
+
+      services = listToAttrs (map (targetName:
+        let
+          machine = getAttr targetName configurations;
+          serviceConfig = {
+            name = targetName;
+            pkg = machine.config.system.build.toplevel.outPath;
+            dependsOn = {};
+            type = "nixos-configuration";
+          };
+        in
+        { name = generateHash serviceConfig;
+          value = serviceConfig;
+        }
+      ) (attrNames configurations));
+
+      serviceMappings = map (targetName:
+        let
+          machine = getAttr targetName configurations;
+        in
+        { service = generateHash {
+            name = targetName;
+            pkg = machine.config.system.build.toplevel.outPath;
+            dependsOn = {};
+            type = "nixos-configuration";
+          };
+          container = "nixos-configuration";
+          target = targetName;
+        }
+      ) (attrNames configurations);
+
+      snapshotMappings = map (targetName:
+        let
+          machine = getAttr targetName configurations;
+          pkg = machine.config.system.build.toplevel.outPath;
+        in
+        { service = generateHash {
+            name = targetName;
+            dependsOn = {};
+            type = "nixos-configuration";
+            inherit pkg;
+          };
+          component = substring 33 (stringLength pkg) (baseNameOf pkg);
+          container = "nixos-configuration";
+          target = targetName;
+        }
+      ) (attrNames configurations);
+
+      infrastructure = pkgs.lib.mapAttrs (targetName: machine:
+        let
+          machine = getAttr targetName configurations;
+        in
+        {
+          inherit targetProperty clientInterface;
+          numOfCores = 1;
+        } // machine.config.disnixInfrastructure.infrastructure
+      ) configurations;
     };
-  
+
   /*
    * Generates a distributed derivation file constisting of a mapping of store derivations
    * to machines from the 3 Disnix models.
@@ -244,33 +203,30 @@ rec {
    * dysnomia: Path to Dysnomia
    * nixops: Path to NixOps
    *
-   * Returns: 
+   * Returns:
    * An attributeset which should be exported to XML representing the distributed derivation
    */
-  generateDistributedDerivation = network: targetProperty: clientInterface: enableDisnix: nixOpsModel: useVMTesting: useBackdoor: dysnomia: nixops:
+  generateDistributedDerivation = {network, targetProperty, clientInterface, enableDisnix, nixOpsModel, useVMTesting, useBackdoor, dysnomia, nixops}:
     let
-      configurations = generateConfigurations network enableDisnix nixOpsModel useVMTesting useBackdoor dysnomia nixops;
+      configurations = generateConfigurations {
+        inherit network enableDisnix nixOpsModel useVMTesting useBackdoor dysnomia nixops;
+      };
     in
     {
-      build = map (targetName:
+      derivationMappings = pkgs.lib.mapAttrs (targetName: machine:
         let
-          machine = getAttr targetName configurations;
           infrastructure = machine.config.disnixInfrastructure.infrastructure;
         in
-        { derivation = unsafeDiscardOutputDependency (machine.config.system.build.toplevel.drvPath);
-          target = getTargetProperty targetProperty infrastructure;
-        }
-      ) (attrNames configurations);
-    
-      interfaces = map (targetName:
+        unsafeDiscardOutputDependency (machine.config.system.build.toplevel.drvPath)
+      ) configurations;
+
+      interfaces = pkgs.lib.mapAttrs (targetName: machine:
         let
-          machine = getAttr targetName configurations;
           infrastructure = machine.config.disnixInfrastructure.infrastructure;
         in
-        { target = getTargetProperty targetProperty infrastructure;
+        { targetAddress = getTargetProperty targetProperty infrastructure;
           clientInterface = if infrastructure ? clientInterface then infrastructure.clientInterface else clientInterface;
         }
-      ) (attrNames configurations);
-    }
-  ;
+      ) configurations;
+    };
 }

@@ -7,13 +7,15 @@
 
 let
   pkgs = import nixpkgs {};
-  
+
   lib = import ./lib.nix {
     inherit pkgs nixpkgs;
   };
-  
-  network = lib.generateMergedNetwork networkFiles nixOpsModel;
-  
+
+  network = lib.generateMergedNetwork {
+    inherit networkFiles nixOpsModel;
+  };
+
   testScript = import ./generate-testscript.nix {
     inherit network disnix manifestFile;
     inherit (pkgs) socat;

@@ -16,8 +16,14 @@ let
 
   lib = import ./lib.nix { inherit nixpkgs pkgs; };
 
-  mergedNetwork = lib.generateMergedNetwork networkFiles nixOpsModel;
-  manifest = lib.generateManifest mergedNetwork targetProperty clientInterface enableDisnix nixOpsModel useVMTesting useBackdoor dysnomia nixops;
+  mergedNetwork = lib.generateMergedNetwork {
+    inherit networkFiles nixOpsModel;
+  };
+
+  manifest = lib.generateManifest {
+    network = mergedNetwork;
+    inherit targetProperty clientInterface enableDisnix nixOpsModel useVMTesting useBackdoor dysnomia nixops;
+  };
 
   generateManifestXSL = "${disnix}/share/disnix/generatemanifest.xsl";
 in
