@@ -7,10 +7,10 @@
 
 let
   pkgs = import nixpkgs {};
-  
+
   generateManifestSrc =
     {name, tarball}:
-    
+
     pkgs.stdenv.mkDerivation {
       name = "${name}-manifest-src";
       buildCommand =
@@ -24,10 +24,10 @@ in
 {
   sourceTarball =
     {name, version, src, officialRelease}:
-    
+
     pkgs.releaseTools.sourceTarball {
       inherit name version src officialRelease;
-      
+
       distPhase =
         ''
           mkdir ../$name
@@ -41,7 +41,7 @@ in
 
   buildManifest = 
     {name, version, tarball, servicesFile, networkFile, externalNetworkFile ? false, distributionFile, externalDistributionFile ? false}:
-    
+
     let
       infrastructure = import ./generate-infrastructure.nix {
         networkFiles = [ (if externalNetworkFile then networkFile else "${manifestSrc}/${networkFile}") ];
@@ -49,7 +49,7 @@ in
         useBackdoor = true;
         inherit nixpkgs dysnomia;
       };
-      
+
       manifestSrc = generateManifestSrc {
         inherit name tarball;
       };
@@ -57,7 +57,7 @@ in
     pkgs.releaseTools.nixBuild {
       inherit name version;
       src = tarball;
-      
+
       manifest = import "${disnix}/share/disnix/manifest.nix" {
         servicesFile = "${manifestSrc}/${servicesFile}";
         infrastructureFile = "${infrastructure}";
@@ -66,7 +66,7 @@ in
         clientInterface = "${disnixos}/bin/disnix-backdoor-client";
         inherit nixpkgs;
       };
-      
+
       installPhase =
         ''
           mkdir -p $out
@@ -78,19 +78,19 @@ in
 
   disnixTest =
     {name, manifest, tarball, networkFile, externalNetworkFile ? false, testScript, dysnomiaStateDir ? ""}:
-    
+
     let
       manifestSrc = generateManifestSrc {
         inherit name tarball;
       };
-      
+
       network = if externalNetworkFile then import networkFile else import "${manifestSrc}/${networkFile}";
     in
     with import "${nixpkgs}/nixos/lib/testing.nix" { inherit system; };
-    
+
     simpleTest {
       nodes = network;
-      
+
       testScript = import ./generate-testscript.nix {
         inherit network testScript disnix dysnomiaStateDir;
         inherit (pkgs) socat;

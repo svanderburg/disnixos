@@ -16,11 +16,13 @@ let
 
   lib = import ./lib.nix { inherit nixpkgs pkgs; };
 
+  generateManifest = import ./generate-manifest.nix { inherit nixpkgs pkgs; };
+
   mergedNetwork = lib.generateMergedNetwork {
     inherit networkFiles nixOpsModel;
   };
 
-  manifest = lib.generateManifest {
+  manifest = generateManifest {
     network = mergedNetwork;
     inherit targetProperty clientInterface enableDisnix nixOpsModel useVMTesting useBackdoor dysnomia nixops;
   };
