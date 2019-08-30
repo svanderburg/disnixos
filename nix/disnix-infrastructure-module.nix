@@ -46,7 +46,7 @@ in
       containers = lib.recursiveUpdate (import cfg.generateContainersExpr {
         inherit (cfg) enableAuthentication;
         inherit config lib;
-      }) (config.services.dysnomia.extraContainerProperties or {});
+      }) (config.dysnomia.extraContainerProperties or {});
     };
   };
 }
