@@ -53,12 +53,14 @@ in
       manifestSrc = generateManifestSrc {
         inherit name tarball;
       };
+
+      manifestModule = import "${disnix}/share/disnix/manifest.nix";
     in
     pkgs.releaseTools.nixBuild {
       inherit name version;
       src = tarball;
 
-      manifest = import "${disnix}/share/disnix/manifest.nix" {
+      manifest = manifestModule.generateManifestFromModels {
         servicesFile = "${manifestSrc}/${servicesFile}";
         infrastructureFile = "${infrastructure}";
         distributionFile = if externalDistributionFile then distributionFile else "${manifestSrc}/${distributionFile}";
