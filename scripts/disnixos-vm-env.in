@@ -170,7 +170,7 @@ do
     networkArgs="$networkArgs -n $n"
 done
 
-manifest=`disnixos-manifest $modelArgs --vm --no-out-link $deployStateArg $showTraceArg`
+manifest=`disnixos-manifest $modelArgs $networkArgs --vm --no-out-link $deployStateArg $showTraceArg`
 
 # Copy the Dysnomia state data to the shared exchange folder so that all machines can access it
 export TMPDIR=`mktemp -d`
