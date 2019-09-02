@@ -14,11 +14,15 @@ let
 
   lib = import ./lib.nix { inherit nixpkgs pkgs; };
 
+  generateDistributedDerivation = import ./generate-distributed-derivation.nix {
+    inherit nixpkgs pkgs;
+  };
+
   mergedNetwork = lib.generateMergedNetwork {
     inherit networkFiles nixOpsModel;
   };
 
-  distributedDerivation = lib.generateDistributedDerivation {
+  distributedDerivation = generateDistributedDerivation {
     network = mergedNetwork;
     inherit targetProperty clientInterface enableDisnix nixOpsModel dysnomia nixops;
     useVMTesting = false;
