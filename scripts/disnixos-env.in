@@ -27,6 +27,7 @@ showUsage()
 Usage: $0 -s services_nix -n network_nix [ -n network2_nix ... ] -d distribution_nix [OPTION]
   or: $0 -P packages_nix -n network_nix [ -n network2_nix ... ] [OPTION]
   or: $0 --rollback [OPTION]
+  or: $0 --undeploy [OPTION]
   or: $0 --switch-generation NUM [OPTION]
   or: $0 --list-generations [OPTION]
   or: $0 --delete-generations NUM [OPTION]
@@ -77,6 +78,8 @@ Options:
       --switch-to-generation=NUM  Switches to a specific profile generation
       --rollback                  Switches back to the previously deployed
                                   configuration
+      --undeploy                  Generates a manifest file that conveniently
+                                  undeploys all services
       --list-generations          Lists all profile generations of the current
                                   deployment
       --delete-generations=NUM    Deletes the specified generations. The number
@@ -165,7 +168,7 @@ EOF
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:P:p:m:hv -l services:,network:,distribution:,packages:,rollback,switch-to-generation:,list-generations,delete-generations:,delete-all-generations,profile:,max-concurrent-transfers:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,deploy-state,no-upgrade,no-lock,no-coordinator-profile,no-target-profiles,no-migration,delete-state,depth-first,keep:,show-trace,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:P:p:m:hv -l services:,network:,distribution:,packages:,rollback,undeploy,switch-to-generation:,list-generations,delete-generations:,delete-all-generations,profile:,max-concurrent-transfers:,target-property:,interface:,use-nixops,disable-disnix,no-infra-deployment,build-on-targets,deploy-state,no-upgrade,no-lock,no-coordinator-profile,no-target-profiles,no-migration,delete-state,depth-first,keep:,show-trace,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -195,6 +198,10 @@ do
         --rollback)
             switchGeneration=1
             switchGenerationArg="--rollback"
+            ;;
+        --undeploy)
+            undeployArg="--undeploy"
+            undeploy=1
             ;;
         --switch-to-generation)
             switchGeneration=1
@@ -321,5 +328,5 @@ else
     fi
 
     # Upgrade the services
-    disnix-env $modelArgs -i $infrastructureFile --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $deployStateArg $noUpgradeArg $noLockArg $noCoordinatorProfileArg $noTargetProfilesArg $noMigrationArg $deleteStateArg $switchToGenerationArg $depthFirstArg $keepArg $showTraceArg
+    disnix-env $modelArgs -i $infrastructureFile --target-property $targetProperty --interface $interface $profileArg $maxConcurrentTransfersArg $buildOnTargetsArg $deployStateArg $noUpgradeArg $noLockArg $noCoordinatorProfileArg $noTargetProfilesArg $noMigrationArg $deleteStateArg $switchToGenerationArg $undeployArg $depthFirstArg $keepArg $showTraceArg
 fi

@@ -50,5 +50,12 @@ simpleTest {
       $coordinator->mustSucceed("xmllint --xpath \"/profileManifestTargets/target[\@name='testtarget1']/profileManifest/services/service[name='testService1']/name\" query.xml");
       $coordinator->mustSucceed("xmllint --xpath \"/profileManifestTargets/target[\@name='testtarget2']/profileManifest/services/service[name='testService2']/name\" query.xml");
       $coordinator->mustSucceed("xmllint --xpath \"/profileManifestTargets/target[\@name='testtarget2']/profileManifest/services/service[name='testService3']/name\" query.xml");
+
+      # Undeploy the entire system and check if no services are on the target machines
+      $coordinator->mustSucceed("${env} disnixos-env --undeploy -n ${physicalNetworkNix} --disable-disnix --no-infra-deployment");
+      $coordinator->mustSucceed("${env} disnixos-query -f xml ${physicalNetworkNix} > query.xml");
+
+      $coordinator->mustFail("xmllint --xpath \"/profileManifestTargets/target[\@name='testtarget1']/profileManifest/services/*\" query.xml");
+      $coordinator->mustFail("xmllint --xpath \"/profileManifestTargets/target[\@name='testtarget2']/profileManifest/services/*\" query.xml");
     '';
 }

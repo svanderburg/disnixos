@@ -1,3 +1,7 @@
+Version 0.9
+===========
+- disnixos-env also accepts the --undeploy paramater to completely undeploy an entire system
+
 Version 0.8
 ===========
 - disnixos-manifest generates deployment models for infrastructure deployment

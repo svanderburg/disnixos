@@ -74,7 +74,7 @@ generateDisnixOSModelArgs()
         modelArgs="$modelArgs -P $packagesFile"
     fi
 
-    if [ "$modelArgs" = "" ]
+    if [ "$modelArgs" = "" ] && [ "$undeploy" != "1" ]
     then
         echo "An unknown combination of inputs models were provided!" >&2
         exit 1
