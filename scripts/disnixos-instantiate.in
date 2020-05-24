@@ -58,6 +58,9 @@ Options:
                               interface. (Defaults to: hostname)
       --interface=INTERFACE   Path to executable that communicates with a Disnix
                               interface. Defaults to: disnix-ssh-client
+      --extra-params          A string with an attribute set in the Nix
+                              expression language propagating extra
+                              parameters to the input models
       --no-out-link           Do not create a 'result' symlink
       --show-trace            Shows a trace of the output
       --vm                    Configures a manifest used for the NixOS test
@@ -96,7 +99,7 @@ EOF
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:P:hv -l services:,network:,distribution:,packages:,target-property:,interface:,no-out-link,show-trace,vm,use-nixops,disable-disnix,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:P:hv -l services:,network:,distribution:,packages:,extra-params:,target-property:,interface:,no-out-link,show-trace,vm,use-nixops,disable-disnix,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -122,6 +125,9 @@ do
             ;;
         -P|--packages)
             packagesFile=`readlink -f $2`
+            ;;
+        --extra-params)
+            extraParamsArg=("--extra-params" "$2")
             ;;
         --target-property)
             targetProperty=$2
@@ -153,7 +159,7 @@ do
             exit 0
             ;;
     esac
-    
+
     shift
 done
 
@@ -206,5 +212,5 @@ else
     # Generate infrastructure model from network model
     infrastructureFile=`disnixos-geninfra --no-out-link $genInfraArgs $nixOpsArg $networkFiles`
 
-    disnix-instantiate $modelArgs -i $infrastructureFile --target-property $targetProperty --interface $interface $noOutLinkArg $showTraceArg
+    disnix-instantiate $modelArgs -i $infrastructureFile --target-property $targetProperty --interface $interface "${extraParamsArg[@]}" $noOutLinkArg $showTraceArg
 fi

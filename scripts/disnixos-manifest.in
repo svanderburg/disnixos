@@ -62,6 +62,9 @@ Options:
                               interface. Defaults to: disnix-ssh-client
       --deploy-state          Indicates whether to globally deploy state
                               (disabled by default)
+      --extra-params          A string with an attribute set in the Nix
+                              expression language propagating extra
+                              parameters to the input models
       --no-out-link           Do not create a 'result' symlink
       --show-trace            Shows a trace of the output
       --vm                    Configures a manifest used for the NixOS test
@@ -102,7 +105,7 @@ EOF
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:P:hv -l services:,network:,distribution:,packages:,target-property:,interface:,deploy-state,no-out-link,show-trace,vm,use-nixops,disable-disnix,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:P:hv -l services:,network:,distribution:,packages:,target-property:,interface:,deploy-state,extra-params:,no-out-link,show-trace,vm,use-nixops,disable-disnix,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -138,6 +141,9 @@ do
         --deploy-state)
             deployStateArg="--deploy-state"
             ;;
+        --extra-params)
+            extraParamsArg=("--extra-params" "$2")
+            ;;
         --no-out-link)
             noOutLink=1
             ;;
@@ -161,7 +167,7 @@ do
             showVersion
             exit 0
     esac
-    
+
     shift
 done
 
@@ -225,5 +231,5 @@ else
     # Generate infrastructure model from network model
     infrastructureFile=`disnixos-geninfra --no-out-link $genInfraArgs $nixOpsArg $networkFiles`
 
-    disnix-manifest $modelArgs -i $infrastructureFile --target-property $targetProperty --interface $interface $deployStateArg $noOutLinkArg $showTraceArg
+    disnix-manifest $modelArgs -i $infrastructureFile --target-property $targetProperty --interface $interface $deployStateArg "${extraParamsArg[@]}" $noOutLinkArg $showTraceArg
 fi

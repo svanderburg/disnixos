@@ -1,5 +1,7 @@
 Version 0.9
 ===========
+- Introduced the --extra-params option to propagate additional parameters to the input models
+
 - disnixos-env also accepts the --undeploy paramater to completely undeploy an entire system
 
 Version 0.8

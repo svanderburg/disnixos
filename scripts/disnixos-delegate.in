@@ -64,6 +64,9 @@ Options:
   -m, --max-concurrent-transfers=NUM
                                   Maximum amount of concurrent closure
                                   transfers. Defauls to: 2
+      --extra-params              A string with an attribute set in the Nix
+                                  expression language propagating extra
+                                  parameters to the input models
       --vm                        Configures a manifest used for the NixOS test
                                   driver
       --use-nixops                Use NixOps instead of Disnix's deployment
@@ -96,7 +99,7 @@ EOF
 
 # Parse valid argument options
 
-PARAMS=`@getopt@ -n $0 -o s:n:d:P:m:hv -l services:,network:,distribution:,packages:,interface:,target-property:,max-concurrent-transfers:,show-trace,vm,use-nixops,disable-disnix,help,version -- "$@"`
+PARAMS=`@getopt@ -n $0 -o s:n:d:P:m:hv -l services:,network:,distribution:,packages:,interface:,target-property:,max-concurrent-transfers:,extra-params:,show-trace,vm,use-nixops,disable-disnix,help,version -- "$@"`
 
 if [ $? != 0 ]
 then
@@ -126,6 +129,9 @@ do
         -m|--max-concurrent-transfers)
             maxConcurrentTransfersArg="-m $2"
             ;;
+        --extra-params)
+            extraParamsArg=("--extra-params" "$2")
+            ;;
         --show-trace)
             showTraceArg="--show-trace"
             ;;
@@ -153,7 +159,7 @@ do
             exit 0
             ;;
     esac
-    
+
     shift
 done
 
@@ -195,6 +201,6 @@ then
 fi
 
 echo "[coordinator]: Instantiating store derivations..."
-distributedDerivation=`disnixos-instantiate $servicesArg $networkArgs $distributionArg $packagesArg --target-property $targetProperty --interface $interface --no-out-link $showTraceArg $vmArg $useNixOpsArg $disableDisnixArg`
+distributedDerivation=`disnixos-instantiate $servicesArg $networkArgs $distributionArg $packagesArg --target-property $targetProperty --interface $interface "${extraParamsArg[@]}" --no-out-link $showTraceArg $vmArg $useNixOpsArg $disableDisnixArg`
 echo "[coordinator]: Building store derivations..."
 disnix-build $maxConcurrentTransfersArg $distributedDerivation

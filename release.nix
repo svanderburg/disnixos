@@ -53,8 +53,8 @@ let
         preDist = ''
           make -C doc/manual install prefix=$out
           
-          make -C doc/manual index.pdf prefix=$out
-          cp doc/manual/index.pdf $out/index.pdf
+          #make -C doc/manual index.pdf prefix=$out
+          #cp doc/manual/index.pdf $out/index.pdf
 
           # The PDF containes filenames of included graphics (see
           # http://www.tug.org/pipermail/pdftex/2007-August/007290.html).
