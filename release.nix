@@ -7,23 +7,23 @@
 
 let
   pkgs = import nixpkgs {};
-  
+
   # Refer either to dysnomia in the parent folder, or to the one in Nixpkgs
   dysnomiaJobset = if fetchDependenciesFromNixpkgs then {
     build = pkgs.lib.genAttrs systems (system:
       (import nixpkgs { inherit system; }).dysnomia
     );
   } else import ../dysnomia/release.nix { inherit nixpkgs systems officialRelease; };
-  
+
   # Refer either to disnix in the parent folder, or to the one in Nixpkgs
   disnixJobset = if fetchDependenciesFromNixpkgs then {
     tarball = pkgs.dysnomia.src;
-    
+
     build = pkgs.lib.genAttrs systems (system:
       (import nixpkgs { inherit system; }).disnix
     );
   } else import ../disnix/release.nix { inherit nixpkgs systems officialRelease; };
-  
+
   jobs = rec {
     tarball =
       let
@@ -38,23 +38,23 @@ let
         dontBuild = false;
 
         buildInputs = [ pkgs.socat pkgs.getopt pkgs.pkgconfig pkgs.libxml2 pkgs.libxslt dysnomia disnix pkgs.dblatex (pkgs.dblatex.tex or pkgs.tetex) pkgs.help2man pkgs.doclifter pkgs.nukeReferences ];
-        
+
         # Add documentation in the tarball
         configureFlags = ''
           --with-docbook-rng=${pkgs.docbook5}/xml/rng/docbook
           --with-docbook-xsl=${pkgs.docbook5_xsl}/xml/xsl/docbook
         '';
-        
+
         preConfigure = ''
           # TeX needs a writable font cache.
           export VARTEXFONTS=$TMPDIR/texfonts
         '';
-        
+
         preDist = ''
           make -C doc/manual install prefix=$out
-          
-          #make -C doc/manual index.pdf prefix=$out
-          #cp doc/manual/index.pdf $out/index.pdf
+
+          make -C doc/manual index.pdf prefix=$out
+          cp doc/manual/index.pdf $out/index.pdf
 
           # The PDF containes filenames of included graphics (see
           # http://www.tug.org/pipermail/pdftex/2007-August/007290.html).
@@ -63,7 +63,7 @@ let
           # to Windows and Macs, so there should be no Linux binaries
           # in the closure).
           nuke-refs $out/index.pdf
-          
+
           echo "doc-pdf manual $out/index.pdf" >> $out/nix-support/hydra-build-products
           echo "doc manual $out/share/doc/disnixos/manual" >> $out/nix-support/hydra-build-products
         '';
@@ -94,63 +94,63 @@ let
           inherit nixpkgs dysnomia disnix disnixos;
           inherit (pkgs) writeTextFile openssh;
         };
-        
+
         deploymentInfraWithData = import ./tests/deployment-infra-with-data.nix {
           inherit nixpkgs dysnomia disnix disnixos;
           inherit (pkgs) writeTextFile runCommand openssh;
           dysnomiaTarball = if fetchDependenciesFromNixpkgs then pkgs.dysnomia.src else dysnomiaJobset.tarball;
         };
-        
+
         distbuildInfra = import ./tests/distbuild-infra.nix {
           inherit nixpkgs dysnomia disnix disnixos;
           inherit (pkgs) writeTextFile openssh;
         };
-        
+
         deploymentServices = import ./tests/deployment-services.nix {
           inherit nixpkgs dysnomia disnix disnixos;
           inherit (pkgs) writeTextFile openssh;
         };
-        
+
         deploymentServicesWithData = import ./tests/deployment-services-with-data.nix {
           inherit nixpkgs dysnomia disnix disnixos;
           inherit (pkgs) writeTextFile openssh;
         };
-        
+
         distbuildServices = import ./tests/distbuild-services.nix {
           inherit nixpkgs dysnomia disnix disnixos;
           inherit (pkgs) writeTextFile openssh;
         };
-        
+
         nixopsClientToDBus = import ./tests/nixops-client.nix {
           inherit nixpkgs dysnomia disnix disnixos;
           inherit (pkgs) writeTextFile openssh;
           disnixRemoteClient = "disnix-client";
         };
-        
+
         nixopsClientToRunActivity = import ./tests/nixops-client.nix {
           inherit nixpkgs dysnomia disnix disnixos;
           inherit (pkgs) writeTextFile openssh;
           disnixRemoteClient = "disnix-run-activity";
         };
-        
+
         snapshotsViaDBus = import ./tests/snapshots.nix {
           inherit nixpkgs dysnomia disnix disnixos;
           inherit (pkgs) stdenv writeTextFile openssh;
           disnixRemoteClient = "disnix-client";
         };
-        
+
         snapshotsViaRunActivity = import ./tests/snapshots.nix {
           inherit nixpkgs dysnomia disnix disnixos;
           inherit (pkgs) stdenv writeTextFile openssh;
           disnixRemoteClient = "disnix-run-activity";
         };
-        
+
         deploymentNixOps = import ./tests/deployment-nixops.nix {
           inherit nixpkgs dysnomia disnix disnixos;
           inherit (pkgs) writeTextFile openssh;
         };
       };
-    
+
     release = pkgs.releaseTools.aggregate {
       name = "disnixos-${tarball.version}";
       constituents = [
