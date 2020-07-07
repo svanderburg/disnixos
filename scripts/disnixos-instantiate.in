@@ -58,7 +58,7 @@ Options:
                               interface. (Defaults to: hostname)
       --interface=INTERFACE   Path to executable that communicates with a Disnix
                               interface. Defaults to: disnix-ssh-client
-      --extra-params          A string with an attribute set in the Nix
+      --extra-params=PARAMS   A string with an attribute set in the Nix
                               expression language propagating extra
                               parameters to the input models
       --no-out-link           Do not create a 'result' symlink

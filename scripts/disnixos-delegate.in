@@ -64,7 +64,7 @@ Options:
   -m, --max-concurrent-transfers=NUM
                                   Maximum amount of concurrent closure
                                   transfers. Defauls to: 2
-      --extra-params              A string with an attribute set in the Nix
+      --extra-params=PARAMS       A string with an attribute set in the Nix
                                   expression language propagating extra
                                   parameters to the input models
       --vm                        Configures a manifest used for the NixOS test
