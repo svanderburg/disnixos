@@ -13,7 +13,7 @@ writeTextFile {
           "${nixpkgs}/nixos/modules/testing/test-instrumentation.nix"
         ];
         boot.loader.grub.enable = false;
-        services.nixosManual.enable = false;
+        documentation.nixos.enable = false;
         services.dbus.enable = true;
         services.openssh.enable = true;
         networking.firewall.enable = false;

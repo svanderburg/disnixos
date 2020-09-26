@@ -15,7 +15,7 @@ writeTextFile {
         boot.loader.grub.enable = false;
         disnixInfrastructure.enable = true;
         disnixInfrastructure.infrastructure.hostname = hostname;
-        services.nixosManual.enable = false;
+        documentation.nixos.enable = false;
         services.dbus.enable = true;
         services.openssh.enable = true;
         networking.firewall.enable = false;

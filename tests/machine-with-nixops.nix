@@ -7,7 +7,9 @@
   virtualisation.diskSize = 10240;
 
   ids.gids = { disnix = 200; };
-  users.extraGroups = [ { gid = 200; name = "disnix"; } ];
+  users.extraGroups = {
+    disnix = { gid = 200; };
+  };
   networking.firewall.enable = false;
 
   services.dbus.enable = true;

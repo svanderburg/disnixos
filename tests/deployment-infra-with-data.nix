@@ -1,6 +1,6 @@
 {nixpkgs, writeTextFile, runCommand, openssh, dysnomiaTarball, dysnomia, disnix, disnixos}:
 
-with import "${nixpkgs}/nixos/lib/testing.nix" { system = builtins.currentSystem; };
+with import "${nixpkgs}/nixos/lib/testing-python.nix" { system = builtins.currentSystem; };
 
 let
   dysnomiaSrc = runCommand "dysnomia-sources" {} ''
@@ -18,7 +18,9 @@ let
       virtualisation.diskSize = 10240;
 
       ids.gids = { disnix = 200; };
-      users.extraGroups = [ { gid = 200; name = "disnix"; } ];
+      users.extraGroups = {
+        disnix = { gid = 200; };
+      };
 
       dysnomiaTest = {
         enable = true;
@@ -32,7 +34,6 @@ let
       services.mysql = {
         enable = true;
         package = pkgs.mysql;
-        rootPassword = pkgs.writeTextFile { name = "mysqlpw"; text = "verysecret"; };
       };
 
       services.postgresql = {
@@ -131,7 +132,6 @@ let
           services.mysql = {
             enable = true;
             package = pkgs.mysql;
-            rootPassword = pkgs.writeTextFile { name = "mysqlpw"; text = "verysecret"; };
           };
 
           services.postgresql = {
@@ -150,7 +150,6 @@ let
           services.mysql = {
             enable = true;
             package = pkgs.mysql;
-            rootPassword = pkgs.writeTextFile { name = "mysqlpw"; text = "verysecret"; };
           };
 
           services.postgresql = {
@@ -183,7 +182,6 @@ let
           services.mysql = {
             enable = true;
             package = pkgs.mysql;
-            rootPassword = pkgs.writeTextFile { name = "mysqlpw"; text = "verysecret"; };
           };
 
           services.postgresql = {
@@ -202,7 +200,6 @@ let
           services.mysql = {
             enable = true;
             package = pkgs.mysql;
-            rootPassword = pkgs.writeTextFile { name = "mysqlpw"; text = "verysecret"; };
           };
 
           services.postgresql = {
@@ -228,116 +225,139 @@ simpleTest {
   };
   testScript =
     ''
-      startAll;
-      $coordinator->waitForJob("network-interfaces.target");
-      $testtarget1->waitForJob("disnix");
-      $testtarget2->waitForJob("disnix");
+      start_all()
+
+      coordinator.wait_for_unit("network-interfaces.target")
+      testtarget1.wait_for_unit("disnix")
+      testtarget2.wait_for_unit("disnix")
 
       # Initialise ssh stuff by creating a key pair for communication
-      my $key=`${openssh}/bin/ssh-keygen -t ecdsa -f key -N ""`;
+      key = subprocess.check_output(
+          '${pkgs.openssh}/bin/ssh-keygen -t ecdsa -f key -N ""',
+          shell=True,
+      )
 
-      $testtarget1->mustSucceed("mkdir -m 700 /root/.ssh");
-      $testtarget1->copyFileFromHost("key.pub", "/root/.ssh/authorized_keys");
+      testtarget1.succeed("mkdir -m 700 /root/.ssh")
+      testtarget1.copy_from_host("key.pub", "/root/.ssh/authorized_keys")
 
-      $testtarget2->mustSucceed("mkdir -m 700 /root/.ssh");
-      $testtarget2->copyFileFromHost("key.pub", "/root/.ssh/authorized_keys");
+      testtarget2.succeed("mkdir -m 700 /root/.ssh")
+      testtarget2.copy_from_host("key.pub", "/root/.ssh/authorized_keys")
 
-      $coordinator->mustSucceed("mkdir -m 700 /root/.ssh");
-      $coordinator->copyFileFromHost("key", "/root/.ssh/id_dsa");
-      $coordinator->mustSucceed("chmod 600 /root/.ssh/id_dsa");
+      coordinator.succeed("mkdir -m 700 /root/.ssh")
+      coordinator.copy_from_host("key", "/root/.ssh/id_dsa")
+      coordinator.succeed("chmod 600 /root/.ssh/id_dsa")
 
       # Deploy the test NixOS network expression. This test should succeed.
-      $coordinator->mustSucceed("${env} disnixos-deploy-network ${logicalNetworkNix} ${physicalNetworkNix} --disable-disnix");
+      coordinator.succeed(
+          "${env} disnixos-deploy-network ${logicalNetworkNix} ${physicalNetworkNix} --disable-disnix"
+      )
 
       # Capture the state of the NixOS configurations
-      $coordinator->mustSucceed("${env} disnixos-snapshot-network ${logicalNetworkNix} ${physicalNetworkNix} --disable-disnix");
+      coordinator.succeed(
+          "${env} disnixos-snapshot-network ${logicalNetworkNix} ${physicalNetworkNix} --disable-disnix"
+      )
 
       # Check if two nixos-configuration snapshots exist
-      my $result = $coordinator->mustSucceed("dysnomia-snapshots --query-latest --container nixos-configuration");
-      my @snapshots = split('\n', $result);
+      result = coordinator.succeed(
+          "dysnomia-snapshots --query-latest --container nixos-configuration"
+      )
+      snapshots = result.split("\n")
 
-      if(scalar(@snapshots) == 2) {
-          print "We have 2 nixos-configuration snapshots\n";
-      } else {
-          die "We should have 2 nixos-configuration snapshots!";
-      }
+      if len(snapshots[:-1]) == 2:
+          print("We have 2 nixos-configuration snapshots")
+      else:
+          raise Exception("We should have 2 nixos-configuration snapshots!")
 
       # Modify the state of the databases
 
-      $testtarget1->mustSucceed("echo \"insert into test values ('Bye world');\" | mysql --user=root --password=verysecret -N testdb");
-      $testtarget1->mustSucceed("echo \"insert into test values ('Bye world');\" | su postgres -s /bin/sh -c 'psql --file - testdb'");
+      testtarget1.succeed("echo \"insert into test values ('Bye world');\" | mysql -N testdb")
+      testtarget1.succeed(
+          "echo \"insert into test values ('Bye world');\" | su postgres -s /bin/sh -c 'psql --file - testdb'"
+      )
 
       # Remove all the remote snapshots and check if both the Disnix and NixOS
       # state dir have no snapshots
-      $coordinator->mustSucceed("${env} disnixos-clean-snapshots --keep 0 ${logicalNetworkNix}");
+      coordinator.succeed(
+          "${env} disnixos-clean-snapshots --keep 0 ${logicalNetworkNix}"
+      )
 
-      $result = $testtarget1->mustSucceed("DYSNOMIA_STATEDIR=/var/state/dysnomia dysnomia-snapshots --query-all");
-      @snapshots = split('\n', $result);
+      result = testtarget1.succeed(
+          "DYSNOMIA_STATEDIR=/var/state/dysnomia dysnomia-snapshots --query-all"
+      )
+      snapshots = result.split("\n")
 
-      if(scalar(@snapshots) == 0) {
-          print "We have 0 snapshots in the Disnix state directory\n";
-      } else {
-          die "We should have 0 snapshots in the Disnix state directory\n";
-      }
+      if len(snapshots[:-1]) == 0:
+          print("We have 0 snapshots in the Disnix state directory")
+      else:
+          raise Exception("We should have 0 snapshots in the Disnix state directory")
 
       # TODO: make command that removes system-level snapshots
-      #$result = $testtarget1->mustSucceed("DYSNOMIA_STATEDIR=/var/state/dysnomia-nixos dysnomia-snapshots --query-all");
-      #@snapshots = split('\n', $result);
+      # result = testtarget1.succeed("DYSNOMIA_STATEDIR=/var/state/dysnomia-nixos dysnomia-snapshots --query-all")
+      # snapshots = result.split("\n")
 
-      #if(scalar(@snapshots) == 0) {
-        #print "We have 0 snapshots in the NixOS state directory\n";
-      #} else {
-      #die "We should have 0 snapshots in the NixOS state directory\n";
-      #}
+      # if len(snapshots) == 0:
+      #     print("We have 0 snapshots in the NixOS state directory")
+      # else:
+      #     raise Exception("We should have 0 snapshots in the NixOS state directory")
 
       # Restore the state of the databases and check whether the modifications
       # are gone.
 
-      $coordinator->mustSucceed("${env} disnixos-restore-network ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix");
+      coordinator.succeed(
+          "${env} disnixos-restore-network ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix"
+      )
 
-      $result = $testtarget1->mustSucceed("echo 'select * from test' | mysql --user=root --password=verysecret -N testdb");
+      result = testtarget1.succeed("echo 'select * from test' | mysql -N testdb")
 
-      if($result =~ /Bye world/) {
-          die "MySQL table should not contain: Bye world!\n";
-      } else {
-          print "MySQL does not contain: Bye world!\n";
-      }
+      if "Bye world" in result:
+          raise Exception("MySQL table should not contain: Bye world!")
+      else:
+          print("MySQL does not contain: Bye world!")
 
-      $result = $testtarget1->mustSucceed("echo 'select * from test' | su postgres -s /bin/sh -c 'psql --file - testdb'");
+      result = testtarget1.succeed(
+          "echo 'select * from test' | su postgres -s /bin/sh -c 'psql --file - testdb'"
+      )
 
-      if($result =~ /Bye world/) {
-          die "PostgreSQL table should not contain: Bye world!\n";
-      } else {
-          print "PostgreSQL does not contain: Bye world!\n";
-      }
+      if "Bye world" in result:
+          raise Exception("PostgreSQL table should not contain: Bye world!")
+      else:
+          print("PostgreSQL does not contain: Bye world!")
 
       # Delete the state. Because no databases have been undeployed, they should be kept.
-      $coordinator->mustSucceed("${env} disnixos-delete-network-state ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix");
+      coordinator.succeed(
+          "${env} disnixos-delete-network-state ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix"
+      )
 
-      $result = $testtarget1->mustSucceed("echo 'select * from test' | mysql --user=root --password=verysecret -N testdb");
+      result = testtarget1.succeed("echo 'select * from test' | mysql -N testdb")
 
-      if($result =~ /Bye world/) {
-          die "MySQL table should not contain: Bye world!\n";
-      } else {
-          print "MySQL does not contain: Bye world!\n";
-      }
+      if "Bye world" in result:
+          raise Exception("MySQL table should not contain: Bye world!")
+      else:
+          print("MySQL does not contain: Bye world!")
 
-      $result = $testtarget1->mustSucceed("echo 'select * from test' | su postgres -s /bin/sh -c 'psql --file - testdb'");
+      result = testtarget1.succeed(
+          "echo 'select * from test' | su postgres -s /bin/sh -c 'psql --file - testdb'"
+      )
 
-      if($result =~ /Bye world/) {
-          die "PostgreSQL table should not contain: Bye world!\n";
-      } else {
-          print "PostgreSQL does not contain: Bye world!\n";
-      }
+      if "Bye world" in result:
+          raise Exception("PostgreSQL table should not contain: Bye world!")
+      else:
+          print("PostgreSQL does not contain: Bye world!")
 
       # Upgrade the test NixOS configuration with the databases undeployed.
-      $coordinator->mustSucceed("${env} disnixos-deploy-network ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix");
+      coordinator.succeed(
+          "${env} disnixos-deploy-network ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix"
+      )
 
       # Delete the state. Because the databases were undeployed, they should have been removed.
 
-      $coordinator->mustSucceed("${env} disnixos-delete-network-state ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix");
+      coordinator.succeed(
+          "${env} disnixos-delete-network-state ${logicalNetworkNix2} ${physicalNetworkNix} --disable-disnix"
+      )
 
-      $testtarget1->mustFail("echo 'select * from test' | mysql --user=root --password=verysecret -N testdb");
-      $testtarget1->mustFail("echo 'select * from test' | su postgres -s /bin/sh -c 'psql --file - testdb'");
+      testtarget1.fail("echo 'select * from test' | mysql -N testdb")
+      testtarget1.fail(
+          "echo 'select * from test' | su postgres -s /bin/sh -c 'psql --file - testdb'"
+      )
     '';
 }
