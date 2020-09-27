@@ -20,7 +20,10 @@ let
     inherit network disnix manifestFile;
     inherit (pkgs) socat;
     inherit (pkgs.lib) concatMapStrings;
-    testScript = "sleep 1e9";
+    testScript = ''
+      while True:
+          time.sleep(1)
+    '';
   };
 in
 pkgs.stdenv.mkDerivation {
