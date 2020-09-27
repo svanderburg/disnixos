@@ -36,7 +36,7 @@ AC_ARG_WITH(docbook-xsl, AC_HELP_STRING([--with-docbook-xsl=PATH],
 AC_SUBST(docbookxsl)
 
 # Checks for Disnix libraries
-DISNIX_REQUIRED=0.9
+DISNIX_REQUIRED=0.10
 PKG_CHECK_MODULES(DISNIX, disnix >= $DISNIX_REQUIRED)
 DISNIX_PREFIX=`pkg-config --variable=prefix disnix`
 AC_SUBST(DISNIX_PREFIX)

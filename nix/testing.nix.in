@@ -88,7 +88,7 @@ in
 
       network = if externalNetworkFile then import networkFile else import "${manifestSrc}/${networkFile}";
     in
-    with import "${nixpkgs}/nixos/lib/testing.nix" { inherit system; };
+    with import "${nixpkgs}/nixos/lib/testing-python.nix" { inherit system; };
 
     simpleTest {
       nodes = network;
