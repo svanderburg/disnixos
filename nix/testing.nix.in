@@ -39,8 +39,8 @@ in
         '';
     };
 
-  buildManifest = 
-    {name, version, tarball, servicesFile, networkFile, externalNetworkFile ? false, distributionFile, externalDistributionFile ? false}:
+  buildManifest =
+    {name, version, tarball, servicesFile, networkFile, externalNetworkFile ? false, distributionFile, extraParams ? {}, externalDistributionFile ? false}:
 
     let
       infrastructure = import ./generate-infrastructure.nix {
@@ -66,7 +66,7 @@ in
         distributionFile = if externalDistributionFile then distributionFile else "${manifestSrc}/${distributionFile}";
         targetProperty = "backdoor";
         clientInterface = "${disnixos}/bin/disnix-backdoor-client";
-        inherit nixpkgs;
+        inherit nixpkgs extraParams;
       };
 
       installPhase =
