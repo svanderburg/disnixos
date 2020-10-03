@@ -4,8 +4,8 @@
 , nixpkgs ? <nixpkgs>
 , enableDisnix ? true
 , nixOpsModel ? false
-, disnix ? builtins.storePath @DISNIX_PREFIX@
-, dysnomia ? builtins.storePath "${dirOf @dysnomia@}/.."
+, disnix
+, dysnomia
 , nixops ? null
 }:
 

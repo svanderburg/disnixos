@@ -2,12 +2,12 @@
 , targetProperty
 , clientInterface
 , nixpkgs ? <nixpkgs>
-, disnix ? builtins.storePath @DISNIX_PREFIX@
 , enableDisnix ? true
 , nixOpsModel ? false
 , useVMTesting ? false
 , useBackdoor ? false
-, dysnomia ? builtins.storePath @dysnomia@/../..
+, disnix
+, dysnomia
 , nixops ? null
 }:
 

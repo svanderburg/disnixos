@@ -51,8 +51,6 @@ nix/Makefile
 nix/generate-infrastructure.nix
 nix/generate-tests.nix
 nix/testing.nix
-nix/instantiate.nix
-nix/manifest.nix
 maintenance/Makefile
 scripts/disnix-backdoor-client
 scripts/disnix-nixops-client

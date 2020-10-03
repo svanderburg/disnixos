@@ -200,6 +200,8 @@ then
     nix-build --arg networkFiles "[ $networkFiles ]" \
               --argstr targetProperty $targetProperty \
               --argstr clientInterface $interface \
+              --arg disnix "builtins.storePath @DISNIX_PREFIX@" \
+              --arg dysnomia "builtins.storePath $(readlink -f $(dirname @dysnomia@)/..)" \
               $noOutLinkArg \
               $nixOpsArg \
               $disableDisnixArg \
