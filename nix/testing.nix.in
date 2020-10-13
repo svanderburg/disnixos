@@ -79,7 +79,7 @@ in
     };
 
   disnixTest =
-    {name, manifest, tarball, networkFile, externalNetworkFile ? false, testScript, dysnomiaStateDir ? ""}:
+    {name, manifest, tarball, networkFile, externalNetworkFile ? false, testScript, dysnomiaStateDir ? "", postActivateTimeout ? 1}:
 
     let
       manifestSrc = generateManifestSrc {
@@ -94,7 +94,7 @@ in
       nodes = network;
 
       testScript = import ./generate-testscript.nix {
-        inherit network testScript disnix dysnomiaStateDir;
+        inherit network testScript disnix dysnomiaStateDir postActivateTimeout;
         inherit (pkgs) socat;
         inherit (pkgs.lib) concatMapStrings;
         manifestFile = "${manifest}/manifest.xml";

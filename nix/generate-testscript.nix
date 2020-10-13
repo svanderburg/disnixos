@@ -1,4 +1,4 @@
-{network, testScript, manifestFile, disnix, socat, concatMapStrings, dysnomiaStateDir ? "/tmp/shared/dysnomia"}:
+{network, testScript, manifestFile, disnix, socat, concatMapStrings, dysnomiaStateDir ? "/tmp/shared/dysnomia", postActivateTimeout ? 1}:
 
 let
   firstTargetName = builtins.head (builtins.attrNames network);
@@ -29,6 +29,7 @@ in
   ${firstTargetName}.succeed(
       "${disnix}/bin/disnix-activate --no-upgrade ${manifestFile}"
   )
+  ${firstTargetName}.succeed("sleep ${toString postActivateTimeout}")
   ${firstTargetName}.succeed(
       "${disnix}/bin/disnix-restore --no-upgrade ${manifestFile}"
   )
