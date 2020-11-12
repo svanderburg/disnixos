@@ -1,5 +1,7 @@
 Version 0.9
 ===========
+- The test infrastructure now also simulates a Disnix profile symlink for more accurate results
+
 - The test infrastructure now uses the Python implementation of NixOS' test driver
 
 - Introduced the --extra-params option to propagate additional parameters to the input models

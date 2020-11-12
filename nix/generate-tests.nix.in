@@ -18,7 +18,7 @@ let
 
   testScript = import ./generate-testscript.nix {
     inherit network disnix manifestFile;
-    inherit (pkgs) socat;
+    inherit (pkgs) socat libxml2;
     inherit (pkgs.lib) concatMapStrings;
     testScript = ''
       while True:

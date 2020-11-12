@@ -1,4 +1,4 @@
-{network, testScript, manifestFile, disnix, socat, concatMapStrings, dysnomiaStateDir ? "/tmp/shared/dysnomia", postActivateTimeout ? 1}:
+{network, testScript, manifestFile, disnix, socat, libxml2, concatMapStrings, dysnomiaStateDir ? "/tmp/shared/dysnomia", postActivateTimeout ? 1}:
 
 let
   firstTargetName = builtins.head (builtins.attrNames network);
@@ -23,6 +23,14 @@ in
   ${targetName}.succeed(
       'if [ -d "${dysnomiaStateDir}/generations" ]; then ln -s ${dysnomiaStateDir}/generations /var/state/dysnomia/generations; fi'
   )
+
+  # Create profile symlink
+
+  profile = ${targetName}.succeed(
+      "${libxml2}/bin/xmllint --xpath \"/manifest/profiles/profile[@name='${targetName}']/text()\" ${manifestFile}"
+  )
+  ${targetName}.succeed("mkdir -p /nix/var/nix/profiles/disnix")
+  ${targetName}.succeed("ln -s {} /nix/var/nix/profiles/default".format(profile[:-1]))
 '') (builtins.attrNames network) +
 ''
 

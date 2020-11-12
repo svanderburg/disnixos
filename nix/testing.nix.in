@@ -95,7 +95,7 @@ in
 
       testScript = import ./generate-testscript.nix {
         inherit network testScript disnix dysnomiaStateDir postActivateTimeout;
-        inherit (pkgs) socat;
+        inherit (pkgs) socat libxml2;
         inherit (pkgs.lib) concatMapStrings;
         manifestFile = "${manifest}/manifest.xml";
       };
