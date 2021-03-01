@@ -39,6 +39,7 @@
   '';
 
   environment.systemPackages = [ pkgs.nix dysnomia disnix disnixos pkgs.hello pkgs.zip pkgs.libxml2 ];
+  environment.variables.DISNIX_REMOTE_CLIENT = "disnix-client";
 
   system.extraDependencies = [
     pkgs.stdenv

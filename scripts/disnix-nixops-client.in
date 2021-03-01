@@ -33,7 +33,7 @@ In most cases this command is not used directly, but is used by specifying the
 --interface option for a Disnix command-line utility (such as \`disnix-env') or
 by setting the \`DISNIX_CLIENT_INTERFACE' environment variable. By using one of
 those properties, the Disnix tools will use the given interface instead of the
-standard \`disnix-client' which only provides loopback access.
+standard \`disnix-run-activity' which only provides local access.
 
 Options:
 
@@ -134,7 +134,8 @@ Environment:
   NIXOPS_OPTS                Additional properties which are passed to the
                              \`nixops' command
   DISNIX_REMOTE_CLIENT       Name of the remote executable to run to execute a
-                             deployment activity (defaults to: disnix-client)
+                             deployment activity (defaults to:
+                             disnix-run-activity)
   DISNIX_PROFILE             Sets the name of the profile that stores the
                              manifest on the coordinator machine and the
                              deployed services per machine on each target
@@ -325,7 +326,7 @@ do
             exit 0
             ;;
     esac
-    
+
     shift
 done
 
@@ -341,10 +342,7 @@ then
     keep=1
 fi
 
-if [ "$DISNIX_REMOTE_CLIENT" = "" ]
-then
-    DISNIX_REMOTE_CLIENT="disnix-client"
-fi
+checkRemoteClient
 
 # Execute selected operation
 

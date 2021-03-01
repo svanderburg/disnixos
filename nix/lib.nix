@@ -54,7 +54,7 @@ rec {
         ]
         ++ pkgs.lib.optional enableDisnix {
           key = "enable-disnix";
-          services.disnix.enable = true;
+          environment.systemPackages = [ dysnomia pkgs.disnix ];
         }
         ++ pkgs.lib.optionals useVMTesting [
           "${nixpkgs}/nixos/modules/virtualisation/qemu-vm.nix"

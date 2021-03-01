@@ -128,6 +128,9 @@ Clean snapshots options:
   -c, --component=COMPONENT  Name of the component to filter on
 
 Environment:
+  DISNIX_REMOTE_CLIENT       Name of the remote executable to run to execute a
+                             deployment activity (defaults to:
+                             disnix-run-activity)
   DISNIX_PROFILE             Sets the name of the profile that stores the
                              manifest on the coordinator machine and the
                              deployed services per machine on each target
@@ -165,6 +168,12 @@ checkContainer()
         container=type
     fi
 }
+
+# Autoconf settings
+export prefix=@prefix@
+
+# Import Disnix checks
+source @DISNIX_PREFIX@/share/disnix/checks
 
 # Parse valid argument options
 
@@ -297,7 +306,7 @@ do
             exit 0
             ;;
     esac
-    
+
     shift
 done
 
@@ -311,10 +320,8 @@ then
     exit 1
 fi
 
-if [ "$TMPDIR" = "" ]
-then
-    export TMPDIR=/tmp
-fi
+checkTmpDir
+checkRemoteClient
 
 export PATH=$PATH:$(dirname @socat@)
 
@@ -332,7 +339,7 @@ case "$operation" in
         ;;
     realise)
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --realise $@; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT --realise $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -340,7 +347,7 @@ case "$operation" in
         ;;
     set)
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client $profileArg --set $@; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT $profileArg --set $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -348,7 +355,7 @@ case "$operation" in
         ;;
     query-installed)
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client $profileArg --query-installed $@; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT $profileArg --query-installed $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -356,7 +363,7 @@ case "$operation" in
         ;;
     query-requisites)
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --query-requisites $@; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT --query-requisites $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -364,7 +371,7 @@ case "$operation" in
         ;;
     collect-garbage)
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --collect-garbage $deleteOldArg $@; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT --collect-garbage $deleteOldArg $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -375,7 +382,7 @@ case "$operation" in
         checkContainer
 
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --type $type --container $container $argsArg --activate $@; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT --type $type --container $container $argsArg --activate $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -386,7 +393,7 @@ case "$operation" in
         checkContainer
 
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --type $type --container $container $argsArg --deactivate $@; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT --type $type --container $container $argsArg --deactivate $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -394,7 +401,7 @@ case "$operation" in
         ;;
     lock)
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --lock $profileArg; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT --lock $profileArg; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -402,7 +409,7 @@ case "$operation" in
         ;;
     unlock)
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --unlock $profileArg; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT --unlock $profileArg; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -413,7 +420,7 @@ case "$operation" in
         checkContainer
 
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --type $type --container $container $argsArg --snapshot $@; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT --type $type --container $container $argsArg --snapshot $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -424,7 +431,7 @@ case "$operation" in
         checkContainer
 
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --type $type --container $container $argsArg --restore $@; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT --type $type --container $container $argsArg --restore $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -435,7 +442,7 @@ case "$operation" in
         checkContainer
 
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --type $type --container $container $argsArg --delete-state $@; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT --type $type --container $container $argsArg --delete-state $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -443,7 +450,7 @@ case "$operation" in
         ;;
     query-all-snapshots)
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --query-all-snapshots --container $container --component $component; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT --query-all-snapshots --container $container --component $component; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -451,7 +458,7 @@ case "$operation" in
         ;;
     query-latest-snapshot)
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --query-latest-snapshot --container $container --component $component; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT --query-latest-snapshot --container $container --component $component; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -459,7 +466,7 @@ case "$operation" in
         ;;
     print-missing-snapshots)
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --print-missing-snapshots $@; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT --print-missing-snapshots $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -473,7 +480,7 @@ case "$operation" in
         ;;
     resolve-snapshots)
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --resolve-snapshots $@; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT --resolve-snapshots $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -491,7 +498,7 @@ case "$operation" in
         fi
 
         outputFile=$(mktemp -p $TMPDIR)
-        echo "disnix-client --clean-snapshots --keep $keep $containerArg $componentArg $@; echo \$?" | socat stdio $target > $outputFile
+        echo "$DISNIX_REMOTE_CLIENT --clean-snapshots --keep $keep $containerArg $componentArg $@; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile
@@ -499,7 +506,7 @@ case "$operation" in
         ;;
     capture-config)
         outputFile=$(mktemp -p $TMPDIR)
-        echo "tempfile=\$(disnix-client --capture-config); cat \$tempfile; rm -f \$tempfile; echo \$?" | socat stdio $target > $outputFile
+        echo "tempfile=\$($DISNIX_REMOTE_CLIENT --capture-config); cat \$tempfile; rm -f \$tempfile; echo \$?" | socat stdio $target > $outputFile
         exitStatus=$(tail -1 $outputFile)
         head -n -1 $outputFile
         rm -f $outputFile

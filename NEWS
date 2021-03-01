@@ -1,5 +1,7 @@
 Version 0.9
 ===========
+- By default, disnix-nixops-client will work in single-user mode. The DISNIX_REMOTE_CLIENT environment variable can be set to disnix-client to enable multi-user mode.
+
 - The test infrastructure now also simulates a Disnix profile symlink for more accurate results
 
 - The test infrastructure now uses the Python implementation of NixOS' test driver
