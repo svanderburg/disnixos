@@ -34,9 +34,18 @@ Installation
 DisnixOS is a typical autotools based package which can be compiled and installed
 by running the following commands in a shell session:
 
-    $ ./configure
-    $ make
-    $ make install
+```bash
+$ ./configure
+$ make
+$ make install
+```
+
+When building from the Git repository, you should run the bootstrap script
+first:
+
+```bash
+$ ./bootstrap
+```
 
 For more information about using the autotools setup or for customizing the
 configuration, take a look at the `./INSTALL` file.
@@ -54,14 +63,18 @@ configurations.
 By running the following command-line instruction with at least one network model
 as a parameter, the system configuration will be deployed through Disnix:
 
-    $ disnixos-deploy-network network.nix
+```bash
+$ disnixos-deploy-network network.nix
+```
 
 Deploying services and infrastructure at the same time
 ------------------------------------------------------
 Besides infrastructure only, we can also deploy services and infrastructure at
 the same time. For example:
 
-    $ disnixos-env -s services.nix -n network.nix -d distribution.nix
+```bash
+$ disnixos-env -s services.nix -n network.nix -d distribution.nix
+```
 
 The above command-line instruction first deploys the infrastructure and then
 the services using Disnix. The infrastructure model is generated automatically
@@ -72,8 +85,10 @@ Deploying services and infrastructure in a network of QEMU VMs
 We can also spawn a network of efficiently instantiated QEMU VMs in which a
 service-oriented system is deployed through Disnix:
 
-    $ disnixos-vm-env -s services.nix -n network.nix -d distribution.nix
-    
+```bash
+$ disnixos-vm-env -s services.nix -n network.nix -d distribution.nix
+```
+
 The above command uses NixOS' test driver to quickly set up VMs and is
 paricularly useful to quickly test a deployment.
 
@@ -84,17 +99,23 @@ Disnix to deploy the services to the corresponding VM instances.
 
 The following command instantiates and deploys a network of VirtualBox machines:
 
-    $ nixops create ./network.nix ./network-virtualbox.nix -d test
-    $ nixops deploy -d test
+```bash
+$ nixops create ./network.nix ./network-virtualbox.nix -d test
+$ nixops deploy -d test
+```
 
 The following environment variable specifies that we want to deploy in a network
 called `test` that is deployed by NixOps:
 
-    $ export NIXOPS_DEPLOYMENT=test
+```bash
+$ export NIXOPS_DEPLOYMENT=test
+```
 
 The following command deploys the services into the network deployed by NixOps:
-    
-    $ disnixos-env -s services.nix -n network.nix -n network-virtualbox.nix -d distribution.nix --use-nixops
+
+```bash
+$ disnixos-env -s services.nix -n network.nix -n network-virtualbox.nix -d distribution.nix --use-nixops
+```
 
 Automated testing of Disnix deployments
 ---------------------------------------
