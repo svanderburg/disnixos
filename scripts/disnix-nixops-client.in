@@ -21,8 +21,10 @@ set -o pipefail
 
 showUsage()
 {
+    me="$(basename "$0")"
+
     cat <<EOF
-Usage: $0 --target hostname operation [OPTION] [paths]
+Usage: $me --target hostname operation [OPTION] [paths]
 
 The command \`disnix-nixops-client' provides remote access to a \`disnix-service'
 instance running on a machine in the network using NixOps. This allows the user
@@ -150,8 +152,10 @@ EOF
 
 showVersion()
 {
+    me="$(basename "$0")"
+
     cat <<EOF
-$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+$me (@PACKAGE_NAME@ @PACKAGE_VERSION@)
 
 Copyright (C) 2008-2021 Sander van der Burg
 EOF

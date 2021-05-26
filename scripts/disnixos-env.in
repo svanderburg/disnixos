@@ -23,15 +23,17 @@ set -o pipefail
 
 showUsage()
 {
+    me="$(basename "$0")"
+
     cat <<EOF
-Usage: $0 -s services_nix -n network_nix [ -n network2_nix ... ] -d distribution_nix [OPTION]
-  or: $0 -P packages_nix -n network_nix [ -n network2_nix ... ] [OPTION]
-  or: $0 --rollback [OPTION]
-  or: $0 --undeploy [OPTION]
-  or: $0 --switch-generation NUM [OPTION]
-  or: $0 --list-generations [OPTION]
-  or: $0 --delete-generations NUM [OPTION]
-  or: $0 --delete-all-generations NUM [OPTION]
+Usage: $me -s services_nix -n network_nix [ -n network2_nix ... ] -d distribution_nix [OPTION]
+  or: $me -P packages_nix -n network_nix [ -n network2_nix ... ] [OPTION]
+  or: $me --rollback [OPTION]
+  or: $me --undeploy [OPTION]
+  or: $me --switch-generation NUM [OPTION]
+  or: $me --list-generations [OPTION]
+  or: $me --delete-generations NUM [OPTION]
+  or: $me --delete-all-generations NUM [OPTION]
 
 The command \`disnixos-env' is used to install, upgrade or roll back the
 services and infrastructure of distributed system in a given environment. This
@@ -162,8 +164,10 @@ EOF
 
 showVersion()
 {
+    me="$(basename "$0")"
+
     cat <<EOF
-$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+$me (@PACKAGE_NAME@ @PACKAGE_VERSION@)
 
 Copyright (C) 2008-2021 Sander van der Burg
 EOF

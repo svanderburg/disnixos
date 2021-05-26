@@ -23,8 +23,10 @@ set -o pipefail
 
 showUsage()
 {
+    me="$(basename "$0")"
+
     cat <<EOF
-Usage: $0 [OPTION] -n network_nix [ -n network2_nix ... ] [MANIFEST]
+Usage: $me [OPTION] -n network_nix [ -n network2_nix ... ] [MANIFEST]
 
 The command \`disnix-convert' converts a deployment done with older versions
 of Disnix still using the V1 schema to V2.
@@ -61,8 +63,10 @@ EOF
 
 showVersion()
 {
+    me="$(basename "$0")"
+
     cat <<EOF
-$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+$me (@PACKAGE_NAME@ @PACKAGE_VERSION@)
 
 Copyright (C) 2008-2021 Sander van der Burg
 EOF

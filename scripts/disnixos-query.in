@@ -23,8 +23,10 @@ set -o pipefail
 
 showUsage()
 {
+    me="$(basename "$0")"
+
     cat <<EOF
-Usage: $0 [OPTION] network_nix [ network2_nix ... ]
+Usage: $me [OPTION] network_nix [ network2_nix ... ]
 
 The command \`disnixos-query' collects and displays all the installed services
 from the machines defined in a given infrastructure model.
@@ -61,8 +63,10 @@ EOF
 
 showVersion()
 {
+    me="$(basename "$0")"
+
     cat <<EOF
-$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+$me (@PACKAGE_NAME@ @PACKAGE_VERSION@)
 
 Copyright (C) 2008-2021 Sander van der Burg
 EOF

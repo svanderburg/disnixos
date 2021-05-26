@@ -23,8 +23,10 @@ set -o pipefail
 
 showUsage()
 {
+    me="$(basename "$0")"
+
     cat <<EOF
-Usage: $0 [OPTION] -n network_expr [ -n network_expr2 ... ] MANIFEST
+Usage: $me [OPTION] -n network_expr [ -n network_expr2 ... ] MANIFEST
 
 The command \`disnixos-gentests' generates a part of the testsuite that starts
 the backdoors on the machines in the network and deploys the services in the
@@ -50,8 +52,10 @@ EOF
 
 showVersion()
 {
+    me="$(basename "$0")"
+
     cat <<EOF
-$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+$me (@PACKAGE_NAME@ @PACKAGE_VERSION@)
 
 Copyright (C) 2008-2021 Sander van der Burg
 EOF

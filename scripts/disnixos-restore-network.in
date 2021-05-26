@@ -23,8 +23,10 @@ set -o pipefail
 
 showUsage()
 {
+    me="$(basename "$0")"
+
     cat <<EOF
-Usage: $0 [OPTION] network_expr ...
+Usage: $me [OPTION] network_expr ...
 
 The command \`disnixos-restore-network' is used to restore the state of all
 mutable components that have been deployed as part of machine's configuration.
@@ -69,8 +71,10 @@ EOF
 
 showVersion()
 {
+    me="$(basename "$0")"
+
     cat <<EOF
-$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+$me (@PACKAGE_NAME@ @PACKAGE_VERSION@)
 
 Copyright (C) 2008-2021 Sander van der Burg
 EOF

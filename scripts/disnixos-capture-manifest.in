@@ -23,8 +23,10 @@ set -o pipefail
 
 showUsage()
 {
+    me="$(basename "$0")"
+
     cat <<EOF
-Usage: $0 [OPTION] network_nix [ network2_nix ... ]
+Usage: $me [OPTION] network_nix [ network2_nix ... ]
 
 The command \`disnixos-capture-manifests' consults the manifests of the target
 Disnix profiles, retrieves their intra-dependency closures and composes a Nix
@@ -64,8 +66,10 @@ EOF
 
 showVersion()
 {
+    me="$(basename "$0")"
+
     cat <<EOF
-$0 (@PACKAGE_NAME@ @PACKAGE_VERSION@)
+$me (@PACKAGE_NAME@ @PACKAGE_VERSION@)
 
 Copyright (C) 2008-2021 Sander van der Burg
 EOF
