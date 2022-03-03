@@ -21,6 +21,8 @@ simpleTest {
       env = "NIX_PATH='nixpkgs=${nixpkgs}:nixos=${nixpkgs}/nixos' DISNIX_REMOTE_CLIENT=${disnixRemoteClient}";
     in
     ''
+      import subprocess
+
       start_all()
       server.wait_for_unit("sshd")
       client.wait_for_unit("sshd")

@@ -18,6 +18,8 @@ simpleTest {
   };
   testScript =
     ''
+      import subprocess
+
       start_all()
 
       testtarget1.wait_for_unit("disnix")

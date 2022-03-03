@@ -17,6 +17,8 @@ simpleTest {
   };
   testScript =
     ''
+      import subprocess
+
       start_all()
 
       coordinator.wait_for_unit("network-interfaces.target")

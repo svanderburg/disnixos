@@ -46,12 +46,11 @@
   system.extraDependencies = [
     pkgs.stdenv
     pkgs.busybox
-    pkgs.module_init_tools
     pkgs.perlPackages.ArchiveCpio
 
-    pkgs.utillinux
+    pkgs.util-linux
     pkgs.texinfo
-    pkgs.xlibs.lndir
+    pkgs.xorg.lndir
     pkgs.getconf
     pkgs.desktop-file-utils
   ]

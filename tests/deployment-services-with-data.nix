@@ -16,8 +16,10 @@ simpleTest {
     testtarget1 = machine;
     testtarget2 = machine;
   };
-  testScript = 
+  testScript =
     ''
+      import subprocess
+
       start_all()
       testtarget1.wait_for_unit("disnix")
       testtarget2.wait_for_unit("disnix")
