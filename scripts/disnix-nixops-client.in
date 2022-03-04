@@ -357,7 +357,7 @@ case "$operation" in
         # A localfile must first be transferred
         if [ "$localfile" != "" ]
         then
-            remoteClosure=`nixops ssh $target "mktemp -p $TMPDIR"`
+            remoteClosure=`nixops ssh $target disnix-tmpfile`
             nixops scp $NIXOPS_OPTS --to $target "$@" $remoteClosure
         else
             remoteClosure="$@"
@@ -454,7 +454,7 @@ case "$operation" in
         # A localfile must first be transferred
         if [ "$localfile" = "1" ]
         then
-            tempdir=`nixops ssh $NIXOPS_OPTS $target "mktemp -d -p $TMPDIR"`
+            tempdir=`nixops ssh $NIXOPS_OPTS $target disnix-tmpfile --directory`
             nixops scp $NIXOPS_OPTS --to $target $@ $tempdir > /dev/null
             remoteSnapshots=`nixops ssh $NIXOPS_OPTS $target echo $tempdir/*`
         else
