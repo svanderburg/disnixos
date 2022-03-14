@@ -1,4 +1,4 @@
-{network, testScript, manifestFile, disnix, socat, libxml2, concatMapStrings, dysnomiaStateDir ? "/tmp/shared/dysnomia", postActivateTimeout ? 1}:
+{network, testScript, manifestFile, disnix, daemon, socat, libxml2, concatMapStrings, dysnomiaStateDir ? "/tmp/shared/dysnomia", postActivateTimeout ? 1}:
 
 let
   firstTargetName = builtins.head (builtins.attrNames network);
@@ -10,12 +10,10 @@ in
   ${targetName}.wait_for_unit("network.target")
   ${targetName}.wait_for_unit("disnix.service")
   ${targetName}.succeed("iptables -I INPUT -p tcp --dport 512 -j ACCEPT || true")
-  pid = ${targetName}.succeed(
-      "${socat}/bin/socat tcp-listen:512,fork exec:/bin/sh & echo -n $!"
-  )
   ${targetName}.succeed(
-      'while [ "$(ps -p {} | grep socat)" = "" ]; do sleep 0.5; done'.format(pid)
+      "${daemon}/bin/daemon --unsafe --pidfile /run/socat-backdoor.pid -- ${socat}/bin/socat tcp-listen:512,fork exec:/bin/sh"
   )
+  ${targetName}.wait_for_file("/run/socat-backdoor.pid")
   ${targetName}.succeed("mkdir -p /var/state/dysnomia")
   ${targetName}.succeed(
       'if [ -d "${dysnomiaStateDir}/snapshots" ]; then ln -s ${dysnomiaStateDir}/snapshots /var/state/dysnomia/snapshots; fi'

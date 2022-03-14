@@ -186,9 +186,9 @@ then
 fi
 
 # Set a test script which automatically deploys the system
-export tests=`cat $(disnixos-gentests --no-out-link $networkArgs $showTraceArg $manifest)`
+testscript="$(disnixos-gentests --no-out-link $networkArgs $showTraceArg $manifest)"
 
 # Start the virtual machines
 cd $TMPDIR
-$vmsPath/bin/nixos-test-driver
+$vmsPath/bin/nixos-run-vms "$testscript"
 rm -R $TMPDIR
