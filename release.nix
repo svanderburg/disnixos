@@ -33,10 +33,10 @@ let
         buildInputs = [ pkgs.socat pkgs.getopt pkgs.pkgconfig pkgs.libxml2 pkgs.libxslt dysnomia disnix pkgs.dblatex (pkgs.dblatex.tex or pkgs.tetex) pkgs.help2man pkgs.doclifter pkgs.nukeReferences ];
 
         # Add documentation in the tarball
-        configureFlags = ''
-          --with-docbook-rng=${pkgs.docbook5}/xml/rng/docbook
-          --with-docbook-xsl=${pkgs.docbook5_xsl}/xml/xsl/docbook
-        '';
+        configureFlags = [
+          "--with-docbook-rng=${pkgs.docbook5}/xml/rng/docbook"
+          "--with-docbook-xsl=${pkgs.docbook_xsl_ns}/xml/xsl/docbook"
+        ];
 
         preConfigure = ''
           # TeX needs a writable font cache.
