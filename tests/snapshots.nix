@@ -48,7 +48,6 @@ simpleTest {
 
       # Test SSH connectivity
       client.succeed("ssh -o StrictHostKeyChecking=no -v server ls /")
-      client.succeed("ssh -o StrictHostKeyChecking=no -v client ls /")
 
       # Deploy infrastructure with NixOps
       client.succeed(

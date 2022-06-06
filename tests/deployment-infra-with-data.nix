@@ -7,8 +7,9 @@ let
     tar --no-same-owner --no-same-permissions -xf $(find ${dysnomiaTarball} -name \*.tar.gz)
     mv dysnomia-* $out
   '';
+
   machine =
-    {config, pkgs, ...}:
+    {config, pkgs, lib, ...}:
 
     {
       imports = [ "${dysnomiaSrc}/dysnomia-module.nix" ];
@@ -33,7 +34,7 @@ let
 
       services.mysql = {
         enable = true;
-        package = pkgs.mysql;
+        package = pkgs.mariadb;
       };
 
       services.postgresql = {
@@ -60,24 +61,28 @@ let
       # We can't download any substitutes in a test environment. To make tests
       # faster, we disable substitutes so that Nix does not waste any time by
       # attempting to download them.
-      nix.extraOptions = ''
-        substitute = false
-      '';
+      nix.settings = {
+        substituters = lib.mkForce [];
+        hashed-mirrors = null;
+        connect-timeout = 1;
+      };
 
       environment.systemPackages = [ config.dysnomiaTest.package disnix disnixos ];
 
       system.extraDependencies = [
         pkgs.stdenv
         pkgs.busybox
-        pkgs.module_init_tools
         pkgs.perlPackages.ArchiveCpio
 
-        pkgs.utillinux
+        pkgs.util-linux
         pkgs.texinfo
-        pkgs.xlibs.lndir
+        pkgs.xorg.lndir
         pkgs.getconf
         pkgs.desktop-file-utils
       ]
+      ++ pkgs.brotli.all
+      ++ pkgs.kmod.all
+      ++ pkgs.libarchive.all
       ++ pkgs.libxml2.all
       ++ pkgs.libxslt.all;
     };
@@ -89,7 +94,7 @@ let
 
     text = ''
       {
-        testtarget1 = {pkgs, ...}:
+        testtarget1 = {pkgs, config, ...}:
 
         {
           imports = [ ${dysnomiaSrc}/dysnomia-module.nix ];
@@ -131,7 +136,7 @@ let
 
           services.mysql = {
             enable = true;
-            package = pkgs.mysql;
+            package = pkgs.mariadb;
           };
 
           services.postgresql = {
@@ -142,14 +147,14 @@ let
           environment.systemPackages = [ (builtins.storePath ${disnix}) ];
         };
 
-        testtarget2 = {pkgs, ...}:
+        testtarget2 = {pkgs, config, ...}:
 
         {
           imports = [ ${dysnomiaSrc}/dysnomia-module.nix ];
 
           services.mysql = {
             enable = true;
-            package = pkgs.mysql;
+            package = pkgs.mariadb;
           };
 
           services.postgresql = {
@@ -168,7 +173,7 @@ let
 
     text = ''
       {
-        testtarget1 = {pkgs, ...}:
+        testtarget1 = {pkgs, config, ...}:
 
         {
           imports = [ ${dysnomiaSrc}/dysnomia-module.nix ];
@@ -181,7 +186,7 @@ let
 
           services.mysql = {
             enable = true;
-            package = pkgs.mysql;
+            package = pkgs.mariadb;
           };
 
           services.postgresql = {
@@ -192,14 +197,14 @@ let
           environment.systemPackages = [ (builtins.storePath ${disnix}) ];
         };
 
-        testtarget2 = {pkgs, ...}:
+        testtarget2 = {pkgs, config, ...}:
 
         {
           imports = [ ${dysnomiaSrc}/dysnomia-module.nix ];
 
           services.mysql = {
             enable = true;
-            package = pkgs.mysql;
+            package = pkgs.mariadb;
           };
 
           services.postgresql = {
@@ -215,7 +220,7 @@ let
 
   physicalNetworkNix = import ./generate-physical-network.nix { inherit writeTextFile nixpkgs; };
 
-  env = "NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
+  env = "NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' DISNIX_REMOTE_CLIENT=disnix-client";
 in
 simpleTest {
   nodes = {

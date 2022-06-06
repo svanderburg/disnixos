@@ -1,10 +1,10 @@
 {disnix, dysnomia, disnixos}:
-{config, pkgs, ...}:
+{config, pkgs, lib, ...}:
 
 {
   virtualisation.writableStore = true;
   virtualisation.memorySize = 8192;
-  virtualisation.diskSize = 10240;
+  virtualisation.diskSize = 40960;
 
   ids.gids = { disnix = 200; };
   users.extraGroups = {
@@ -34,17 +34,21 @@
   # We can't download any substitutes in a test environment. To make tests
   # faster, we disable substitutes so that Nix does not waste any time by
   # attempting to download them.
-  nix.extraOptions = ''
-    substitute = false
-  '';
+  nix.settings = {
+    substituters = lib.mkForce [];
+    hashed-mirrors = null;
+    connect-timeout = 1;
+  };
 
   environment.systemPackages = [ pkgs.nix dysnomia disnix disnixos pkgs.hello pkgs.zip pkgs.libxml2 ];
   environment.variables.DISNIX_REMOTE_CLIENT = "disnix-client";
 
+  # Add all dependencies that allow rebuilds and deploying NixOS without a network connection
   system.extraDependencies = [
     pkgs.stdenv
     pkgs.busybox
     pkgs.perlPackages.ArchiveCpio
+    pkgs.e2fsprogs
 
     pkgs.util-linux
     pkgs.texinfo
@@ -52,6 +56,9 @@
     pkgs.getconf
     pkgs.desktop-file-utils
   ]
+  ++ pkgs.brotli.all
+  ++ pkgs.kmod.all
+  ++ pkgs.libarchive.all
   ++ pkgs.libxml2.all
   ++ pkgs.libxslt.all;
 }
