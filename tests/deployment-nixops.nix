@@ -12,6 +12,7 @@ let
   env = "NIX_PATH=nixpkgs=${nixpkgs}:nixos=${nixpkgs}/nixos ";
 in
 simpleTest {
+  name = "deployment-nixops";
   nodes = {
     coordinator = machine;
     testtarget1 = machine;

@@ -91,6 +91,7 @@ in
     with import "${nixpkgs}/nixos/lib/testing-python.nix" { inherit system; };
 
     simpleTest {
+      inherit name;
       nodes = network;
 
       testScript = import ./generate-testscript.nix {

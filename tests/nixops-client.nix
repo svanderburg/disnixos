@@ -10,6 +10,7 @@ in
 with import "${nixpkgs}/nixos/lib/testing-python.nix" { system = builtins.currentSystem; };
 
 simpleTest {
+  name = "nixops-client";
   nodes = {
     client = machine;
     server = machine;
@@ -29,7 +30,7 @@ simpleTest {
       manifest = client.succeed(
           "${env} disnixos-manifest -s ${manifestTests}/services.nix -n ${logicalNetworkNix} -n ${physicalNetworkNix} -d ${manifestTests}/distribution-server.nix --use-nixops"
       )
-      closure = client.succeed("nix-store -qR {}".format(manifest)).split("\n")
+      closureList = client.succeed("nix-store -qR {}".format(manifest)).split("\n")
 
       # Initialise ssh stuff by creating a key pair for communication
       key = subprocess.check_output(
@@ -127,7 +128,7 @@ simpleTest {
       # client. Then it imports the closure into the Nix store of the
       # server. This test should succeed.
 
-      serverProfile = [c for c in closure if "-server" in c][0]
+      serverProfile = [c for c in closureList if "-server" in c][0]
       server.fail("nix-store --check-validity {}".format(serverProfile))
       client.succeed(
           "nix-store --export $(nix-store -qR {}) > /root/serverProfile.closure".format(
@@ -201,8 +202,8 @@ simpleTest {
           "${env} disnix-nixops-client --target server --unlock"
       )
 
-      closure = client.succeed("nix-store -qR {}".format(manifest)).split("\n")
-      testService1 = [c for c in closure if "-testService1" in c][0]
+      closureList = client.succeed("nix-store -qR {}".format(manifest)).split("\n")
+      testService1 = [c for c in closureList if "-testService1" in c][0]
 
       # Use the echo type to activate a service.
       # We use the testService1 service defined in the manifest earlier

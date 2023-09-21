@@ -10,6 +10,7 @@ let
   physicalNetworkNix = import ./generate-physical-network.nix { inherit writeTextFile nixpkgs; };
 in
 simpleTest {
+  name = "deployment-infra";
   nodes = {
     coordinator = machine;
     testtarget1 = machine;

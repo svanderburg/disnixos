@@ -11,6 +11,7 @@ let
   env = "DYSNOMIA_STATEDIR=/root/dysnomia NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
 in
 simpleTest {
+  name = "deployment-services-with-data";
   nodes = {
     coordinator = machine;
     testtarget1 = machine;

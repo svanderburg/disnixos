@@ -14,9 +14,12 @@ let
     {
       imports = [ "${dysnomiaSrc}/dysnomia-module.nix" ];
 
-      virtualisation.writableStore = true;
-      virtualisation.memorySize = 8192;
-      virtualisation.diskSize = 10240;
+      virtualisation = {
+        writableStore = true;
+        memorySize = 16384;
+        diskSize = 10240;
+        additionalPaths = [ pkgs.stdenv pkgs.stdenvNoCC ];
+      };
 
       ids.gids = { disnix = 200; };
       users.extraGroups = {
@@ -85,6 +88,8 @@ let
       ++ pkgs.libarchive.all
       ++ pkgs.libxml2.all
       ++ pkgs.libxslt.all;
+
+      system.includeBuildDependencies = true;
     };
 
   manifestTests = ./manifest;
@@ -223,6 +228,7 @@ let
   env = "NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' DISNIX_REMOTE_CLIENT=disnix-client";
 in
 simpleTest {
+  name = "deployment-infra-with-data";
   nodes = {
     coordinator = machine;
     testtarget1 = machine;

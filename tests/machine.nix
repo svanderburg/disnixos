@@ -2,9 +2,12 @@
 {config, pkgs, lib, ...}:
 
 {
-  virtualisation.writableStore = true;
-  virtualisation.memorySize = 8192;
-  virtualisation.diskSize = 40960;
+  virtualisation = {
+    writableStore = true;
+    memorySize = 16384;
+    diskSize = 40960;
+    additionalPaths = [ pkgs.stdenv pkgs.stdenvNoCC ];
+  };
 
   ids.gids = { disnix = 200; };
   users.extraGroups = {
@@ -61,4 +64,6 @@
   ++ pkgs.libarchive.all
   ++ pkgs.libxml2.all
   ++ pkgs.libxslt.all;
+
+  system.includeBuildDependencies = true;
 }

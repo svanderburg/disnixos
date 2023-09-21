@@ -12,6 +12,7 @@ in
 with import "${nixpkgs}/nixos/lib/testing-python.nix" { system = builtins.currentSystem; };
 
 simpleTest {
+  name = "snapshots";
   nodes = {
     client = machine;
     server = machine;

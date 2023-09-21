@@ -2,9 +2,12 @@
 {config, pkgs, ...}:
 
 {
-  virtualisation.writableStore = true;
-  virtualisation.memorySize = 8192;
-  virtualisation.diskSize = 10240;
+  virtualisation = {
+    writableStore = true;
+    memorySize = 16384;
+    diskSize = 10240;
+    additionalPaths = [ pkgs.stdenv pkgs.stdenvNoCC ];
+  };
 
   ids.gids = { disnix = 200; };
   users.extraGroups = {
@@ -39,6 +42,13 @@
   nix.extraOptions = ''
     substitute = false
   '';
+
+  nixpkgs.config.permittedInsecurePackages = [
+    "python-2.7.18.6"
+    "python2.7-certifi-2021.10.8"
+    "python2.7-pyjwt-1.7.1"
+    "openssl-1.1.1v"
+  ];
 
   environment.systemPackages = [ pkgs.nix dysnomia disnix disnixos pkgs.hello pkgs.zip pkgs.nixops pkgs.libxml2 ];
   environment.variables.DISNIX_REMOTE_CLIENT = "disnix-client";

@@ -11,6 +11,7 @@ let
   env = "NIX_PATH=nixpkgs=${nixpkgs} SSH_OPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
 in
 simpleTest {
+  name = "deployment-services";
   nodes = {
     coordinator = machine;
     testtarget1 = machine;

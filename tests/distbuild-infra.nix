@@ -9,6 +9,7 @@ let
   physicalNetworkNix = import ./generate-physical-network.nix { inherit nixpkgs writeTextFile; };
 in
 simpleTest {
+  name = "distbuild-infra";
   nodes = {
     coordinator = machine;
     testtarget1 = machine;
