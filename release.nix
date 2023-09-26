@@ -30,7 +30,7 @@ let
         inherit officialRelease;
         dontBuild = false;
 
-        buildInputs = [ pkgs.socat pkgs.getopt pkgs.pkgconfig pkgs.libxml2 pkgs.libxslt dysnomia disnix pkgs.dblatex (pkgs.dblatex.tex or pkgs.tetex) pkgs.help2man pkgs.doclifter pkgs.nukeReferences ];
+        buildInputs = [ pkgs.socat pkgs.getopt pkgs.pkg-config pkgs.libxml2 pkgs.libxslt dysnomia disnix pkgs.dblatex (pkgs.dblatex.tex or pkgs.tetex) pkgs.help2man pkgs.doclifter pkgs.nukeReferences ];
 
         # Add documentation in the tarball
         configureFlags = [
@@ -72,7 +72,7 @@ let
         pkgs.releaseTools.nixBuild {
           name = "disnixos";
           src = tarball;
-          buildInputs = [ pkgs.socat pkgs.pkgconfig dysnomia disnix pkgs.getopt ];
+          buildInputs = [ pkgs.socat pkgs.pkg-config dysnomia disnix pkgs.getopt ];
         }
       );
 
